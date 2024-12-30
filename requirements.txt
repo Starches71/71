@@ -1,5 +1,3 @@
-python 
-ffmpeg
 ffmpeg-python
 yt-dlp
 edge-tts
