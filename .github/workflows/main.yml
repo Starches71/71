@@ -1,0 +1,37 @@
+
+name: Run City Query and Trigger Script
+
+on:
+  workflow_dispatch:  # This triggers the action manually from GitHub UI
+  push:
+    branches:
+      - main  # You can specify other branches if needed
+
+jobs:
+  run_task:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"  # Specify the version of Python you want to use
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt  # Ensure your requirements.txt is in the repository
+
+      # Run the script
+      - name: Run the Python script
+        run: |
+          source venv/bin/activate
+          python start.py  # Replace with your actual script name, now 'start.py'
