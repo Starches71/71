@@ -1,0 +1,44 @@
+
+name: Run City Query and Save Output
+
+on:
+  workflow_dispatch:  # Trigger the action manually from GitHub UI
+  push:
+    branches:
+      - main  # Specify the branch to trigger on push
+
+jobs:
+  run_task:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"  # Specify the version of Python you want to use
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt  # Ensure your requirements.txt is in the repository
+
+      # Run the script
+      - name: Run the Python script
+        run: |
+          source venv/bin/activate
+          python start.py  # Replace with your actual script name, now 'start.py'
+
+      # Upload the output directory as an artifact
+      - name: Upload output directory
+        uses: actions/upload-artifact@v3
+        with:
+          name: places-output
+          path: places/  # Replace 'places' with the directory your script creates
