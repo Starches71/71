@@ -1,103 +1,70 @@
-import subprocess
-import sys
-import yt_dlp
-import requests
-import json
 import os
+import requests
+from yt_dlp import YoutubeDL
 
-# Check if yt-dlp is installed, if not, install it
-try:
-    import yt_dlp
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "yt-dlp"])
-
-# Download video using yt-dlp
-def download_video(url, output_path):
+# Function to download video
+def download_video(url, output_path, cookies_path=None):
     ydl_opts = {
-        'outtmpl': output_path,  # Download path template
-        'noplaylist': True,  # Ensure single video download
-        'format': 'bestvideo+bestaudio/best',  # Best video + audio quality
+        'outtmpl': output_path,
+        'noplaylist': True,
+        'format': 'bestvideo+bestaudio/best',
     }
-    
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    if cookies_path:
+        ydl_opts['cookiefile'] = cookies_path
+
+    with YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
-# Upload video via InnerTube (YouTube API)
-def upload_video(video_path, title, description, cookie_url, context):
-    # Download the cookies.txt from GitHub URL
-    cookies_content = requests.get(cookie_url).text
+# Function to upload video via InnerTube API
+def upload_video(file_path, title, description, cookies_path):
+    # Read cookies from file
+    with open(cookies_path, 'r') as f:
+        cookies = f.read()
 
-    # Prepare headers and other necessary parameters
+    # YouTube InnerTube upload endpoint
+    upload_url = "https://www.youtube.com/upload_video"
+
     headers = {
-        'User-Agent': context['client']['userAgent'],
-        'Content-Type': 'application/json',
+        "Content-Type": "multipart/form-data",
+        "Authorization": f"Bearer {cookies}",  # Use cookies for auth
     }
 
-    # Prepare InnerTube upload parameters
-    upload_url = 'https://upload.youtube.com/upload/your_video_upload_endpoint'  # Replace with actual endpoint
-    video_data = {
+    # Payload for metadata
+    metadata = {
         "title": title,
         "description": description,
-        "tags": ['random', 'video', 'yt-dlp'],
-        "privacyStatus": "public",  # Can be "private", "unlisted", or "public"
-        "file": open(video_path, 'rb'),  # Open the downloaded video
-        "thumbnail": None,  # No thumbnail
-        "cookies": cookies_content,
     }
-    
-    # Send the upload request
-    response = requests.post(upload_url, headers=headers, data=json.dumps(video_data))
-    
+
+    # Upload video file
+    with open(file_path, 'rb') as video_file:
+        files = {
+            "video": video_file,
+            "metadata": (None, str(metadata)),
+        }
+        response = requests.post(upload_url, headers=headers, files=files)
+
     if response.status_code == 200:
-        print(f"Video uploaded successfully: {title}")
+        print("Video uploaded successfully!")
+        print("Response:", response.json())
     else:
-        print(f"Failed to upload video: {response.status_code}, {response.text}")
+        print("Failed to upload video.")
+        print("Response:", response.text)
 
-# Main function to combine downloading and uploading
+# Main function
 def main():
-    # Download a random 10-sec YouTube video
-    video_url = 'https://youtu.be/s7yBWncUrI0'
-    output_path = 'random_video.mp4'  # Save the video as random_video.mp4
-    
-    # Download the video
-    download_video(video_url, output_path)
-    
-    # Title and description for the video
-    title = "Random 10 sec Video"
-    description = "This is a random 10-second video downloaded using yt-dlp and uploaded via InnerTube."
+    video_url = "https://youtu.be/s7yBWncUrI0"  # Replace with your desired video URL
+    output_path = "downloaded_video.mp4"
+    cookies_path = "cookies.txt"
 
-    # GitHub URL for cookies.txt
-    cookie_url = 'https://raw.githubusercontent.com/your-username/your-repo/main/cookies.txt'  # Replace with actual URL
+    # Step 1: Download video
+    print("Downloading video...")
+    download_video(video_url, output_path, cookies_path)
 
-    # InnerTube context
-    context = {
-        'client': {
-            'userAgent': 'com.google.android.apps.youtube.creator/24.45.100 (Linux; U; Android 11) gzip',
-            'clientName': 'ANDROID_CREATOR',
-            'clientVersion': '24.45.100',
-            'androidSdkVersion': 30,
-            'osName': 'Android',
-            'osVersion': '11',
-        },
-        'INNERTUBE_CONTEXT': {
-            'client': {
-                'clientName': 'ANDROID_CREATOR',
-                'clientVersion': '24.45.100',
-                'androidSdkVersion': 30,
-                'userAgent': 'com.google.android.apps.youtube.creator/24.45.100 (Linux; U; Android 11) gzip',
-                'osName': 'Android',
-                'osVersion': '11',
-            },
-        },
-        'INNERTUBE_CONTEXT_CLIENT_NAME': 14,
-        'REQUIRE_JS_PLAYER': False,
-        'REQUIRE_PO_TOKEN': True,
-        'REQUIRE_AUTH': True,
-    }
+    # Step 2: Upload video
+    print("Uploading video...")
+    title = "Random 10-second video"
+    description = "This is an auto-posted video using InnerTube API."
+    upload_video(output_path, title, description, cookies_path)
 
-    # Upload the downloaded video
-    upload_video(output_path, title, description, cookie_url, context)
-
-# Run the script
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
