@@ -27,7 +27,7 @@ jobs:
 
     - name: Download cookies.txt
       run: |
-        curl -O https://raw.githubusercontent.com/<username>/<repo>/main/cookies.txt
+        curl -O https://raw.githubusercontent.com/<starches71>/<71>/main/cookies.txt
 
     - name: Run Python script
       run: python autopost_video.py
