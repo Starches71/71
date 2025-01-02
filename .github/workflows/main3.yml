@@ -1,33 +1,49 @@
-
-name: Auto Video Upload
+name: YouTube Video Test
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_dispatch: # Trigger workflow manually
 
 jobs:
-  upload_video:
+  download-and-upload:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code from GitHub
-      uses: actions/checkout@v2
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Use a stable version of Node.js
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install yt-dlp requests
+      # Step 3: Install yt-dlp
+      - name: Install yt-dlp
+        run: sudo apt-get update && sudo apt-get install -y yt-dlp
 
-    - name: Download cookies.txt
-      run: 
-        curl -O https://raw.githubusercontent.com/starches71/71/main/cookies.txt
+      # Step 4: Download a 10-second video
+      - name: Download 10 seconds of video
+        run: yt-dlp --download-sections "*0-10" -o "video.mp4" "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
 
-    - name: Run Python script
-      run: python autopost_video.py
+      # Step 5: Install YouTube uploader library
+      - name: Install youtube-videos-uploader
+        run: npm install youtube-videos-uploader
+
+      # Step 6: Upload video to YouTube
+      - name: Upload video to YouTube
+        run: |
+          node -e "
+          const { upload } = require('youtube-videos-uploader');
+          const credentials = {
+            email: 'starches171@gmail.com',
+            pass: 'is-haqkabaju',
+            recoveryemail: 'starches131@gmail.com'
+          };
+          const video = {
+            path: 'video.mp4',
+            title: 'Test Video',
+            description: 'This is a test video uploaded via GitHub Actions'
+          };
+          upload(credentials, [video]).then(console.log).catch(console.error);
+          "
