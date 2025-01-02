@@ -1,0 +1,25 @@
+
+name: YouTube Video Download
+
+on:
+  workflow_dispatch: # Allows manual triggering of the workflow from the GitHub Actions UI
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up yt-dlp with proxy
+        run: |
+          sudo apt update
+          sudo apt install -y yt-dlp tor
+          # Start Tor for the proxy
+          nohup tor &
+          # Download the first 10 seconds of the video using yt-dlp with a proxy
+          yt-dlp --proxy "socks5://127.0.0.1:9050" --download-sections "*0-10" -o "video.mp4" "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
+
+      - name: List Downloaded Files
+        run: ls -l
