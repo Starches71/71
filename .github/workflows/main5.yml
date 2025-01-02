@@ -1,0 +1,38 @@
+name: Download Video and Upload to YouTube
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  download_and_upload:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y tor ffmpeg
+        pip install yt-dlp
+
+    - name: Start Tor Service
+      run: |
+        sudo service tor start
+
+    - name: Download video using yt-dlp
+      run: |
+        yt-dlp -u starches171@gmail.com -p is-haqkabaju --proxy "socks5://127.0.0.1:9050" --download-sections "*0-10" -o "video.mp4" "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
+
+    - name: Upload video to YouTube using youtube-videos-uploader
+      run: |
+        npm install youtube-videos-uploader
+        node -e "
+        const { upload } = require('youtube-videos-uploader');
+        const credentials = { email: 'starches171@gmail.com', pass: 'is-haqkabaju', recoveryemail: 'starches131@gmail.com' };
+        const video1 = { path: 'video.mp4', title: 'Test Video', description: 'First 10 seconds of the video' };
+        upload(credentials, [video1]).then(console.log).catch(console.error);
+        "
