@@ -1,25 +1,39 @@
 
-name: YouTube Video Download
+name: Download Video and Upload to YouTube
 
 on:
-  workflow_dispatch: # Allows manual triggering of the workflow from the GitHub Actions UI
+  push:
+    branches:
+      - main
 
 jobs:
-  download:
+  download_and_upload:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Set up yt-dlp with proxy
-        run: |
-          sudo apt update
-          sudo apt install -y yt-dlp tor
-          # Start Tor for the proxy
-          nohup tor &
-          # Download the first 10 seconds of the video using yt-dlp with a proxy
-          yt-dlp --proxy "socks5://127.0.0.1:9050" --download-sections "*0-10" -o "video.mp4" "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
+    - name: Install yt-dlp and Tor
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y tor
+        pip install yt-dlp
 
-      - name: List Downloaded Files
-        run: ls -l
+    - name: Start Tor Service
+      run: |
+        sudo service tor start
+
+    - name: Download video using yt-dlp
+      run: |
+        yt-dlp -u starches171@gmail.com -p is-haqkabaju --proxy "socks5://127.0.0.1:9050" --download-sections "*0-10" -o "video.mp4" "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
+
+    - name: Upload video to YouTube using youtube-videos-uploader
+      run: |
+        npm install youtube-videos-uploader
+        node -e "
+        const { upload } = require('youtube-videos-uploader');
+        const credentials = { email: 'starches171@gmail.com', pass: 'is-haqkabaju', recoveryemail: 'starches131@gmail.com' };
+        const video1 = { path: 'video.mp4', title: 'Test Video', description: 'First 10 seconds of the video' };
+        upload(credentials, [video1]).then(console.log).catch(console.error);
+        "
