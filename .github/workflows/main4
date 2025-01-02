@@ -1,0 +1,3 @@
+
+- name: Download with Rotating Proxy
+  run: yt-dlp --proxy "http://user:pass@proxy_ip:proxy_port" -o "video.mp4" "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
