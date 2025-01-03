@@ -1,0 +1,21 @@
+
+name: Download YouTube Video
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  download_video:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        
+      - name: Setup yt-dlp
+        uses: AnimMouse/setup-yt-dlp@v3
+        
+      - name: Download Video
+        run: yt-dlp https://www.youtube.com/watch?v=BaW_jenozKc
