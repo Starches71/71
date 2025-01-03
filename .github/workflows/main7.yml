@@ -1,0 +1,37 @@
+name: Download YouTube Video with yt-dlp and Docker Volume
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  download-video:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Create Docker Volume
+        run: |
+          docker volume create yt_dlp_data
+
+      - name: Run yt-dlp with Docker
+        run: |
+          docker run --rm \
+            -v yt_dlp_data:/root/.config/yt-dlp \
+            -e YT_USERNAME=starches171@gmail.com \
+            -e YT_PASSWORD=is-haqkabaju \
+            ghcr.io/yt-dlp/yt-dlp \
+            -u "$YT_USERNAME" -p "$YT_PASSWORD" \
+            --download-sections "*0-10" -o "video.mp4" "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
+
+      - name: Upload video to GitHub artifact (optional)
+        uses: actions/upload-artifact@v3
+        with:
+          name: downloaded-video
+          path: video.mp4
