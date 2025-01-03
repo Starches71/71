@@ -1,4 +1,4 @@
-name: Download YouTube Video with yt-dlp and Cookies
+name: Download YouTube Video without Proxy
 
 on:
   push:
@@ -25,11 +25,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
-      - name: Download YouTube video using cookies and proxy
+      - name: Download YouTube video
         run: |
-          yt-dlp --cookies yt_cookies.txt --proxy "socks5://127.0.0.1:9050" \
-                 --download-sections "*0-10" -o "video.mp4" \
-                 "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
+          yt-dlp --cookies yt_cookies.txt --download-sections "*0-10" -o "video.mp4" "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
 
       - name: Upload video as artifact
         uses: actions/upload-artifact@v3
