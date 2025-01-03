@@ -1,0 +1,25 @@
+name: Download YouTube Video
+
+on:
+  workflow_dispatch:
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install yt-dlp
+        run: |
+          python -m pip install --upgrade pip
+          pip install yt-dlp
+
+      - name: Download YouTube video using cookies.txt
+        run: |
+          yt-dlp --cookies ./cookies.txt https://youtu.be/PvR3t4-ViZo?si=TOWdD0R0ZxDugfgO
