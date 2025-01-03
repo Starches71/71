@@ -1,4 +1,4 @@
-name: Download YouTube Video without Proxy
+name: Download YouTube Video with yt-dlp and Cookies
 
 on:
   push:
@@ -18,19 +18,11 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
+      - name: Install yt-dlp
         run: |
           python -m pip install --upgrade pip
           pip install yt-dlp
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
 
-      - name: Download YouTube video
+      - name: Download YouTube video using cookies
         run: |
-          yt-dlp --cookies yt_cookies.txt --download-sections "*0-10" -o "video.mp4" "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
-
-      - name: Upload video as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: downloaded-video
-          path: video.mp4
+          yt-dlp --cookies ./cookies/yt_cookies.txt --download-sections "*0-10" -o "video.mp4" "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
