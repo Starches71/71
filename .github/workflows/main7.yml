@@ -1,3 +1,4 @@
+
 name: Download YouTube Video with yt-dlp and Docker Volume
 
 on:
@@ -26,7 +27,7 @@ jobs:
             -v yt_dlp_data:/root/.config/yt-dlp \
             -e YT_USERNAME=starches171@gmail.com \
             -e YT_PASSWORD=is-haqkabaju \
-            ghcr.io/yt-dlp/yt-dlp \
+            youtube/yt-dlp:latest \
             -u "$YT_USERNAME" -p "$YT_PASSWORD" \
             --download-sections "*0-10" -o "video.mp4" "https://youtu.be/3vW-l8XbVoU?si=A7I2Fu_QUiJ9PpJj"
 
