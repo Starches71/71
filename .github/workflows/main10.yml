@@ -1,0 +1,24 @@
+
+name: Download YouTube Video
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  download_video:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        
+      - name: Setup yt-dlp
+        uses: AnimMouse/setup-yt-dlp@v3
+        
+      - name: Download Video
+        run: |
+          set +e  # Disable exit on error
+          yt-dlp https://youtu.be/7fDFfx4ulMQ?si=GLRJ9Ub_iV6JrtD_ || echo "Video unavailable or download failed"
+          set -e  # Re-enable exit on error
