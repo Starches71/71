@@ -1,26 +1,5 @@
-
-# Netscape HTTP Cookie File
-# This is a generated file! Do not edit.
-
-.youtube.com    TRUE    /       TRUE    1893548400      VISITOR_INFO1_LIVE    zQaEFiercmM
-.youtube.com    TRUE    /       TRUE    1893548400      PREF                   f6=40000000&tz=Africa.Dar_es_Salaam
-.youtube.com    TRUE    /       TRUE    1893548400      YSC                    IV8PRIZZ2yI
-.youtube.com    TRUE    /       TRUE    1893548400      SID                    g.a000sAjh1FIupLj...
-.youtube.com    TRUE    /       TRUE    1893548400      SSID                   ATRPudkgSgW8XnYb0
-.youtube.com    TRUE    /       TRUE    1893548400      __Secure-1PSID         g.a000sAjh1FIupLj...
-.youtube.com    TRUE    /       TRUE    1893548400      __Secure-3PSID         g.a000sAjh1FIupLj...
-.youtube.com    TRUE    /       TRUE    1893548400      SAPISID                0fHjI3sc-BkPqUjN...
-
-# Additional cookies from your original file (kept intact):
-.youtube.com    TRUE    /       TRUE    1893548400      VISITOR_PRIVACY_METADATA    CgJUWhIEGgAgQQ%3D%3D
-.youtube.com    TRUE    /       TRUE    1893548400      __Secure-ROLLOUT_TOKEN      CMHj6Z2ty_ShaBDG8a_QuNSKAxizvMPly9iKAw%3D%3D
-.youtube.com    TRUE    /       TRUE    1893548400      __Secure-1PSIDTS            sidts-CjEB7wV3sWKJu...
-.youtube.com    TRUE    /       TRUE    1893548400      __Secure-3PSIDTS            sidts-CjEB7wV3sWKJu...
-.youtube.com    TRUE    /       TRUE    1893548400      SIDCC                      AKEyXzUd4eDs1jhh...
-.youtube.com    TRUE    /       TRUE    1893548400      __Secure-1PSIDCC           AKEyXzVMt2t425uFMz...
-.youtube.com    TRUE    /       TRUE    1893548400      __Secure-3PSIDCC           AKEyXzXKNHCFMBMuzg...
-
-# Comments:
-# - All expiration dates are now set to January 1, 2030 (UNIX timestamp 1893548400).
-# - Use this file with `yt-dlp` using the `--cookies` flag.
-# - If the file stops working, it may require regeneration.
+.youtube.com    TRUE    /    FALSE    0    SID    g.a000rwijh1GrGG3_SXORVTQOJugUSfVYXivlWOZDBQ00ak1KA5RIR45hpe0SZ94001Sw3PgyB2gACgYKAYESARESFQHGX2Mi3Nx69rto892fj4Gw8XdnLRoVAUF8yKqPimphUtOcbFdVpiUYsPKfO076;
+.youtube.com    TRUE    /    FALSE    0    APISID    8-BV2ZBW-NVDfgBQ/Abn7tMSp3qx4vLOMd
+.youtube.com    TRUE    /    FALSE    0    SAPISID    -P404EmFZH4njLbbE/AhzTUBbtttxq5XxN;
+.youtube.com    TRUE    /    FALSE    0    PREF    f7=41 00&tz=Africa.Dar_es_Salaam&f5=20000&f6=40000000&f4=4000000;
+.youtube.com    TRUE    /    FALSE    0    SIDCC    AKEyXzUBHbS)ycfdC9N_ZYjQngFVHo2|TmBgejplLu084KqiCsuoNt01evxl4sUV7U6Qmcl4BwA;
