@@ -1,7 +1,10 @@
+
 import requests
 
+# Updated YouTube video ID
+video_id = 'lv0jJtMW58k'  # Extract the video ID from the URL
 url = 'https://yt-api.p.rapidapi.com/dl'
-querystring = {'id': 'fuxHYubVqMk', 'cgeo': 'DE'}
+querystring = {'id': video_id, 'cgeo': 'DE'}
 
 headers = {
     'x-rapidapi-key': '00181c98c6mshb28efee02d1aa4cp101a3bjsn810e9f1a5717',
@@ -12,7 +15,12 @@ response = requests.get(url, headers=headers, params=querystring)
 
 # Check the response status
 if response.status_code == 200:
-    download_url = response.json().get('url')
+    # Print the entire response JSON to inspect its structure
+    response_json = response.json()
+    print("Response JSON:", response_json)
+
+    # Attempt to find the download URL
+    download_url = response_json.get('url')
     if download_url:
         print(f'Download URL: {download_url}')
     else:
