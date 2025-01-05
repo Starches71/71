@@ -15,15 +15,25 @@ response = requests.get(url, headers=headers, params=querystring)
 
 # Check the response status
 if response.status_code == 200:
-    # Print the entire response JSON to inspect its structure
     response_json = response.json()
     print("Response JSON:", response_json)
 
-    # Attempt to find the download URL
-    download_url = response_json.get('url')
-    if download_url:
+    # Extract video download URL if it exists
+    if 'url' in response_json:
+        download_url = response_json['url']
         print(f'Download URL: {download_url}')
     else:
-        print('Download URL not found in response.')
+        # If the 'url' isn't in the main response, try extracting from a different part
+        playback_url = None
+        if 'formats' in response_json:
+            for format in response_json['formats']:
+                if 'url' in format:
+                    playback_url = format['url']
+                    break
+
+        if playback_url:
+            print(f'Found Download URL: {playback_url}')
+        else:
+            print('Download URL not found in response.')
 else:
     print(f'Failed to get video. Status code: {response.status_code}')
