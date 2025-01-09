@@ -1,3 +1,9 @@
+name: Download YouTube Video
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   download:
