@@ -1,4 +1,5 @@
-name: yt-dlp Search - Best Hotels in Jeddah
+
+name: yt-dlp Download Test
 
 on:
   push:
@@ -6,7 +7,7 @@ on:
       - main  # Trigger on push to main branch
 
 jobs:
-  search_hotels:
+  download_video:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,6 +25,6 @@ jobs:
           sudo apt install -y python3-pip
           pip3 install yt-dlp
 
-      - name: Search for "Best Hotels in Jeddah" and Get Links
+      - name: Download Test Video
         run: |
-          yt-dlp "ytsearch:Best hotels in Jeddah" --flat-playlist --max-results 3
+          yt-dlp "https://youtu.be/fBWCtGTOP9Q?si=hwMo5oAwK_E6SzYf"
