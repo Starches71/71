@@ -1,0 +1,29 @@
+name: yt-dlp Search - Best Hotels in Jeddah
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to main branch
+
+jobs:
+  search_hotels:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up ScraperAPI Proxy
+        run: |
+          export HTTP_PROXY="http://79b346b4cdcb927188ec5855f624f3bd@proxy-server.scraperapi.com:8001"
+          export HTTPS_PROXY="http://79b346b4cdcb927188ec5855f624f3bd@proxy-server.scraperapi.com:8001"
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install yt-dlp
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip
+          pip3 install yt-dlp
+
+      - name: Search for "Best Hotels in Jeddah" and Get Links
+        run: |
+          yt-dlp "ytsearch:Best hotels in Jeddah" --get-links --max-results 3
