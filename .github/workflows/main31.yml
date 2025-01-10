@@ -26,4 +26,4 @@ jobs:
 
       - name: Search for "Best Hotels in Jeddah" and Get Links
         run: |
-          yt-dlp "ytsearch:Best hotels in Jeddah" --get-links --max-results 3
+          yt-dlp "ytsearch:Best hotels in Jeddah" --flat-playlist --max-results 3
