@@ -1,24 +1,60 @@
 
-name: Download YouTube Video
+name: Download and Upload YouTube Video
 
 on:
-  push:
-    branches:
-      - main
+  push:  # Triggers automatically when a commit is pushed to any branch
 
 jobs:
-  download_video:
+  download-and-upload:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
-    - name: Download YouTube video
-      run: |
-        python download_video.py
+      # Step 3: Install Python dependencies
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      # Step 4: Run download_video.py to get the download link
+      - name: Fetch download link
+        run: |
+          python download_video.py > raw_output.txt
+          grep -oP '(?<=Found Download URL: ).*' raw_output.txt > download_link.txt
+
+      # Step 5: Download the video using curl
+      - name: Download video
+        run: |
+          DOWNLOAD_URL=$(cat download_link.txt)
+          curl -L "$DOWNLOAD_URL" -o downloaded_video.mp4
+
+      # Step 6: Install YouTube uploader
+      - name: Install youtube-videos-uploader
+        run: npm install youtube-videos-uploader
+
+      # Step 7: Upload the video to YouTube
+      - name: Upload video to YouTube
+        run: |
+          node -e "
+          const { upload } = require('youtube-videos-uploader');
+          const credentials = {
+            email: 'starches171@gmail.com',
+            pass: 'is-haqkabaju',
+            recoveryemail: 'starches131@gmail.com'
+          };
+          const video = {
+            path: 'downloaded_video.mp4',
+            title: 'Reuploaded Video',
+            description: 'This video was downloaded and uploaded automatically via GitHub Actions'
+          };
+          upload(credentials, [video]).then(console.log).catch(console.error);
+          "
