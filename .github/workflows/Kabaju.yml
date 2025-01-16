@@ -1,0 +1,40 @@
+
+name: Download YouTube Video via Tor
+
+on:
+  push:
+    paths:
+      - '.github/workflows/download_video.yml'  # Trigger when this file is pushed
+  workflow_dispatch:  # Allows manual triggering anytime
+
+jobs:
+  download-video:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      # Set up Tor
+      - name: Install Tor and dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y tor torsocks python3-pip
+          pip3 install yt-dlp
+
+      # Start Tor service in background
+      - name: Start Tor
+        run: |
+          sudo service tor start
+
+      # Download the video using yt-dlp via Tor
+      - name: Download video via yt-dlp with Tor
+        run: |
+          torsocks yt-dlp https://youtu.be/4Wa5DivljOM?si=xwdTDMDMcPnvZvbU
+
+      # Upload the downloaded file to the repository (optional)
+      - name: Upload video file to repository (optional)
+        uses: actions/upload-artifact@v3
+        with:
+          name: downloaded-video
+          path: "*.webm"
