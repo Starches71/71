@@ -1,35 +1,40 @@
 
-name: Download YouTube Video
+name: Download YouTube Video via Tor
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - '.github/workflows/download_video.yml'  # Trigger when this file is pushed
+  workflow_dispatch:  # Allows manual triggering anytime
 
 jobs:
-  download:
+  download-video:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      # Set up Tor
+      - name: Install Tor and dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y tor torsocks python3-pip
+          pip3 install yt-dlp
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.8'
+      # Start Tor service in background
+      - name: Start Tor
+        run: |
+          sudo service tor start
 
-    - name: Install Chrome and Selenium
-      run: |
-        sudo apt update
-        sudo apt install -y chromium-chromedriver
-        pip install selenium
+      # Download the video using yt-dlp via Tor
+      - name: Download video via yt-dlp with Tor
+        run: |
+          torsocks yt-dlp https://youtu.be/4Wa5DivljOM?si=xwdTDMDMcPnvZvbU
 
-    - name: Setup yt-dlp
-      uses: AnimMouse/setup-yt-dlp@v3
-
-    - name: Log in to YouTube and Export Cookies
-      run: python login_script.py
-
-    - name: Download YouTube Video
-      run: yt-dlp --cookies cookies.txt https://youtu.be/Cr1mUzsJiXM
+      # Upload the downloaded file to the repository (optional)
+      - name: Upload video file to repository (optional)
+        uses: actions/upload-artifact@v3
+        with:
+          name: downloaded-video
+          path: "*.webm"
