@@ -1,10 +1,10 @@
+
 name: Download Google Images
 
-# Trigger the workflow on push to any branch
 on:
   push:
     branches:
-      - main  # or specify other branches like 'master', depending on your repo's main branch name
+      - main
   workflow_dispatch:  # Allow manual trigger
   schedule:
     - cron: '0 0 * * *'  # Optional: Schedule daily trigger at midnight
@@ -25,7 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install google_images_download
+        pip install google_images_download==2.8.0  # Specify the version
 
     - name: Download images
       run: python download_images.py
