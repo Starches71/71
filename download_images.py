@@ -1,17 +1,10 @@
-from google_images_download import googleimagesdownload
 
-def download_images(keyword, limit=10):
-    response = googleimagesdownload()
-    arguments = {
-        "keywords": keyword,
-        "limit": limit,  # Number of images to download
-        "print_urls": True,
-        "format": "jpg",
-        "size": "medium",
-        "output_directory": "downloaded_images",  # Directory to save images
-    }
-    response.download(arguments)
+from icrawler import ImageCrawler
+from icrawler.builtin import GoogleImageCrawler
+
+def download_images():
+    crawler = GoogleImageCrawler(storage={'root_dir': 'downloaded_images'})
+    crawler.crawl(keyword='San Francisco', max_num=10)  # You can adjust the keyword and number of images
 
 if __name__ == "__main__":
-    keyword = "San Francisco"
-    download_images(keyword, limit=1)
+    download_images()
