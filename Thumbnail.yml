@@ -3,9 +3,10 @@ name: Generate Thumbnail
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    paths:
+      - ".github/workflows/**" # Trigger on changes to workflow files
+      - "**"                   # Trigger on any file changes in the repo
+  workflow_dispatch:           # Allow manual triggering
 
 jobs:
   generate-thumbnail:
