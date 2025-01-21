@@ -4,8 +4,8 @@ name: Generate Thumbnail
 on:
   push:
     branches:
-      - main  # Trigger on pushes to the main branch
-  workflow_dispatch:  # Allow manual triggering
+      - main
+  workflow_dispatch:
 
 jobs:
   generate-thumbnail:
@@ -28,12 +28,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install moviepy icrawler imageio[ffmpeg]
 
-      # Step 4: Verify Python Environment
-      - name: Verify Python Environment
+      # Step 4: Verify Installation
+      - name: Verify MoviePy Installation
         run: |
-          which python
-          python --version
-          python -m pip list
+          python -c "import moviepy; print('MoviePy is installed and working')"
 
       # Step 5: Run Python Script
       - name: Run Script
