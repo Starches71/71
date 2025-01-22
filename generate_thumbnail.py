@@ -1,38 +1,16 @@
 
-from manim import *
+from remotion import Image, Text, Composition
 
-class ThumbnailWithText(Scene):
-    def construct(self):
-        # Load the image
-        image = ImageMobject("downloaded_images/000001.jpg")  # Adjust the image path
-        image.scale_to_fit_height(config.frame_height)  # Fit image to frame
+# Load the image
+image = Image("downloaded_images/000001.jpg")  # Adjust the image path
+image = image.resize(height=720)  # Resize to fit the height of 720p
 
-        # Add text overlay
-        text = Text(
-            "Welcome to San Francisco!",
-            font="Arial-Bold",
-            color=WHITE,
-            weight=BOLD
-        ).scale(0.5)  # Adjust text size
-        text.next_to(image, DOWN, buff=0.5)  # Position text below the image
+# Create a text overlay
+text = Text("Welcome to San Francisco!", font_size=50, color="white", font="Arial-Bold")
+text = text.align("center").set_position((0, -250))  # Position text below the image
 
-        # Add the image and text to the scene
-        self.add(image, text)
+# Create a composition (this is like a canvas for the image and text)
+composition = Composition([image, text])
 
-        # Save a static frame (optional)
-        self.pause()
-
-# Create a separate function for downloading images
-from icrawler.builtin import GoogleImageCrawler
-
-def download_images():
-    # Create a GoogleImageCrawler instance
-    crawler = GoogleImageCrawler(storage={'root_dir': 'downloaded_images'})
-    crawler.crawl(keyword='San Francisco', max_num=10)  # Adjust keyword and max_num as needed
-
-if __name__ == "__main__":
-    # Download images
-    download_images()
-
-    # Render the thumbnail with Manim
-    ThumbnailWithText().render()
+# Export the result as an image (not a video)
+composition.export("output/thumbnail_with_text.png")
