@@ -43,3 +43,10 @@ jobs:
       - name: Run Script
         run: |
           python generate_thumbnail.py
+
+      # Step 7: Upload Output File
+      - name: Upload Generated File
+        uses: actions/upload-artifact@v3
+        with:
+          name: generated-thumbnail
+          path: media/videos/1080p60/ThumbnailWithText.mp4
