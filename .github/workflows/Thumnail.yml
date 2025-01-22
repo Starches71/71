@@ -29,8 +29,8 @@ jobs:
           if [ ! -f package.json ]; then
             npm init -y
           fi
-          # Install necessary dependencies
-          npm install remotion
+          # Install necessary dependencies including Babel and Remotion
+          npm install remotion @babel/core @babel/cli @babel/preset-env @babel/preset-react
 
       # Step 4: Install ImageMagick (for image manipulation if needed by Remotion)
       - name: Install ImageMagick
@@ -73,8 +73,11 @@ jobs:
           }
           generateThumbnail();' > generate-thumbnail.js
 
-          # Run the script to generate the thumbnail
-          node generate-thumbnail.js
+          # Transpile JSX code using Babel
+          npx babel generate-thumbnail.js --out-file generated-thumbnail-compiled.js
+
+          # Run the transpiled JavaScript file
+          node generated-thumbnail-compiled.js
 
       # Step 8: Upload the generated thumbnail
       - name: Upload Generated Thumbnail
