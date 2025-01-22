@@ -38,12 +38,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y imagemagick
 
-      # Step 5: Download images (using icrawler or your method of choice)
+      # Step 5: Install icrawler
+      - name: Install Python Dependencies (including icrawler)
+        run: |
+          python -m pip install --upgrade pip
+          pip install icrawler
+
+      # Step 6: Download images (using icrawler or your method of choice)
       - name: Download Images
         run: |
           python -c 'from icrawler.builtin import GoogleImageCrawler; crawler = GoogleImageCrawler(storage={"root_dir": "downloaded_images"}); crawler.crawl(keyword="San Francisco", max_num=1)'
 
-      # Step 6: Create and Run the Node.js Remotion script to generate the thumbnail
+      # Step 7: Create and Run the Node.js Remotion script to generate the thumbnail
       - name: Run Remotion Script
         run: |
           # Create the generate-thumbnail.js script dynamically
@@ -70,7 +76,7 @@ jobs:
           # Run the script to generate the thumbnail
           node generate-thumbnail.js
 
-      # Step 7: Upload the generated thumbnail
+      # Step 8: Upload the generated thumbnail
       - name: Upload Generated Thumbnail
         uses: actions/upload-artifact@v3
         with:
