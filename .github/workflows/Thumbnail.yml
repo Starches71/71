@@ -1,5 +1,5 @@
 
-name: Generate Thumbnail with Downgraded MoviePy
+name: Generate Thumbnail with Downgraded MoviePy and Pillow
 
 on:
   push:
@@ -19,9 +19,10 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: Install specific version of MoviePy
+    - name: Install specific versions of MoviePy and Pillow
       run: |
         pip install moviepy==1.0.3
+        pip install Pillow==9.5.0
         pip install icrawler
 
     - name: Run thumbnail generator
