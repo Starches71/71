@@ -32,21 +32,26 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install manim icrawler importlib-metadata
+          pip install remotion icrawler importlib-metadata
 
-      # Step 5: Verify Installation
-      - name: Verify Manim Installation
+      # Step 5: Verify Remotion Installation
+      - name: Verify Remotion Installation
         run: |
-          python -c "import manim; print('Manim is installed and working')"
+          python -c "import remotion; print('Remotion is installed and working')"
 
-      # Step 6: Run Python Script
+      # Step 6: Download Images (using icrawler)
+      - name: Download Images
+        run: |
+          python -c 'from icrawler.builtin import GoogleImageCrawler; crawler = GoogleImageCrawler(storage={"root_dir": "downloaded_images"}); crawler.crawl(keyword="San Francisco", max_num=10)'
+
+      # Step 7: Run Python Script to Generate Thumbnail
       - name: Run Script
         run: |
           python generate_thumbnail.py
 
-      # Step 7: Upload Output File
+      # Step 8: Upload Generated Thumbnail
       - name: Upload Generated File
         uses: actions/upload-artifact@v3
         with:
           name: generated-thumbnail
-          path: media/videos/1080p60/ThumbnailWithText.mp4
+          path: output/thumbnail_with_text.mp4
