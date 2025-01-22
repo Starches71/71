@@ -1,4 +1,4 @@
-name: Generate Thumbnail
+name: Generate Thumbnail with iCrawler
 
 on:
   push:
@@ -19,7 +19,8 @@ jobs:
         python-version: 3.9
 
     - name: Install dependencies
-      run: pip install moviepy
+      run: |
+        pip install moviepy icrawler
 
     - name: Run thumbnail generator
       run: python generate_thumbnail.py
