@@ -32,7 +32,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install manim icrawler
+          pip install manim icrawler importlib-metadata
 
       # Step 5: Verify Installation
       - name: Verify Manim Installation
