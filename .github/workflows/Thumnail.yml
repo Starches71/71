@@ -16,42 +16,36 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Install System-Level Dependencies
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-dev libcairo2-dev libpango1.0-dev ffmpeg pkg-config
-
-      # Step 3: Set up Python
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          python-version: '3.9'
+          node-version: '16'  # You can use any supported Node.js version
 
-      # Step 4: Install Python Dependencies
+      # Step 3: Install dependencies
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install remotion icrawler importlib-metadata
+          npm install
 
-      # Step 5: Verify Remotion Installation
-      - name: Verify Remotion Installation
+      # Step 4: Install ImageMagick (for image manipulation if needed by Remotion)
+      - name: Install ImageMagick
         run: |
-          python -c "import remotion; print('Remotion is installed and working')"
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
 
-      # Step 6: Download Images (using icrawler)
+      # Step 5: Download images (using icrawler or your method of choice)
       - name: Download Images
         run: |
-          python -c 'from icrawler.builtin import GoogleImageCrawler; crawler = GoogleImageCrawler(storage={"root_dir": "downloaded_images"}); crawler.crawl(keyword="San Francisco", max_num=10)'
+          python -c 'from icrawler.builtin import GoogleImageCrawler; crawler = GoogleImageCrawler(storage={"root_dir": "downloaded_images"}); crawler.crawl(keyword="San Francisco", max_num=1)'
 
-      # Step 7: Run Python Script to Generate Thumbnail
-      - name: Run Script
+      # Step 6: Run the Node.js Remotion script to generate the thumbnail
+      - name: Run Remotion Script
         run: |
-          python generate_thumbnail.py
+          node generate-thumbnail.js
 
-      # Step 8: Upload Generated Thumbnail
-      - name: Upload Generated File
+      # Step 7: Upload the generated thumbnail
+      - name: Upload Generated Thumbnail
         uses: actions/upload-artifact@v3
         with:
           name: generated-thumbnail
-          path: output/thumbnail_with_text.mp4
+          path: output/thumbnail_with_text.png
