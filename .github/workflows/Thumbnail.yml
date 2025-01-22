@@ -1,4 +1,5 @@
-name: Generate Thumbnail with iCrawler
+
+name: Generate Thumbnail with Downgraded MoviePy
 
 on:
   push:
@@ -18,9 +19,10 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: Install dependencies
+    - name: Install specific version of MoviePy
       run: |
-        pip install moviepy icrawler
+        pip install moviepy==1.0.3
+        pip install icrawler
 
     - name: Run thumbnail generator
       run: python generate_thumbnail.py
