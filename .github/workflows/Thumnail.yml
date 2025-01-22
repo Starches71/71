@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the code
+      # Step 1: Checkout the code
       - name: Checkout Code
         uses: actions/checkout@v3
 
@@ -49,7 +49,14 @@ jobs:
         run: |
           python -c 'from icrawler.builtin import GoogleImageCrawler; crawler = GoogleImageCrawler(storage={"root_dir": "downloaded_images"}); crawler.crawl(keyword="San Francisco", max_num=1)'
 
-      # Step 7: Create and Run the Node.js Remotion script to generate the thumbnail
+      # Step 7: Create Babel Configuration for JSX
+      - name: Create Babel Config for JSX
+        run: |
+          echo '{
+            "presets": ["@babel/preset-env", "@babel/preset-react"]
+          }' > babel.config.json
+
+      # Step 8: Create and Run the Node.js Remotion script to generate the thumbnail
       - name: Run Remotion Script
         run: |
           # Create the generate-thumbnail.js script dynamically
@@ -79,7 +86,7 @@ jobs:
           # Run the transpiled JavaScript file
           node generated-thumbnail-compiled.js
 
-      # Step 8: Upload the generated thumbnail
+      # Step 9: Upload the generated thumbnail
       - name: Upload Generated Thumbnail
         uses: actions/upload-artifact@v3
         with:
