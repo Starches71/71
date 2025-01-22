@@ -1,0 +1,31 @@
+name: Generate Thumbnail
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate-thumbnail:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: pip install moviepy
+
+    - name: Run thumbnail generator
+      run: python generate_thumbnail.py
+
+    - name: Upload thumbnail to artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: thumbnail
+        path: output/thumbnail_with_text.png
