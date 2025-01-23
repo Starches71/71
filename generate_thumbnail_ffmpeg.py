@@ -1,3 +1,4 @@
+
 import os
 from icrawler.builtin import GoogleImageCrawler
 
@@ -9,13 +10,13 @@ def download_image(search_term, output_dir="downloaded_images"):
     print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
     return os.path.join(output_dir, "000001.jpg")
 
-# Step 2: Generate a thumbnail using FFmpeg with white text and shadow
-def generate_thumbnail(input_image, output_image, text="Best hotels\n        in\n      Jeddah", font_path="rock_stencil.ttf"):
+# Step 2: Generate a thumbnail using FFmpeg with larger text in uppercase
+def generate_thumbnail(input_image, output_image, text="BEST HOTELS\n       IN\n     JEDDAH", font_path="rock_stencil.ttf"):
     ffmpeg_command = (
         f'ffmpeg -y -i "{input_image}" '
         f'-vf "drawtext=text=\'{text}\':'
         f'fontfile=\'{font_path}\':'
-        f'fontcolor=white:fontsize=48:shadowx=3:shadowy=3:shadowcolor=black:x=(w-text_w)/2:y=(h-text_h)-50" '
+        f'fontcolor=white:fontsize=96:shadowx=5:shadowy=5:shadowcolor=black:x=(w-text_w)/2:y=(h-text_h)/2" '
         f'"{output_image}"'
     )
     print("Running FFmpeg command:", ffmpeg_command)
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     search_query = "Rosewood Jeddah hotel booking.com"
     input_image = download_image(search_query)
 
-    # Step 2: Generate thumbnail with overlay text, white font, and shadow
+    # Step 2: Generate thumbnail with uppercase, larger text, and shadow
     output_image = "thumbnail_with_text.jpg"
     font_file = "rock_stencil.ttf"  # Path to the downloaded font
     generate_thumbnail(input_image, output_image, font_path=font_file)
