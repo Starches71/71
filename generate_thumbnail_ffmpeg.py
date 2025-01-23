@@ -1,45 +1,33 @@
-
 import os
 from icrawler.builtin import GoogleImageCrawler
 
-# Step 1: Download an image using iCrawler
-def download_image(query, output_dir, max_num=1):
+# Step 1: Download the image
+def download_image(search_term, output_dir="downloaded_images"):
     os.makedirs(output_dir, exist_ok=True)
-    google_crawler = GoogleImageCrawler(storage={'root_dir': output_dir})
-    google_crawler.crawl(keyword=query, max_num=max_num)
-    image_path = os.path.join(output_dir, "000001.jpg")
-    return image_path
+    crawler = GoogleImageCrawler(storage={"root_dir": output_dir})
+    crawler.crawl(keyword=search_term, max_num=1)
+    print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
+    return os.path.join(output_dir, "000001.jpg")
 
-# Step 2: Generate a thumbnail with text using FFmpeg
-def generate_thumbnail_with_text(input_image, output_image, text, font="DejaVuSans-Bold", font_size=36, color="white"):
-    if not os.path.exists(input_image):
-        print(f"Input image does not exist: {input_image}")
-        return
-
-    # FFmpeg command to overlay text on the image
-    command = [
-        "ffmpeg",
-        "-i", input_image,
-        "-vf", f"drawtext=fontfile=/usr/share/fonts/truetype/dejavu/{font}.ttf:text='{text}':fontcolor={color}:fontsize={font_size}:x=(w-text_w)/2:y=(h-text_h)-50",
-        "-y", output_image
-    ]
-
-    # Run the FFmpeg command
-    result = os.system(" ".join(command))
+# Step 2: Generate a thumbnail using FFmpeg
+def generate_thumbnail(input_image, output_image, text="Welcome to San Francisco!"):
+    ffmpeg_command = (
+        f'ffmpeg -y -i "{input_image}" '
+        f'-vf "drawtext=text=\'{text}\':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)-50" '
+        f'"{output_image}"'
+    )
+    print("Running FFmpeg command:", ffmpeg_command)
+    result = os.system(ffmpeg_command)
     if result == 0:
-        print(f"Thumbnail generated: {output_image}")
+        print("Thumbnail generated successfully:", output_image)
     else:
         print("Failed to generate thumbnail.")
 
-# Main script
 if __name__ == "__main__":
-    query = "San Francisco cityscape"
-    output_dir = "downloaded_images"
+    # Step 1: Download an image
+    search_query = "San Francisco cityscape"
+    input_image = download_image(search_query)
+
+    # Step 2: Generate thumbnail with overlay text
     output_image = "thumbnail_with_text.jpg"
-    text = "Welcome to San Francisco!"
-
-    # Step 1: Download the image
-    input_image = download_image(query, output_dir)
-
-    # Step 2: Generate the thumbnail with text
-    generate_thumbnail_with_text(input_image, output_image, text)
+    generate_thumbnail(input_image, output_image)
