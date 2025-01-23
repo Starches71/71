@@ -1,4 +1,4 @@
-name: Generate Thumbnail
+name: Generate Thumbnail with Styled Font
 
 on:
   push:
@@ -23,6 +23,10 @@ jobs:
 
       - name: Install FFmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Download Font
+        run: |
+          curl -L -o rock_stencil.ttf "https://dl.dafont.com/dl/?f=rock_stencil"
 
       - name: Run Thumbnail Script
         run: python generate_thumbnail_ffmpeg.py
