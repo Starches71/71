@@ -33,7 +33,7 @@ jobs:
         run: python generate_thumbnail_ffmpeg.py
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: thumbnail
           path: thumbnail_with_text.jpg
