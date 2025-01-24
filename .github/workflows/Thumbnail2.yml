@@ -25,8 +25,24 @@ jobs:
       - name: Install FFmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
+      - name: Debug Repository Contents
+        run: |
+          echo "Checking repository files:"
+          ls -la
+
       - name: Run Thumbnail Script
-        run: python generate_thumbnail_ffmpeg.py
+        run: |
+          echo "Running Python script to generate thumbnail..."
+          python generate_thumbnail_ffmpeg.py
+
+      - name: Check for Thumbnail
+        run: |
+          if [ -f "thumbnail_with_text.jpg" ]; then
+            echo "Thumbnail generated successfully!"
+          else
+            echo "Thumbnail generation failed. Check Python script or input files."
+            exit 1
+          fi
 
       - name: Upload Thumbnail Artifact
         uses: actions/upload-artifact@v4
