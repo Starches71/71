@@ -1,4 +1,4 @@
-name: Generate Thumbnail with Styled Font
+name: Generate Thumbnail with Styled Font and Image Download
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 jobs:
   generate-thumbnail:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -27,12 +28,13 @@ jobs:
       - name: Download Font
         run: |
           curl -L -o nature_beauty.ttf "https://dl.dafont.com/dl/?f=nature_beauty"
-          ls -l nature_beauty.ttf  # Ensure the font is downloaded successfully
+          echo "Downloaded font:"
+          ls -l nature_beauty.ttf
 
       - name: Run Thumbnail Script
         run: python generate_thumbnail_ffmpeg.py
 
-      - name: Upload Artifact
+      - name: Upload Thumbnail Artifact
         uses: actions/upload-artifact@v4
         with:
           name: thumbnail
