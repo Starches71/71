@@ -1,4 +1,3 @@
-
 name: Generate Thumbnail with Styled Font
 
 on:
@@ -27,7 +26,8 @@ jobs:
 
       - name: Download Font
         run: |
-          curl -L -o rock_stencil.ttf "https://dl.dafont.com/dl/?f=rock_stencil"
+          curl -L -o nature_beauty.ttf "https://dl.dafont.com/dl/?f=nature_beauty"
+          ls -l nature_beauty.ttf  # Ensure the font is downloaded successfully
 
       - name: Run Thumbnail Script
         run: python generate_thumbnail_ffmpeg.py
