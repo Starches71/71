@@ -9,7 +9,7 @@ def download_image(search_term, output_dir="downloaded_images"):
     print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
     return os.path.join(output_dir, "000001.jpg")
 
-# Step 2: Generate a thumbnail using FFmpeg with the new font, larger text, and shadow
+# Step 2: Generate a thumbnail using FFmpeg with larger text, shadow, and lowercase
 def generate_thumbnail(input_image, output_image, text="best hotels\n       in\n     jeddah", font_path="nature_beauty.ttf"):
     ffmpeg_command = (
         f'ffmpeg -y -i "{input_image}" '
@@ -32,5 +32,5 @@ if __name__ == "__main__":
 
     # Step 2: Generate thumbnail with lowercase text, larger font size, and shadow
     output_image = "thumbnail_with_text.jpg"
-    font_file = "nature_beauty.ttf"  # Path to the downloaded font
+    font_file = "nature_beauty.ttf"  # Path to the font downloaded by GitHub Actions
     generate_thumbnail(input_image, output_image, font_path=font_file)
