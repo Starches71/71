@@ -1,4 +1,3 @@
-
 import os
 from icrawler.builtin import GoogleImageCrawler
 
@@ -14,7 +13,17 @@ def download_image(query, save_dir="downloaded_images", max_images=1):
 def generate_thumbnail(input_image="downloaded_images/000001.jpg", 
                        output_image="thumbnail_with_vignette.jpg", 
                        font_path="Nature Beauty Personal Use.ttf"):
-    # Get the absolute path of the font file
+    # Check if input image exists
+    if not os.path.exists(input_image):
+        print(f"Error: Input image '{input_image}' not found.")
+        exit(1)
+    
+    # Check if font file exists
+    if not os.path.exists(font_path):
+        print(f"Error: Font file '{font_path}' not found.")
+        exit(1)
+
+    # Absolute font path
     absolute_font_path = os.path.abspath(font_path)
 
     # FFmpeg command with vignette effect and formatted text
@@ -36,28 +45,32 @@ def generate_thumbnail(input_image="downloaded_images/000001.jpg",
         f'-frames:v 1 "{output_image}"'
     )
 
-    # Run the FFmpeg command
+    # Debugging: Print and execute FFmpeg command
     print("Running FFmpeg command:", ffmpeg_command)
     result = os.system(ffmpeg_command)
 
     if result == 0:
         print("Thumbnail generated successfully:", output_image)
     else:
-        print("Failed to generate thumbnail.")
+        print("Thumbnail generation failed. Check FFmpeg command or input files.")
 
 
 if __name__ == "__main__":
+    # Step 1: Download the image
     search_query = "Rosewood Jeddah hotel booking.com"
     download_image(query=search_query)
 
+    # Step 2: Verify image and font existence
     input_image = "downloaded_images/000001.jpg"
-    if not os.path.exists(input_image):
-        print(f"Input image not found at {input_image}")
-        exit(1)
-
     font_file = "Nature Beauty Personal Use.ttf"
-    if not os.path.exists(font_file):
-        print(f"Font file not found at {font_file}")
+
+    if not os.path.exists(input_image):
+        print(f"Error: Input image '{input_image}' not found.")
         exit(1)
 
+    if not os.path.exists(font_file):
+        print(f"Error: Font file '{font_file}' not found.")
+        exit(1)
+
+    # Step 3: Generate the thumbnail
     generate_thumbnail(input_image=input_image, font_path=font_file)
