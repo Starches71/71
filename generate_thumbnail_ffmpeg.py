@@ -22,7 +22,7 @@ def download_image(query, save_dir="downloaded_images", max_images=1):
 def generate_thumbnail(input_image="downloaded_images/000001.jpg", 
                        output_image="thumbnail_with_text.jpg", 
                        text="best hotels\n       in\n     jeddah", 
-                       font_path="nature_beauty.ttf"):
+                       font_path="Nature Beauty Personal Use.ttf"):
     """
     Generates a thumbnail image with text overlay using FFmpeg.
 
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         exit(1)
 
     # Step 3: Ensure the font file exists
-    font_file = "nature_beauty.ttf"
+    font_file = "Nature Beauty Personal Use.ttf"
     if not os.path.exists(font_file):
         print(f"Font file not found at {font_file}")
         exit(1)
