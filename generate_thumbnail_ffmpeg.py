@@ -24,7 +24,7 @@ def generate_thumbnail(input_image="downloaded_images/000001.jpg",
                        text="best hotels\n       in\n     jeddah", 
                        font_path="Nature Beauty Personal Use.ttf"):
     """
-    Generates a thumbnail image with text overlay using FFmpeg.
+    Generates a thumbnail image with glowing text overlay using FFmpeg.
 
     Parameters:
     - input_image (str): Path to the input image.
@@ -39,12 +39,16 @@ def generate_thumbnail(input_image="downloaded_images/000001.jpg",
     print("Using font file at:", absolute_font_path)
     print("Generating thumbnail...")
 
-    # FFmpeg command to overlay text with the specified font
+    # FFmpeg command to overlay text with glowing effect
     ffmpeg_command = (
         f'ffmpeg -y -i "{input_image}" '
         f'-vf "drawtext=text=\'{text}\':'
         f'fontfile=\'{absolute_font_path}\':'
-        f'fontcolor=white:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:x=(w-text_w)/2:y=(h-text_h)/2" '
+        f'fontcolor=yellow:fontsize=300:'
+        f'shadowx=5:shadowy=5:'
+        f'shadowcolor=yellow@0.8:'
+        f'draw=box:enable=1:boxcolor=yellow@0.6:boxborderw=20:'
+        f'x=(w-text_w)/2:y=(h-text_h)/2" '
         f'-frames:v 1 "{output_image}"'
     )
     
