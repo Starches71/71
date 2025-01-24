@@ -1,52 +1,42 @@
 import os
-import logging
-from icrawler.builtin import GoogleImageCrawler
 import subprocess
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
+# Define paths
+input_image_dir = "downloaded_images"
+output_image = "thumbnail_with_vignette.jpg"
+text = "Explore the Best Hotels in Jamaica!"  # Customize your text
+font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"  # Update this to the path of your font
 
-# Create directories for downloaded images
-os.makedirs("downloaded_images", exist_ok=True)
-
-# Image search and download
-search_term = "Rosewood Jeddah hotel booking.com"
-google_crawler = GoogleImageCrawler(storage={"root_dir": "downloaded_images"})
-google_crawler.crawl(keyword=search_term, max_num=1)
-
-# Check if any image was downloaded
-image_path = os.path.join("downloaded_images", "000001.jpg")
-if not os.path.isfile(image_path):
-    logging.error("Image download failed!")
+# Ensure the input directory exists
+if not os.path.exists(input_image_dir):
+    print(f"Directory '{input_image_dir}' does not exist.")
     exit(1)
 
-# Define output file path
-output_path = "thumbnail_with_vignette.jpg"
+# Find the first image in the directory
+input_images = [f for f in os.listdir(input_image_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
+if not input_images:
+    print("No images found in 'downloaded_images' directory.")
+    exit(1)
 
-# FFmpeg command to add vignette and styled text
+input_image = os.path.join(input_image_dir, input_images[0])
+
+# Check if FFmpeg is installed
+try:
+    subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+except FileNotFoundError:
+    print("FFmpeg is not installed or not found in PATH.")
+    exit(1)
+
+# Apply vignette effect and add text overlay
 ffmpeg_command = [
-    "ffmpeg", "-y",
-    "-i", image_path,
-    "-vf",
-    (
-        "curves=vintage, "
-        "drawtext=text='Best Hotels':fontfile='Nature Beauty Personal Use.ttf':"
-        "fontcolor=silver:fontsize=350:shadowx=5:shadowy=5:shadowcolor=silver@0.8:"
-        "x=(w-text_w)/2:y=(h-text_h)/3, "
-        "drawtext=text='in':fontfile='Nature Beauty Personal Use.ttf':"
-        "fontcolor=silver:fontsize=300:shadowx=5:shadowy=5:shadowcolor=silver@0.8:"
-        "x=(w-text_w)/2:y=(h-text_h)/2, "
-        "drawtext=text='Jeddah':fontfile='Nature Beauty Personal Use.ttf':"
-        "fontcolor=silver:fontsize=300:shadowx=5:shadowy=5:shadowcolor=silver@0.8:"
-        "x=(w-text_w)/2:y=(h+text_h)/2"
-    ),
-    "-frames:v", "1", output_path
+    "ffmpeg", "-y", "-i", input_image, "-vf",
+    f"vignette,drawtext=fontfile={font_path}:text='{text}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/1.2",
+    output_image
 ]
 
-# Run FFmpeg command
 try:
     subprocess.run(ffmpeg_command, check=True)
-    logging.info(f"Thumbnail generated successfully: {output_path}")
+    print(f"Thumbnail with vignette effect and text created: {output_image}")
 except subprocess.CalledProcessError as e:
-    logging.error(f"FFmpeg command failed: {e}")
+    print(f"Error generating thumbnail: {e}")
     exit(1)
