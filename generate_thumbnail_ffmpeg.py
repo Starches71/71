@@ -1,36 +1,38 @@
 
-name: Download and Process Image
+import os
+from icrawler.builtin import GoogleImageCrawler
 
-on:
-  push:
-    branches:
-      - main
+# Step 1: Download the image
+def download_image(search_term, output_dir="downloaded_images"):
+    os.makedirs(output_dir, exist_ok=True)
+    crawler = GoogleImageCrawler(storage={"root_dir": output_dir})
+    crawler.crawl(keyword=search_term, max_num=1)
+    print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
+    return os.path.join(output_dir, "000001.jpg")
 
-jobs:
-  image_processing:
-    runs-on: ubuntu-latest
+# Step 2: Generate a thumbnail using FFmpeg with silver text, shadow, and vignette effect
+def generate_thumbnail(input_image, output_image, text="BEST HOTELS\n       IN\n     JEDDAH", font_path="rock_stencil.ttf"):
+    ffmpeg_command = (
+        f'ffmpeg -y -i "{input_image}" '
+        f'-vf "drawtext=text=\'{text}\':'
+        f'fontfile=\'{font_path}\':'
+        f'fontcolor=#C0C0C0:fontsize=96:shadowx=10:shadowy=10:shadowcolor=black:x=(w-text_w)/2:y=(h-text_h)/2,'
+        f'lenscorrection=k1=-0.5:k2=0.3" '
+        f'"{output_image}"'
+    )
+    print("Running FFmpeg command:", ffmpeg_command)
+    result = os.system(ffmpeg_command)
+    if result == 0:
+        print("Thumbnail generated successfully:", output_image)
+    else:
+        print("Failed to generate thumbnail.")
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+if __name__ == "__main__":
+    # Step 1: Download an image
+    search_query = "Rosewood Jeddah hotel booking.com"
+    input_image = download_image(search_query)
 
-      - name: Set up Python environment
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
-
-      - name: Install dependencies
-        run: |
-          pip install icrawler
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
-
-      - name: Download and process image
-        run: |
-          python3 generate_thumbnail_ffmpeg.py
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: generated-thumbnail
-          path: thumbnail_with_text_vignette.jpg
+    # Step 2: Generate thumbnail with silver text, more shadow, and vignette effect
+    output_image = "thumbnail_with_text_vignette.jpg"
+    font_file = "rock_stencil.ttf"  # Path to the downloaded font
+    generate_thumbnail(input_image, output_image, font_path=font_file)
