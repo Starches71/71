@@ -1,5 +1,5 @@
+
 import os
-from icrawler.builtin import GoogleImageCrawler
 import bpy
 
 # Step 1: Download the image using icrawler
@@ -21,15 +21,15 @@ def generate_thumbnail(input_image, output_image, text="BEST HOTELS\n       IN\n
     # Create a new plane to display the image
     bpy.ops.mesh.primitive_plane_add(size=10, enter_editmode=False, align='WORLD', location=(0, 0, 0))
     plane = bpy.context.active_object
-    plane.data.uv_textures.new()
 
     # Apply the image texture to the plane
     material = bpy.data.materials.new("Material")
     material.use_nodes = True
     bsdf = material.node_tree.nodes["Principled BSDF"]
-    texture_image = bpy.data.images.load(input_image)
     texture_node = material.node_tree.nodes.new("ShaderNodeTexImage")
-    texture_node.image = texture_image
+    texture_node.image = bpy.data.images.load(input_image)
+
+    # Connect the texture node to the material's base color
     material.node_tree.links.new(bsdf.inputs['Base Color'], texture_node.outputs['Color'])
     plane.data.materials.append(material)
 
