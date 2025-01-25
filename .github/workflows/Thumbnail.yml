@@ -1,4 +1,4 @@
-name: Generate Thumbnail with Styled Font and Image Download
+name: Download and Process Image
 
 on:
   push:
@@ -6,36 +6,24 @@ on:
       - main
 
 jobs:
-  generate-thumbnail:
+  image_processing:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Python environment
+        uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: '3.8'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
           pip install icrawler
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
-      - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-
-      - name: Download Font
+      - name: Download and process image
         run: |
-          curl -L -o nature_beauty.ttf "https://dl.dafont.com/dl/?f=nature_beauty"
-          echo "Downloaded font:"
-          ls -l nature_beauty.ttf
-
-      - name: Run Thumbnail Script
-        run: python generate_thumbnail_ffmpeg.py
-
-      - name: Upload Thumbnail Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: thumbnail
-          path: thumbnail_with_text.jpg
+          python3 script.py  # Replace with your Python script filename
