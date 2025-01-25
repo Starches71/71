@@ -1,42 +1,37 @@
-name: Debug Image Processing
+
+name: Generate Thumbnail
 
 on:
   push:
     branches:
-      - main
+      - main  # Triggers on push to 'main' branch
+  workflow_dispatch:  # Allows manual trigger from the Actions tab
 
 jobs:
-  image_processing:
-    runs-on: ubuntu-latest
+  generate-thumbnail:
+    runs-on: ubuntu-latest  # Runs on the latest Ubuntu environment
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2  # Checks out your code from the repository
 
-      - name: Set up Python environment
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
+    - name: Set up Python
+      uses: actions/setup-python@v2  # Sets up Python for the workflow
+      with:
+        python-version: '3.x'  # Specifies Python version (3.x should be fine)
 
-      - name: Install dependencies
-        run: |
-          pip install icrawler
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install icrawler  # Installs the icrawler module (for downloading images)
+        pip install ffmpeg-python  # Installs FFmpeg for Python bindings
 
-      - name: Verify FFmpeg version and filters
-        run: ffmpeg -filters
+    - name: Run the thumbnail generation script
+      run: |
+        python generate_thumbnail_ffmpag.py  # Runs your Python script
 
-      - name: Debug font and image availability
-        run: |
-          ls -R
-          ls downloaded_images
-
-      - name: Run Python script
-        run: python3 generate_thumbnail_ffmpeg.py
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: generated-thumbnail
-          path: thumbnail_with_text_vignette.jpg
+    - name: Upload generated thumbnail as artifact
+      uses: actions/upload-artifact@v2  # Uploads the generated file as an artifact
+      with:
+        name: generated-thumbnail  # Name of the artifact
+        path: thumbnail_with_text_vignette.jpg  # Path to the generated file (adjust if needed)
