@@ -14,19 +14,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Python and Install Dependencies
+      - name: Set up Blender and Python
         run: |
           sudo apt-get update
+          sudo apt-get install blender
           sudo apt-get install python3-pip
           pip install icrawler
-          sudo apt-get install blender
 
+      - name: Download Image using iCrawler
+        run: |
+          python -c "from icrawler.builtin import GoogleImageCrawler; GoogleImageCrawler().crawl(keyword='rosewood jeddah booking.com', max_num=1)"
+        
       - name: Run Blender Script to Process Image
         run: |
           blender --background --python ./Blender.py
 
-      - name: Upload the output image
+      - name: List files in output directory
+        run: ls -l ./output
+
+      - name: Upload the output image as artifact
         uses: actions/upload-artifact@v3
         with:
           name: processed-image
-          path: ./output_image_with_effects.png
+          path: ./output/output_image_with_effects.png  # Ensure correct path
