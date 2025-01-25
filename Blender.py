@@ -1,6 +1,7 @@
 
 import os
 import bpy
+from icrawler.builtin import GoogleImageCrawler  # Import the GoogleImageCrawler
 
 # Step 1: Download the image using icrawler
 def download_image(search_term, output_dir="downloaded_images"):
