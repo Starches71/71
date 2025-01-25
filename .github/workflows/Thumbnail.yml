@@ -1,35 +1,52 @@
 
-name: Generate Thumbnail
+name: Generate Thumbnail with Styled Font and Image Download
 
 on:
   push:
     branches:
-      - main  # This will trigger the workflow on push to the 'main' branch
+      - main
 
 jobs:
   generate-thumbnail:
-    runs-on: ubuntu-latest  # The job will run on the latest Ubuntu environment
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2  # This checks out the repository so that the workflow can access your files
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'  # Set the version of Python to use (you can adjust this if needed)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install icrawler  # Install the necessary Python dependencies (icrawler is used in your script)
+      - name: Install Dependencies
+        run: |
+          pip install icrawler
 
-    - name: Run thumbnail generation script
-      run: |
-        python generate_thumbnail_ffmpag.py  # This runs the Python script you want to execute
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-    - name: Upload generated thumbnail as artifact
-      uses: actions/upload-artifact@v2  # Upload the generated file as an artifact
-      with:
-        name: generated-thumbnail  # The name of the artifact
-        path: thumbnail_with_text_vignette.jpg  # Path to the generated file (adjust as needed)
+      - name: Debug Repository Contents
+        run: |
+          echo "Checking repository files:"
+          ls -la
+
+      - name: Run Thumbnail Script
+        run: |
+          echo "Running Python script to generate thumbnail..."
+          python generate_thumbnail_ffmpeg.py
+
+      - name: Check for Thumbnail
+        run: |
+          if [ -f "thumbnail_with_text.jpg" ]; then
+            echo "Thumbnail generated successfully!"
+          else
+            echo "Thumbnail generation failed. Check Python script or input files."
+            exit 1
+          fi
+
+      - name: Upload Thumbnail Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: thumbnail
+          path: thumbnail_with_text.jpg
