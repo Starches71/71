@@ -1,4 +1,3 @@
-
 name: Blender Image Processing
 
 on:
@@ -24,7 +23,12 @@ jobs:
       - name: Download Image using iCrawler
         run: |
           python -c "from icrawler.builtin import GoogleImageCrawler; GoogleImageCrawler().crawl(keyword='rosewood jeddah booking.com', max_num=1)"
-        
+
+      - name: Move downloaded image to correct location
+        run: |
+          mkdir -p ./rosewood_images
+          mv ./rosewood_jeddah_image.jpg ./rosewood_images/
+
       - name: Run Blender Script to Process Image
         run: |
           blender --background --python ./Blender.py
