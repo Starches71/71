@@ -1,11 +1,15 @@
-
 import bpy
 import os
 
-# Define output directory and file path
+# Define the directory to save output image
 output_dir = './output'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
+
+# Ensure the downloaded image exists and is correct
+image_path = './rosewood_jeddah_image.jpg'  # Path to the downloaded image from iCrawler
+if not os.path.exists(image_path):
+    raise FileNotFoundError(f"Image not found at: {image_path}")
 
 output_image_path = os.path.join(output_dir, 'output_image_with_effects.png')
 print(f"Saving image to: {output_image_path}")
@@ -14,7 +18,6 @@ print(f"Saving image to: {output_image_path}")
 bpy.ops.wm.read_factory_settings(use_empty=True)
 
 # Load the image
-image_path = './rosewood_jeddah_image.jpg'  # Path to your downloaded image (use icrawler or another method to download the image)
 image = bpy.data.images.load(image_path)
 
 # Create a new scene and camera
