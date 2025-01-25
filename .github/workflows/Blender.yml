@@ -1,0 +1,32 @@
+
+name: Blender Image Processing
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  blender-image-processing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python and Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3-pip
+          pip install icrawler
+          sudo apt-get install blender
+
+      - name: Run Blender Script to Process Image
+        run: |
+          blender --background --python /path/to/your/blender_script.py
+
+      - name: Upload the output image
+        uses: actions/upload-artifact@v2
+        with:
+          name: processed-image
+          path: /path/to/output_image_with_effects.png
