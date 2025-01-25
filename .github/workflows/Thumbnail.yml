@@ -1,5 +1,4 @@
-
-name: Generate Thumbnail with Styled Font and Image Download
+name: Debug Image Processing
 
 on:
   push:
@@ -7,46 +6,37 @@ on:
       - main
 
 jobs:
-  generate-thumbnail:
+  image_processing:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Python environment
+        uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: '3.8'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
           pip install icrawler
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
-      - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Verify FFmpeg version and filters
+        run: ffmpeg -filters
 
-      - name: Debug Repository Contents
+      - name: Debug font and image availability
         run: |
-          echo "Checking repository files:"
-          ls -la
+          ls -R
+          ls downloaded_images
 
-      - name: Run Thumbnail Script
-        run: |
-          echo "Running Python script to generate thumbnail..."
-          python generate_thumbnail_ffmpeg.py
+      - name: Run Python script
+        run: python3 generate_thumbnail_ffmpeg.py
 
-      - name: Check for Thumbnail
-        run: |
-          if [ -f "thumbnail_with_text.jpg" ]; then
-            echo "Thumbnail generated successfully!"
-          else
-            echo "Thumbnail generation failed. Check Python script or input files."
-            exit 1
-          fi
-
-      - name: Upload Thumbnail Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: thumbnail
-          path: thumbnail_with_text.jpg
+          name: generated-thumbnail
+          path: thumbnail_with_text_vignette.jpg
