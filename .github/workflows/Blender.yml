@@ -1,4 +1,4 @@
-name: Blender Image Processing
+name: Generate Thumbnail in Blender
 
 on:
   push:
@@ -6,38 +6,32 @@ on:
       - main
 
 jobs:
-  blender-image-processing:
+  generate-thumbnail:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      - name: Set up Blender and Python
+      - name: Set up Blender
         run: |
           sudo apt-get update
           sudo apt-get install blender
-          sudo apt-get install python3-pip
+
+      - name: Install Python Dependencies
+        run: |
           pip install icrawler
 
-      - name: Download Image using iCrawler
+      - name: Download Image Using icrawler
         run: |
           python -c "from icrawler.builtin import GoogleImageCrawler; GoogleImageCrawler().crawl(keyword='rosewood jeddah booking.com', max_num=1)"
 
-      - name: Move downloaded image to correct location
-        run: |
-          mkdir -p ./rosewood_images
-          mv ./rosewood_jeddah_image.jpg ./rosewood_images/
-
-      - name: Run Blender Script to Process Image
+      - name: Run Blender Script
         run: |
           blender --background --python ./Blender.py
 
-      - name: List files in output directory
-        run: ls -l ./output
-
-      - name: Upload the output image as artifact
+      - name: Upload Thumbnail Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: processed-image
-          path: ./output/output_image_with_effects.png  # Ensure correct path
+          name: thumbnail
+          path: thumbnail_with_text.png
