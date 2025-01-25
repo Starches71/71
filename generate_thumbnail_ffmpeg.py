@@ -1,3 +1,4 @@
+
 import os
 from icrawler.builtin import GoogleImageCrawler
 
@@ -9,19 +10,18 @@ def download_image(search_term, output_dir="downloaded_images"):
     print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
     return os.path.join(output_dir, "000001.jpg")
 
-# Step 2: Generate a thumbnail using FFmpeg with vignette and formatted text
+# Step 2: Generate a thumbnail using FFmpeg with vignette and formatted text (orange text, green shadows)
 def generate_thumbnail(input_image, output_image, text="Best Hotels\n       in\n    Jeddah", font_path="Nature Beauty Personal Use.ttf"):
-    # Simulate vignette by darkening the edges with radial gradient
+    # FFmpeg command to apply text, shadow, vignette, and darken edges
     ffmpeg_command = (
         f'ffmpeg -y -i "{input_image}" '
         f'-vf "format=yuv420p,'
-        f'curves=preset=lighter,'
-        f'drawbox=x=0:y=0:w=iw:h=ih:color=black@0.5:t=fill,'
+        f'curves=preset=lighter,'  # Apply curve to lighten the overall image
         f'drawtext=text=\'{text}\':'
         f'fontfile=\'{font_path}\':'
-        f'fontcolor=#C0C0C0:fontsize=120:shadowx=10:shadowy=10:shadowcolor=black:'
+        f'fontcolor=#FFA500:fontsize=120:shadowx=10:shadowy=10:shadowcolor=#006400:'  # Orange text, green shadow
         f'x=(w-text_w)/2:y=(h-text_h)/2,'
-        f'vignette" '
+        f'vignette=PI/4:enable=\'between(t,0,5)\'" '  # Vignette filter applied at the edges
         f'"{output_image}"'
     )
     print("Running FFmpeg command:", ffmpeg_command)
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     search_query = "Rosewood Jeddah hotel booking.com"
     input_image = download_image(search_query)
 
-    # Step 2: Generate thumbnail with capitalized text and vignette effect
+    # Step 2: Generate thumbnail with capitalized text, orange text, and green shadow with vignette effect
     output_image = "thumbnail_with_text_vignette.jpg"
     font_file = "Nature Beauty Personal Use.ttf"  # Font file in the main branch
     generate_thumbnail(input_image, output_image, font_path=font_file)
