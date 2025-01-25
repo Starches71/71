@@ -10,11 +10,14 @@ def download_image(search_term, output_dir="downloaded_images"):
     print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
     return os.path.join(output_dir, "000001.jpg")
 
-# Step 2: Generate a thumbnail using FFmpeg with silver text, shadow, and vignette effect
-def generate_thumbnail(input_image, output_image, text="BEST HOTELS\n       IN\n     JEDDAH", font_path="rock_stencil.ttf"):
+# Step 2: Generate a thumbnail using FFmpeg with custom font and slight darkening
+def generate_thumbnail(input_image, output_image, text="BEST HOTELS\n       IN\n     JEDDAH", font_path="Nature Beauty Personal Use.ttf"):
+    # Apply darkening and text overlay
     ffmpeg_command = (
         f'ffmpeg -y -i "{input_image}" '
-        f'-vf "drawtext=text=\'{text}\':'
+        f'-vf "format=yuv420p,'
+        f'curves=preset=darken,'
+        f'drawtext=text=\'{text}\':'
         f'fontfile=\'{font_path}\':'
         f'fontcolor=#C0C0C0:fontsize=96:shadowx=10:shadowy=10:shadowcolor=black:x=(w-text_w)/2:y=(h-text_h)/2,'
         f'lenscorrection=k1=-0.5:k2=0.3" '
@@ -32,7 +35,7 @@ if __name__ == "__main__":
     search_query = "Rosewood Jeddah hotel booking.com"
     input_image = download_image(search_query)
 
-    # Step 2: Generate thumbnail with silver text, more shadow, and vignette effect
+    # Step 2: Generate thumbnail with darkening, custom font, and vignette effect
     output_image = "thumbnail_with_text_vignette.jpg"
-    font_file = "rock_stencil.ttf"  # Path to the downloaded font
+    font_file = "Nature Beauty Personal Use.ttf"  # Font file in the main branch
     generate_thumbnail(input_image, output_image, font_path=font_file)
