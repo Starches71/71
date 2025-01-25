@@ -1,3 +1,4 @@
+
 name: Download and Process Image
 
 on:
@@ -26,4 +27,10 @@ jobs:
 
       - name: Download and process image
         run: |
-          python3 script.py  # Replace with your Python script filename
+          python3 generate_thumbnail_ffmpeg.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: generated-thumbnail
+          path: thumbnail_with_text_vignette.jpg
