@@ -1,42 +1,38 @@
+
 import os
-import subprocess
+from icrawler.builtin import GoogleImageCrawler
 
-# Define paths
-input_image_dir = "downloaded_images"
-output_image = "thumbnail_with_vignette.jpg"
-text = "Explore the Best Hotels in Jamaica!"  # Customize your text
-font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"  # Update this to the path of your font
+# Step 1: Download the image
+def download_image(search_term, output_dir="downloaded_images"):
+    os.makedirs(output_dir, exist_ok=True)
+    crawler = GoogleImageCrawler(storage={"root_dir": output_dir})
+    crawler.crawl(keyword=search_term, max_num=1)
+    print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
+    return os.path.join(output_dir, "000001.jpg")
 
-# Ensure the input directory exists
-if not os.path.exists(input_image_dir):
-    print(f"Directory '{input_image_dir}' does not exist.")
-    exit(1)
+# Step 2: Generate a thumbnail using FFmpeg with silver text, shadow, and vignette effect
+def generate_thumbnail(input_image, output_image, text="BEST HOTELS\n       IN\n     JEDDAH", font_path="rock_stencil.ttf"):
+    ffmpeg_command = (
+        f'ffmpeg -y -i "{input_image}" '
+        f'-vf "drawtext=text=\'{text}\':'
+        f'fontfile=\'{font_path}\':'
+        f'fontcolor=#C0C0C0:fontsize=96:shadowx=10:shadowy=10:shadowcolor=black:x=(w-text_w)/2:y=(h-text_h)/2,'
+        f'lenscorrection=k1=-0.5:k2=0.3" '
+        f'"{output_image}"'
+    )
+    print("Running FFmpeg command:", ffmpeg_command)
+    result = os.system(ffmpeg_command)
+    if result == 0:
+        print("Thumbnail generated successfully:", output_image)
+    else:
+        print("Failed to generate thumbnail.")
 
-# Find the first image in the directory
-input_images = [f for f in os.listdir(input_image_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
-if not input_images:
-    print("No images found in 'downloaded_images' directory.")
-    exit(1)
+if __name__ == "__main__":
+    # Step 1: Download an image
+    search_query = "Rosewood Jeddah hotel booking.com"
+    input_image = download_image(search_query)
 
-input_image = os.path.join(input_image_dir, input_images[0])
-
-# Check if FFmpeg is installed
-try:
-    subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-except FileNotFoundError:
-    print("FFmpeg is not installed or not found in PATH.")
-    exit(1)
-
-# Apply vignette effect and add text overlay
-ffmpeg_command = [
-    "ffmpeg", "-y", "-i", input_image, "-vf",
-    f"vignette,drawtext=fontfile={font_path}:text='{text}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/1.2",
-    output_image
-]
-
-try:
-    subprocess.run(ffmpeg_command, check=True)
-    print(f"Thumbnail with vignette effect and text created: {output_image}")
-except subprocess.CalledProcessError as e:
-    print(f"Error generating thumbnail: {e}")
-    exit(1)
+    # Step 2: Generate thumbnail with silver text, more shadow, and vignette effect
+    output_image = "thumbnail_with_text_vignette.jpg"
+    font_file = "rock_stencil.ttf"  # Path to the downloaded font
+    generate_thumbnail(input_image, output_image, font_path=font_file)
