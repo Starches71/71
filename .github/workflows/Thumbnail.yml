@@ -25,6 +25,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
+      - name: Ensure font file exists
+        run: |
+          if [ ! -f "Nature Beauty Personal Use.ttf" ]; then
+            echo "Font file missing! Please ensure Nature Beauty Personal Use.ttf is in the repository."
+            exit 1
+          fi
+
       - name: Download and process image
         run: |
           python3 generate_thumbnail_ffmpeg.py
