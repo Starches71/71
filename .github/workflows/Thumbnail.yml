@@ -1,4 +1,3 @@
-
 name: Generate Thumbnail
 
 on:
@@ -25,13 +24,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install icrawler
 
-    - name: Download image from Google
+    - name: Download Image and Generate Thumbnail
       run: |
-        python download_image.py  # Assuming you have a download_image.py script
-
-    - name: Generate Thumbnail
-      run: |
-        python generate_thumbnail_ffmpeg.py  # Your main script to generate the thumbnail
+        python generate_thumbnail_ffmpeg.py  # This is your script that downloads and processes the image
 
     - name: Upload generated thumbnail as artifact
       uses: actions/upload-artifact@v3  # Updated version v3
