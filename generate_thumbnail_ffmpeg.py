@@ -1,4 +1,3 @@
-
 import os
 from icrawler.builtin import GoogleImageCrawler
 
@@ -10,17 +9,19 @@ def download_image(search_term, output_dir="downloaded_images"):
     print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
     return os.path.join(output_dir, "000001.jpg")
 
-# Step 2: Generate a thumbnail using FFmpeg with lowercase text
-def generate_thumbnail(input_image, output_image, text="best hotels\n       in\n     jeddah", font_path="Nature Beauty Personal Use.ttf"):
-    # Apply darkening and text overlay
+# Step 2: Generate a thumbnail using FFmpeg with vignette and formatted text
+def generate_thumbnail(input_image, output_image, text="Best Hotels\n       in\n    Jeddah", font_path="Nature Beauty Personal Use.ttf"):
+    # Simulate vignette by darkening the edges with radial gradient
     ffmpeg_command = (
         f'ffmpeg -y -i "{input_image}" '
         f'-vf "format=yuv420p,'
-        f'colorchannelmixer=.8:.0:.0:.0:.0:.8:.0:.0:.0:.0:.8:.0,'
+        f'curves=preset=lighter,'
+        f'drawbox=x=0:y=0:w=iw:h=ih:color=black@0.5:t=fill,'
         f'drawtext=text=\'{text}\':'
         f'fontfile=\'{font_path}\':'
-        f'fontcolor=#C0C0C0:fontsize=96:shadowx=10:shadowy=10:shadowcolor=black:x=(w-text_w)/2:y=(h-text_h)/2,'
-        f'lenscorrection=k1=-0.5:k2=0.3" '
+        f'fontcolor=#C0C0C0:fontsize=120:shadowx=10:shadowy=10:shadowcolor=black:'
+        f'x=(w-text_w)/2:y=(h-text_h)/2,'
+        f'vignette" '
         f'"{output_image}"'
     )
     print("Running FFmpeg command:", ffmpeg_command)
@@ -35,7 +36,7 @@ if __name__ == "__main__":
     search_query = "Rosewood Jeddah hotel booking.com"
     input_image = download_image(search_query)
 
-    # Step 2: Generate thumbnail with lowercase text, darkening, and vignette effect
+    # Step 2: Generate thumbnail with capitalized text and vignette effect
     output_image = "thumbnail_with_text_vignette.jpg"
     font_file = "Nature Beauty Personal Use.ttf"  # Font file in the main branch
     generate_thumbnail(input_image, output_image, font_path=font_file)
