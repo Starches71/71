@@ -11,27 +11,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
+    - name: Set Up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.9"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install icrawler
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install icrawler
 
-      - name: Run script to download image and generate thumbnail
-        run: python generate_thumbnail_ffmpeg.py
+    - name: Install FFmpeg
+      run: |
+        sudo apt update
+        sudo apt install -y ffmpeg
 
-      - name: Debug: List files in the working directory
-        run: ls -al
+    - name: Download and Generate Thumbnail
+      run: |
+        python generate_thumbnail_ffmpeg.py  # Running your Python script
 
-      - name: Upload generated thumbnail as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: generated-thumbnail
-          path: thumbnail_with_text_vignette.jpg
+    - name: Upload Thumbnail as Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: thumbnail
+        path: thumbnail_with_text_vignette.jpg  # Path to the generated thumbnail
