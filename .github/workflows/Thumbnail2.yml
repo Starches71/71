@@ -31,7 +31,7 @@ jobs:
         run: |
           # Run your script that generates the thumbnails
           # Using the correct script name 'generate_thumbnails_ffmpeg.py'
-          python generate_thumbnails_ffmpeg.py
+          python generate_thumbnail_ffmpeg.py
 
       # Upload the generated thumbnails
       - name: Upload Generated Thumbnails
