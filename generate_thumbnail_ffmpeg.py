@@ -1,15 +1,48 @@
+
 import os
 from icrawler.builtin import GoogleImageCrawler
+from PIL import Image
 
-# Step 1: Download the image
-def download_image(search_term, output_dir="downloaded_images"):
+# Step 1: Download 3 images
+def download_images(search_term, output_dir="downloaded_images", num_images=3):
     os.makedirs(output_dir, exist_ok=True)
     crawler = GoogleImageCrawler(storage={"root_dir": output_dir})
-    crawler.crawl(keyword=search_term, max_num=1)
-    print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
-    return os.path.join(output_dir, "000001.jpg")
+    crawler.crawl(keyword=search_term, max_num=num_images)
+    downloaded_files = [os.path.join(output_dir, f"{str(i+1).zfill(6)}.jpg") for i in range(num_images)]
+    print("Images downloaded:", downloaded_files)
+    return downloaded_files
 
-# Step 2: Generate a thumbnail using FFmpeg with thicker black borders
+# Step 2: Combine images in a V-like layout
+def combine_images_v_like(images, output_image="combined_image.jpg"):
+    # Open images
+    img1 = Image.open(images[0])
+    img2 = Image.open(images[1])
+    img3 = Image.open(images[2])
+
+    # Resize images to make them consistent
+    width = max(img1.width, img2.width, img3.width)
+    height = max(img1.height, img2.height, img3.height)
+    
+    img1 = img1.resize((width, height))
+    img2 = img2.resize((width, height))
+    img3 = img3.resize((width, height))
+
+    # Create a new blank image with a V-like layout
+    new_width = width * 2
+    new_height = height * 2
+    combined_img = Image.new("RGB", (new_width, new_height), (255, 255, 255))
+
+    # Place images in the V-like layout
+    combined_img.paste(img1, (0, height // 2))  # img1 at left
+    combined_img.paste(img2, (width // 2, 0))  # img2 at center
+    combined_img.paste(img3, (width, height // 2))  # img3 at right
+
+    # Save combined image
+    combined_img.save(output_image)
+    print("Combined image saved as:", output_image)
+    return output_image
+
+# Step 3: Generate a thumbnail with text and thick black borders
 def generate_thumbnail(input_image, output_image, font_path="Nature Beauty Personal Use.ttf"):
     # Check if the input image exists
     if not os.path.exists(input_image):
@@ -28,11 +61,11 @@ def generate_thumbnail(input_image, output_image, font_path="Nature Beauty Perso
         f'curves=preset=lighter,'
         f'drawtext=text=\'Best Hotels\':'
         f'fontfile=\'{font_path}\':'
-        f'fontcolor=white:fontsize=150:borderw=6:bordercolor=black:'  # Thicker border with borderw=6
+        f'fontcolor=white:fontsize=150:borderw=8:bordercolor=black:'  # Thicker border with borderw=8
         f'x=(w-text_w)/2:y=(h-text_h)/2-100,'
         f'drawtext=text=\'Jeddah\':'
         f'fontfile=\'{font_path}\':'
-        f'fontcolor=white:fontsize=150:borderw=6:bordercolor=black:'  # Thicker border with borderw=6
+        f'fontcolor=white:fontsize=150:borderw=8:bordercolor=black:'  # Thicker border with borderw=8
         f'x=(w-text_w)/2:y=(h-text_h)/2+100,'
         f'vignette=PI/4" '
         f'"{output_image}"'
@@ -46,11 +79,15 @@ def generate_thumbnail(input_image, output_image, font_path="Nature Beauty Perso
         print("Failed to generate thumbnail.")
 
 if __name__ == "__main__":
-    # Step 1: Download an image
+    # Step 1: Download 3 images
     search_query = "Rosewood Jeddah hotel booking.com"
-    input_image = download_image(search_query)
+    downloaded_images = download_images(search_query)
 
-    # Step 2: Generate thumbnail with thicker black borders
-    output_image = "thumbnail_with_text_border.jpg"
+    # Step 2: Combine the images in a V-like layout
+    combined_image = "combined_image.jpg"
+    combine_images_v_like(downloaded_images, combined_image)
+
+    # Step 3: Generate thumbnail with text and thicker black borders
     font_file = "Nature Beauty Personal Use.ttf"  # Font file in the main branch
-    generate_thumbnail(input_image, output_image, font_path=font_file)
+    output_thumbnail = "thumbnail_with_text_border.jpg"
+    generate_thumbnail(combined_image, output_thumbnail, font_path=font_file)
