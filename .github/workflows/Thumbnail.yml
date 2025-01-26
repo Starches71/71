@@ -1,10 +1,11 @@
+
 name: Generate Thumbnail
 
 on:
   push:
     branches:
-      - main  # Adjust this if your main branch has a different name
-  workflow_dispatch:  # Optional, allows manual trigger
+      - main
+  workflow_dispatch:
 
 jobs:
   generate-thumbnail:
@@ -24,12 +25,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install icrawler
 
-    - name: Download Image and Generate Thumbnail
-      run: |
-        python generate_thumbnail_ffmpeg.py  # This is your script that downloads and processes the image
+    - name: Run script to download image and generate thumbnail
+      run: python generate_thumbnail_ffmpeg.py
+
+    - name: Debug: List files in the working directory
+      run: ls -al
 
     - name: Upload generated thumbnail as artifact
-      uses: actions/upload-artifact@v3  # Updated version v3
+      uses: actions/upload-artifact@v3
       with:
-        name: generated-thumbnail  # Name of the artifact
-        path: thumbnail_with_text_vignette.jpg  # Path to the generated file
+        name: generated-thumbnail
+        path: thumbnail_with_text_vignette.jpg
