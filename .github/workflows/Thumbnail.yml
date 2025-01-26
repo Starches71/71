@@ -1,3 +1,4 @@
+
 name: Generate Thumbnail
 
 on:
@@ -31,10 +32,10 @@ jobs:
 
     - name: Download and Generate Thumbnail
       run: |
-        python generate_thumbnail_ffmpeg.py  # Running your Python script
+        python generate_thumbnail_ffmpeg.py
 
     - name: Upload Thumbnail as Artifact
       uses: actions/upload-artifact@v3
       with:
         name: thumbnail
-        path: thumbnail_with_text_vignette.jpg  # Path to the generated thumbnail
+        path: thumbnail_with_text_border.jpg  # Match the correct file name
