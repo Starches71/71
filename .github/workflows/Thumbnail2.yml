@@ -23,15 +23,15 @@ jobs:
       # Install required dependencies
       - name: Install dependencies
         run: |
+          sudo apt update
+          sudo apt install -y ffmpeg
           python -m pip install --upgrade pip
           pip install py icrawler
 
       # Run the correct image generation script
       - name: Run image generation script
         run: |
-          # Run your script that generates the thumbnails
-          # Using the correct script name 'generate_thumbnails_ffmpeg.py'
-          python generate_thumbnail_ffmpeg.py
+          python generate_thumbnails_ffmpeg.py
 
       # Upload the generated thumbnails
       - name: Upload Generated Thumbnails
