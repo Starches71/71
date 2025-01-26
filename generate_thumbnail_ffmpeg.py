@@ -1,3 +1,4 @@
+
 import os
 from icrawler.builtin import GoogleImageCrawler
 
@@ -21,10 +22,14 @@ def generate_thumbnail(input_image, output_image, text="Best Hotels\n       in\n
         f'ffmpeg -y -i "{input_image}" '
         f'-vf "format=yuv420p,'
         f'curves=preset=lighter,'  # Apply curve to lighten the overall image
-        f'drawtext=text=\'{text}\':'
+        f'drawtext=text=\'Best\':'
         f'fontfile=\'{font_path}\':'
         f'fontcolor=#FFA500:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # Slightly brighter orange (#FFA500), larger font size
         f'x=(w-text_w)/2:y=(h-text_h)/2,'
+        f'drawtext=text=\'Jeddah\':'
+        f'fontfile=\'{font_path}\':'
+        f'fontcolor=#FFA500:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # Same text styling for Jeddah
+        f'x=(w-text_w)/2:y=(h-text_h)/2+150,'  # Adjust y-position to align Jeddah below Best
         f'vignette=PI/4:enable=\'between(t,0,5)\'" '  # Vignette filter applied at the edges
         f'"{output_image}"'
     )
