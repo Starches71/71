@@ -1,4 +1,3 @@
-
 import os
 from icrawler.builtin import GoogleImageCrawler
 
@@ -10,14 +9,14 @@ def download_image(search_term, output_dir="downloaded_images"):
     print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
     return os.path.join(output_dir, "000001.jpg")
 
-# Step 2: Generate a thumbnail using FFmpeg with vignette and formatted text (frost color, underlined "Best Hotels")
+# Step 2: Generate a thumbnail using FFmpeg with vignette and formatted text (frost color, underlined manually)
 def generate_thumbnail(input_image, output_image, text="Best Hotels\n       Jeddah", font_path="Nature Beauty Personal Use.ttf"):
     # Check if the font exists
     if not os.path.exists(font_path):
         print("Font file not found! Please provide a valid path to the font.")
         return
 
-    # FFmpeg command to apply text, shadow, vignette, and darken edges
+    # FFmpeg command to apply text, shadow, vignette, and darken edges, with simulated underline
     ffmpeg_command = (
         f'ffmpeg -y -i "{input_image}" '
         f'-vf "format=yuv420p,'
@@ -25,12 +24,14 @@ def generate_thumbnail(input_image, output_image, text="Best Hotels\n       Jedd
         f'drawtext=text=\'Best Hotels\':'
         f'fontfile=\'{font_path}\':'
         f'fontcolor=#FCFBFC:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'
-        f'underlined=1:'  # Underline applied to "Best Hotels"
         f'x=(w-text_w)/2:y=(h-text_h)/2-100,'
         f'drawtext=text=\'Jeddah\':'
         f'fontfile=\'{font_path}\':'
-        f'fontcolor=#FCFBFC:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # Same text styling for Jeddah
-        f'x=(w-text_w)/2:y=(h-text_h)/2+100,'  # Adjust y-position to align Jeddah below Best Hotels
+        f'fontcolor=#FCFBFC:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'
+        f'x=(w-text_w)/2:y=(h-text_h)/2+100,'
+        # Simulating underline for "Best Hotels"
+        f'drawbox=x=(w-text_w)/2-10:y=(h-text_h)/2+50:w=text_w+20:h=5:color=black@1.0:t=fill,'  
+        # This will create a box under "Best Hotels" to simulate underlining
         f'vignette=PI/4:enable=\'between(t,0,5)\'" '  # Vignette filter applied at the edges
         f'"{output_image}"'
     )
@@ -47,7 +48,7 @@ if __name__ == "__main__":
     search_query = "Rosewood Jeddah hotel booking.com"
     input_image = download_image(search_query)
 
-    # Step 2: Generate thumbnail with "Best Hotels" underlined and "Jeddah" below in frost color and black shadow with vignette effect
+    # Step 2: Generate thumbnail with "Best Hotels" underlined manually and "Jeddah" below in frost color and black shadow with vignette effect
     output_image = "thumbnail_with_text_vignette.jpg"
     font_file = "Nature Beauty Personal Use.ttf"  # Font file in the main branch
     generate_thumbnail(input_image, output_image, font_path=font_file)
