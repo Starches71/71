@@ -18,7 +18,10 @@ def combine_images_diagonal(image_paths, output_path, output_size=(1024, 1024)):
 
     for img_path in image_paths:
         img = Image.open(img_path)
-        img = img.resize((output_size[0] // len(image_paths), output_size[1] // len(image_paths)), Image.ANTIALIAS)
+        img = img.resize(
+            (output_size[0] // len(image_paths), output_size[1] // len(image_paths)), 
+            Image.Resampling.LANCZOS  # Updated here
+        )
         combined_image.paste(img, (width_offset, height_offset))
         width_offset += img.width
         height_offset += img.height
