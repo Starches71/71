@@ -1,9 +1,9 @@
 
-from PIL import Image, ImageDraw, ImageFont
 import os
+from PIL import Image, ImageDraw, ImageFont
 from icrawler.builtin import GoogleImageCrawler
 
-# Step 1: Download images
+# Step 1: Download 3 images using icrawler
 def download_images(search_term, output_dir="downloaded_images", num_images=3):
     os.makedirs(output_dir, exist_ok=True)
     crawler = GoogleImageCrawler(storage={"root_dir": output_dir})
@@ -12,70 +12,81 @@ def download_images(search_term, output_dir="downloaded_images", num_images=3):
     print("Images downloaded:", downloaded_files)
     return downloaded_files
 
-# Step 2: Combine images diagonally into a 16:9 thumbnail
+# Step 2: Combine images diagonally
 def combine_images_diagonal(images, output_image="combined_image.jpg", output_size=(1280, 720)):
-    # Open the images and resize them to 16:9 segments
-    cropped_images = []
-    for img_path in images:
-        img = Image.open(img_path)
-        img = img.resize((output_size[0] // 3, output_size[1]), Image.ANTIALIAS)  # Resize each image to 1/3 width
-        cropped_images.append(img)
+    # Create a blank canvas with the specified output size
+    canvas = Image.new("RGB", output_size, (255, 255, 255))
 
-    # Create a blank canvas for the combined image
-    combined_image = Image.new("RGB", output_size)
+    for i, image_path in enumerate(images):
+        img = Image.open(image_path)
 
-    # Paste the images diagonally
-    for i, img in enumerate(cropped_images):
-        x_offset = i * (output_size[0] // 3)
-        combined_image.paste(img, (x_offset, 0))
+        # Resize each image to fit 1/3 of the canvas width while maintaining the height
+        img = img.resize((output_size[0] // 3, output_size[1]), Image.Resampling.LANCZOS)  # Updated resizing method
+        x_offset = (output_size[0] // 3) * i  # Position for each image
 
-    # Save the combined image
-    combined_image.save(output_image)
+        # Paste the image diagonally
+        canvas.paste(img, (x_offset, 0))
+
+    canvas.save(output_image)
     print(f"Combined image saved as: {output_image}")
     return output_image
 
-# Step 3: Add text with thick black borders
-def add_text_with_border(input_image, output_image, text="Best Hotels in Jeddah", font_path="Nature Beauty Personal Use.ttf"):
+# Step 3: Add text to the combined image
+def generate_thumbnail(input_image, output_image, font_path="Nature Beauty Personal Use.ttf"):
+    # Check if the input image exists
+    if not os.path.exists(input_image):
+        print("Input image not found! Aborting thumbnail generation.")
+        return
+
+    # Check if the font exists
+    if not os.path.exists(font_path):
+        print("Font file not found! Please provide a valid path to the font.")
+        return
+
     # Open the combined image
     img = Image.open(input_image)
     draw = ImageDraw.Draw(img)
 
-    # Load font (adjust font size as needed)
-    try:
-        font = ImageFont.truetype(font_path, 80)
-    except IOError:
-        print("Font file not found! Please provide a valid path.")
-        return
+    # Add text in the center with thick black borders
+    font_size = 80
+    font = ImageFont.truetype(font_path, font_size)
 
-    # Text position
-    text_width, text_height = draw.textsize(text, font=font)
-    x = (img.width - text_width) // 2
-    y = (img.height - text_height) // 2
+    # First text
+    text1 = "Best Hotels"
+    text1_width, text1_height = draw.textsize(text1, font=font)
+    x1 = (img.width - text1_width) // 2
+    y1 = (img.height - text1_height) // 2 - 50
+    draw.text((x1 - 2, y1 - 2), text1, font=font, fill="black")
+    draw.text((x1 + 2, y1 - 2), text1, font=font, fill="black")
+    draw.text((x1 + 2, y1 + 2), text1, font=font, fill="black")
+    draw.text((x1 - 2, y1 + 2), text1, font=font, fill="black")
+    draw.text((x1, y1), text1, font=font, fill="white")
 
-    # Draw black border (by drawing multiple layers of text slightly offset)
-    border_thickness = 5
-    for offset_x in range(-border_thickness, border_thickness + 1):
-        for offset_y in range(-border_thickness, border_thickness + 1):
-            draw.text((x + offset_x, y + offset_y), text, font=font, fill="black")
-
-    # Draw white text on top
-    draw.text((x, y), text, font=font, fill="white")
+    # Second text
+    text2 = "Jeddah"
+    text2_width, text2_height = draw.textsize(text2, font=font)
+    x2 = (img.width - text2_width) // 2
+    y2 = (img.height - text2_height) // 2 + 50
+    draw.text((x2 - 2, y2 - 2), text2, font=font, fill="black")
+    draw.text((x2 + 2, y2 - 2), text2, font=font, fill="black")
+    draw.text((x2 + 2, y2 + 2), text2, font=font, fill="black")
+    draw.text((x2 - 2, y2 + 2), text2, font=font, fill="black")
+    draw.text((x2, y2), text2, font=font, fill="white")
 
     # Save the final thumbnail
     img.save(output_image)
-    print(f"Thumbnail with text saved as: {output_image}")
+    print(f"Thumbnail generated successfully: {output_image}")
 
-# Main function
 if __name__ == "__main__":
-    # Step 1: Download images
+    # Step 1: Download 3 images
     search_query = "Rosewood Jeddah hotel booking.com"
     downloaded_images = download_images(search_query)
 
-    # Step 2: Combine images
+    # Step 2: Combine the images diagonally
     combined_image = "combined_image.jpg"
     combine_images_diagonal(downloaded_images, combined_image)
 
-    # Step 3: Add text with thick borders
-    font_file = "Nature Beauty Personal Use.ttf"  # Ensure the font file exists in your working directory
+    # Step 3: Generate thumbnail with text and thicker black borders
+    font_file = "Nature Beauty Personal Use.ttf"  # Font file in the main branch
     output_thumbnail = "thumbnail_with_text_border.jpg"
-    add_text_with_border(combined_image, output_thumbnail, font_path=font_file)
+    generate_thumbnail(combined_image, output_thumbnail, font_path=font_file)
