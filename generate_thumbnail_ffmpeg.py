@@ -1,4 +1,3 @@
-
 import os
 from icrawler.builtin import GoogleImageCrawler
 
@@ -24,11 +23,11 @@ def generate_thumbnail(input_image, output_image, text="Best Hotels\n       Jedd
         f'curves=preset=lighter,'  # Apply curve to lighten the overall image
         f'drawtext=text=\'Best Hotels\':'
         f'fontfile=\'{font_path}\':'
-        f'fontcolor=#FFD800:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # School bus yellow (#FFD800), larger font size
+        f'fontcolor=#FFF5E1:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # Cream color (#FFF5E1), larger font size
         f'x=(w-text_w)/2:y=(h-text_h)/2-100,'
         f'drawtext=text=\'Jeddah\':'
         f'fontfile=\'{font_path}\':'
-        f'fontcolor=#FFD800:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # Same text styling for Jeddah
+        f'fontcolor=#FFF5E1:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # Same text styling for Jeddah
         f'x=(w-text_w)/2:y=(h-text_h)/2+100,'  # Adjust y-position to align Jeddah below Best Hotels
         f'vignette=PI/4:enable=\'between(t,0,5)\'" '  # Vignette filter applied at the edges
         f'"{output_image}"'
@@ -46,7 +45,7 @@ if __name__ == "__main__":
     search_query = "Rosewood Jeddah hotel booking.com"
     input_image = download_image(search_query)
 
-    # Step 2: Generate thumbnail with "Best Hotels" and "Jeddah" in school bus yellow and black shadow with vignette effect
+    # Step 2: Generate thumbnail with "Best Hotels" and "Jeddah" in cream color and black shadow with vignette effect
     output_image = "thumbnail_with_text_vignette.jpg"
     font_file = "Nature Beauty Personal Use.ttf"  # Font file in the main branch
     generate_thumbnail(input_image, output_image, font_path=font_file)
