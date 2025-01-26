@@ -1,4 +1,3 @@
-
 import os
 from icrawler.builtin import GoogleImageCrawler
 from PIL import Image
@@ -12,9 +11,9 @@ def download_images(search_term, output_dir="downloaded_images", num_images=3):
     print("Images downloaded:", downloaded_files)
     return downloaded_files
 
-# Step 2: Crop and Combine images in a V-like layout
+# Step 2: Crop and Combine images in a V-like diagonal layout
 def combine_images_v_like(images, output_image="combined_image.jpg", final_width=1280, final_height=720):
-    # Open images and crop to the center part (making it fit the final thumbnail size)
+    # Open images
     img1 = Image.open(images[0])
     img2 = Image.open(images[1])
     img3 = Image.open(images[2])
@@ -27,19 +26,24 @@ def combine_images_v_like(images, output_image="combined_image.jpg", final_width
     img1 = img1.resize((target_width // 3, target_height))
     img2 = img2.resize((target_width // 3, target_height))
     img3 = img3.resize((target_width // 3, target_height))
-    
-    # Create a new blank image for the V-like layout
-    combined_img = Image.new("RGB", (target_width, target_height), (255, 255, 255))
 
-    # Crop each image to focus on the center (creating the "V" effect)
+    # Crop images to focus on the center (creating the "V" effect)
     img1 = img1.crop((img1.width // 4, 0, img1.width * 3 // 4, img1.height))
     img2 = img2.crop((img2.width // 4, 0, img2.width * 3 // 4, img2.height))
     img3 = img3.crop((img3.width // 4, 0, img3.width * 3 // 4, img3.height))
 
-    # Place images in the V-like layout
-    combined_img.paste(img1, (0, target_height // 2))  # img1 at left
-    combined_img.paste(img2, (target_width // 3, 0))  # img2 at center
-    combined_img.paste(img3, (target_width * 2 // 3, target_height // 2))  # img3 at right
+    # Create a new blank image for the V-like layout
+    combined_img = Image.new("RGB", (target_width, target_height), (255, 255, 255))
+
+    # Place images in the V-like diagonal layout
+    # Image 1: Left side
+    combined_img.paste(img1, (0, target_height // 2))  # Left side of the "V"
+    
+    # Image 2: Center part, slightly lower than image 1
+    combined_img.paste(img2, (target_width // 3, 0))  # Center of the "V"
+    
+    # Image 3: Right side, overlap with image 2
+    combined_img.paste(img3, (target_width * 2 // 3, target_height // 2))  # Right side of the "V"
 
     # Save the combined image
     combined_img.save(output_image)
@@ -87,7 +91,7 @@ if __name__ == "__main__":
     search_query = "Rosewood Jeddah hotel booking.com"
     downloaded_images = download_images(search_query)
 
-    # Step 2: Combine the images in a V-like layout
+    # Step 2: Combine the images in a V-like diagonal layout
     combined_image = "combined_image.jpg"
     combine_images_v_like(downloaded_images, combined_image)
 
