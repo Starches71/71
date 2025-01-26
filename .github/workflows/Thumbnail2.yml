@@ -1,3 +1,4 @@
+
 name: Generate Thumbnail
 
 on:
@@ -31,3 +32,10 @@ jobs:
     - name: Run Thumbnail Script
       run: |
         python pillow.py
+
+    # Step 5: Upload the output image as artifact
+    - name: Upload Thumbnail
+      uses: actions/upload-artifact@v3
+      with:
+        name: combined-thumbnail
+        path: combined_image.jpg
