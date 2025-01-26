@@ -1,46 +1,33 @@
-name: Setup Python, Install Dependencies, and Upload Thumbnails
+name: Generate Thumbnail
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  setup-and-upload:
+  generate-thumbnail:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code to work with
-      - name: Checkout code
-        uses: actions/checkout@v3
+    # Step 1: Check out the repository
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-      # Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.x'
+    # Step 2: Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
 
-      # Install required dependencies
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y ffmpeg
-          python -m pip install --upgrade pip
-          pip install py icrawler
+    # Step 3: Install dependencies
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pillow icrawler
 
-      # Run the correct image generation script
-      - name: Run image generation script
-        run: |
-          python generate_thumbnail_ffmpeg.py
-
-      # Upload the generated thumbnails
-      - name: Upload Generated Thumbnails
-        uses: actions/upload-artifact@v3
-        with:
-          name: thumbnails
-          path: |
-            thumbnail_1.jpg
-            thumbnail_2.jpg
-            thumbnail_3.jpg
-            thumbnail_4.jpg
-            thumbnail_5.jpg
+    # Step 4: Run the Python script
+    - name: Run Thumbnail Script
+      run: |
+        python pillow.py
