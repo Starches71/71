@@ -12,32 +12,36 @@ def download_images(search_term, output_dir="downloaded_images", num_images=3):
     print("Images downloaded:", downloaded_files)
     return downloaded_files
 
-# Step 2: Combine images in a V-like layout
-def combine_images_v_like(images, output_image="combined_image.jpg"):
-    # Open images
+# Step 2: Crop and Combine images in a V-like layout
+def combine_images_v_like(images, output_image="combined_image.jpg", final_width=1280, final_height=720):
+    # Open images and crop to the center part (making it fit the final thumbnail size)
     img1 = Image.open(images[0])
     img2 = Image.open(images[1])
     img3 = Image.open(images[2])
 
-    # Resize images to make them consistent
-    width = max(img1.width, img2.width, img3.width)
-    height = max(img1.height, img2.height, img3.height)
+    # Define the target width and height (16:9 aspect ratio)
+    target_width = final_width
+    target_height = final_height
     
-    img1 = img1.resize((width, height))
-    img2 = img2.resize((width, height))
-    img3 = img3.resize((width, height))
+    # Resize images to fit within the target size (cropping the middle section)
+    img1 = img1.resize((target_width // 3, target_height))
+    img2 = img2.resize((target_width // 3, target_height))
+    img3 = img3.resize((target_width // 3, target_height))
+    
+    # Create a new blank image for the V-like layout
+    combined_img = Image.new("RGB", (target_width, target_height), (255, 255, 255))
 
-    # Create a new blank image with a V-like layout
-    new_width = width * 2
-    new_height = height * 2
-    combined_img = Image.new("RGB", (new_width, new_height), (255, 255, 255))
+    # Crop each image to focus on the center (creating the "V" effect)
+    img1 = img1.crop((img1.width // 4, 0, img1.width * 3 // 4, img1.height))
+    img2 = img2.crop((img2.width // 4, 0, img2.width * 3 // 4, img2.height))
+    img3 = img3.crop((img3.width // 4, 0, img3.width * 3 // 4, img3.height))
 
     # Place images in the V-like layout
-    combined_img.paste(img1, (0, height // 2))  # img1 at left
-    combined_img.paste(img2, (width // 2, 0))  # img2 at center
-    combined_img.paste(img3, (width, height // 2))  # img3 at right
+    combined_img.paste(img1, (0, target_height // 2))  # img1 at left
+    combined_img.paste(img2, (target_width // 3, 0))  # img2 at center
+    combined_img.paste(img3, (target_width * 2 // 3, target_height // 2))  # img3 at right
 
-    # Save combined image
+    # Save the combined image
     combined_img.save(output_image)
     print("Combined image saved as:", output_image)
     return output_image
