@@ -31,7 +31,7 @@ jobs:
       # Run the correct image generation script
       - name: Run image generation script
         run: |
-          python generate_thumbnails_ffmpeg.py
+          python generate_thumbnail_ffmpeg.py
 
       # Upload the generated thumbnails
       - name: Upload Generated Thumbnails
