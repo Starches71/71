@@ -1,4 +1,3 @@
-
 import os
 from icrawler.builtin import GoogleImageCrawler
 
@@ -7,11 +6,22 @@ def download_image(search_term, output_dir="downloaded_images"):
     os.makedirs(output_dir, exist_ok=True)
     crawler = GoogleImageCrawler(storage={"root_dir": output_dir})
     crawler.crawl(keyword=search_term, max_num=1)
-    print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
-    return os.path.join(output_dir, "000001.jpg")
+    
+    downloaded_image = os.path.join(output_dir, "000001.jpg")
+    if os.path.exists(downloaded_image):
+        print("Image downloaded as:", downloaded_image)
+        return downloaded_image
+    else:
+        print("Failed to download image.")
+        return None
 
 # Step 2: Generate a thumbnail using FFmpeg with white text and thick black border
-def generate_thumbnail(input_image, output_image, text="Best Hotels\n       in\n    Jeddah", font_path="Nature Beauty Personal Use.ttf"):
+def generate_thumbnail(input_image, output_image, font_path="Nature Beauty Personal Use.ttf"):
+    # Check if the input image exists
+    if not os.path.exists(input_image):
+        print("Input image not found! Aborting thumbnail generation.")
+        return
+
     # Check if the font exists
     if not os.path.exists(font_path):
         print("Font file not found! Please provide a valid path to the font.")
@@ -21,7 +31,7 @@ def generate_thumbnail(input_image, output_image, text="Best Hotels\n       in\n
     ffmpeg_command = (
         f'ffmpeg -y -i "{input_image}" '
         f'-vf "format=yuv420p,'
-        f'curves=preset=lighter,'  # Apply curve to lighten the overall image
+        f'curves=preset=lighter,'
         f'drawtext=text=\'Best Hotels\':'
         f'fontfile=\'{font_path}\':'
         f'fontcolor=white:fontsize=150:borderw=4:bordercolor=black:'
@@ -30,7 +40,7 @@ def generate_thumbnail(input_image, output_image, text="Best Hotels\n       in\n
         f'fontfile=\'{font_path}\':'
         f'fontcolor=white:fontsize=150:borderw=4:bordercolor=black:'
         f'x=(w-text_w)/2:y=(h-text_h)/2+100,'
-        f'vignette=PI/4:enable=\'between(t,0,5)\'" '  # Vignette filter applied at the edges
+        f'vignette=PI/4" '
         f'"{output_image}"'
     )
 
@@ -46,7 +56,8 @@ if __name__ == "__main__":
     search_query = "Rosewood Jeddah hotel booking.com"
     input_image = download_image(search_query)
 
-    # Step 2: Generate thumbnail with white text and thick black border
-    output_image = "thumbnail_with_text_border.jpg"
-    font_file = "Nature Beauty Personal Use.ttf"  # Font file in the main branch
-    generate_thumbnail(input_image, output_image, font_path=font_file)
+    if input_image:  # Proceed only if the image was downloaded successfully
+        # Step 2: Generate thumbnail with white text and thick black border
+        output_image = "thumbnail_with_text_border.jpg"
+        font_file = "Nature Beauty Personal Use.ttf"  # Font file in the repository
+        generate_thumbnail(input_image, output_image, font_path=font_file)
