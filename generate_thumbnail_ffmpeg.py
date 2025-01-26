@@ -10,7 +10,7 @@ def download_image(search_term, output_dir="downloaded_images"):
     print("Image downloaded as:", os.path.join(output_dir, "000001.jpg"))
     return os.path.join(output_dir, "000001.jpg")
 
-# Step 2: Generate a thumbnail using FFmpeg with vignette and formatted text (frost color and adjusted size)
+# Step 2: Generate a thumbnail using FFmpeg with vignette and formatted text (frost color, underlined "Best Hotels")
 def generate_thumbnail(input_image, output_image, text="Best Hotels\n       Jeddah", font_path="Nature Beauty Personal Use.ttf"):
     # Check if the font exists
     if not os.path.exists(font_path):
@@ -24,7 +24,8 @@ def generate_thumbnail(input_image, output_image, text="Best Hotels\n       Jedd
         f'curves=preset=lighter,'  # Apply curve to lighten the overall image
         f'drawtext=text=\'Best Hotels\':'
         f'fontfile=\'{font_path}\':'
-        f'fontcolor=#FCFBFC:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # Frost color (#FCFBFC), larger font size
+        f'fontcolor=#FCFBFC:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'
+        f'underlined=1:'  # Underline applied to "Best Hotels"
         f'x=(w-text_w)/2:y=(h-text_h)/2-100,'
         f'drawtext=text=\'Jeddah\':'
         f'fontfile=\'{font_path}\':'
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     search_query = "Rosewood Jeddah hotel booking.com"
     input_image = download_image(search_query)
 
-    # Step 2: Generate thumbnail with "Best Hotels" and "Jeddah" in frost color and black shadow with vignette effect
+    # Step 2: Generate thumbnail with "Best Hotels" underlined and "Jeddah" below in frost color and black shadow with vignette effect
     output_image = "thumbnail_with_text_vignette.jpg"
     font_file = "Nature Beauty Personal Use.ttf"  # Font file in the main branch
     generate_thumbnail(input_image, output_image, font_path=font_file)
