@@ -1,4 +1,4 @@
-name: Generate Thumbnails
+name: Generate Thumbnail
 
 on:
   push:
@@ -7,14 +7,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup-and-upload:
+  generate-thumbnail:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Set up Python
+    - name: Set Up Python
       uses: actions/setup-python@v3
       with:
         python-version: "3.9"
@@ -25,13 +25,16 @@ jobs:
         pip install icrawler
 
     - name: Install FFmpeg
-      run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      run: |
+        sudo apt update
+        sudo apt install -y ffmpeg
 
-    - name: Run Thumbnail Script
-      run: python generate_thumbnail_ffmpeg.py
+    - name: Download and Generate Thumbnail
+      run: |
+        python generate_thumbnail_ffmpeg.py  # Running your Python script
 
-    - name: Upload Generated Thumbnails
+    - name: Upload Thumbnail as Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: thumbnails
-        path: thumbnail_with_lines.jpg
+        name: thumbnail
+        path: thumbnail_with_text_vignette.jpg  # Path to the generated thumbnail
