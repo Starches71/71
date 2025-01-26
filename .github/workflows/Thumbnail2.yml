@@ -1,4 +1,4 @@
-name: Generate Thumbnail with Styled Font and Image Download
+name: Setup Python, Install Dependencies, and Upload Thumbnails
 
 on:
   push:
@@ -6,46 +6,41 @@ on:
       - main
 
 jobs:
-  generate-thumbnail:
+  setup-and-upload:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      # Checkout the code to work with
+      - name: Checkout code
         uses: actions/checkout@v3
 
+      # Set up Python
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v3
         with:
-          python-version: 3.9
+          python-version: '3.x'
 
-      - name: Install Dependencies
+      # Install required dependencies
+      - name: Install dependencies
         run: |
-          pip install icrawler
+          python -m pip install --upgrade pip
+          pip install py icrawler
 
-      - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-
-      - name: Debug Repository Contents
+      # Run the correct image generation script
+      - name: Run image generation script
         run: |
-          echo "Checking repository files:"
-          ls -la
+          # Run your script that generates the thumbnails
+          # Using the correct script name 'generate_thumbnails_ffmpeg.py'
+          python generate_thumbnails_ffmpeg.py
 
-      - name: Run Thumbnail Script
-        run: |
-          echo "Running Python script to generate thumbnail..."
-          python generate_thumbnail_ffmpeg.py
-
-      - name: Check for Thumbnail
-        run: |
-          if [ -f "thumbnail_with_text.jpg" ]; then
-            echo "Thumbnail generated successfully!"
-          else
-            echo "Thumbnail generation failed. Check Python script or input files."
-            exit 1
-          fi
-
-      - name: Upload Thumbnail Artifact
-        uses: actions/upload-artifact@v4
+      # Upload the generated thumbnails
+      - name: Upload Generated Thumbnails
+        uses: actions/upload-artifact@v3
         with:
-          name: thumbnail
-          path: thumbnail_with_text.jpg
+          name: thumbnails
+          path: |
+            thumbnail_1.jpg
+            thumbnail_2.jpg
+            thumbnail_3.jpg
+            thumbnail_4.jpg
+            thumbnail_5.jpg
