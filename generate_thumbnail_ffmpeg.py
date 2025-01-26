@@ -11,7 +11,7 @@ def download_image(search_term, output_dir="downloaded_images"):
     return os.path.join(output_dir, "000001.jpg")
 
 # Step 2: Generate a thumbnail using FFmpeg with vignette and formatted text (brighter text and adjusted size)
-def generate_thumbnail(input_image, output_image, text="Best Hotels\n       in\n    Jeddah", font_path="Nature Beauty Personal Use.ttf"):
+def generate_thumbnail(input_image, output_image, text="Best Hotels\n       Jeddah", font_path="Nature Beauty Personal Use.ttf"):
     # Check if the font exists
     if not os.path.exists(font_path):
         print("Font file not found! Please provide a valid path to the font.")
@@ -22,14 +22,14 @@ def generate_thumbnail(input_image, output_image, text="Best Hotels\n       in\n
         f'ffmpeg -y -i "{input_image}" '
         f'-vf "format=yuv420p,'
         f'curves=preset=lighter,'  # Apply curve to lighten the overall image
-        f'drawtext=text=\'Best\':'
+        f'drawtext=text=\'Best Hotels\':'
         f'fontfile=\'{font_path}\':'
-        f'fontcolor=#FFA500:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # Slightly brighter orange (#FFA500), larger font size
-        f'x=(w-text_w)/2:y=(h-text_h)/2,'
+        f'fontcolor=#FFD800:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # School bus yellow (#FFD800), larger font size
+        f'x=(w-text_w)/2:y=(h-text_h)/2-100,'
         f'drawtext=text=\'Jeddah\':'
         f'fontfile=\'{font_path}\':'
-        f'fontcolor=#FFA500:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # Same text styling for Jeddah
-        f'x=(w-text_w)/2:y=(h-text_h)/2+150,'  # Adjust y-position to align Jeddah below Best
+        f'fontcolor=#FFD800:fontsize=150:shadowx=10:shadowy=10:shadowcolor=black:'  # Same text styling for Jeddah
+        f'x=(w-text_w)/2:y=(h-text_h)/2+100,'  # Adjust y-position to align Jeddah below Best Hotels
         f'vignette=PI/4:enable=\'between(t,0,5)\'" '  # Vignette filter applied at the edges
         f'"{output_image}"'
     )
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     search_query = "Rosewood Jeddah hotel booking.com"
     input_image = download_image(search_query)
 
-    # Step 2: Generate thumbnail with larger text, brighter orange color, and black shadow with vignette effect
+    # Step 2: Generate thumbnail with "Best Hotels" and "Jeddah" in school bus yellow and black shadow with vignette effect
     output_image = "thumbnail_with_text_vignette.jpg"
     font_file = "Nature Beauty Personal Use.ttf"  # Font file in the main branch
     generate_thumbnail(input_image, output_image, font_path=font_file)
