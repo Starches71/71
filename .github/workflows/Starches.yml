@@ -1,4 +1,3 @@
-
 name: Run Starches Script
 
 on:
@@ -20,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.10  # Specify the Python version
+          python-version: 3.10  # Specify a valid Python version
 
       # Step 3: Install dependencies
       - name: Install dependencies
@@ -32,6 +31,6 @@ jobs:
       - name: Run starches.py
         run: python starches.py
 
-      # Step 5: List output files (optional)
+      # Step 5: List output files (optional for debugging)
       - name: List output files
         run: ls -R
