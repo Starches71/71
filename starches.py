@@ -1,3 +1,4 @@
+
 import os
 from groq import Groq
 import subprocess
@@ -14,12 +15,12 @@ places_dir = "places"
 os.makedirs(places_dir, exist_ok=True)
 
 
-def query_cities(country_name):
+def query_admin_divisions(country_name):
     """
-    Query Groq for the list of cities in the specified country.
+    Query Groq for the list of first/high-level administrative divisions in the specified country.
     Saves the result in city.txt.
     """
-    query = f"Mention me all cities in {country_name}, without any additional details."
+    query = f"List all first-level administrative divisions in {country_name}. Provide only their names, one per line, without any additional details or comments."
     conversation_history = [{"role": "user", "content": query}]
 
     try:
@@ -42,7 +43,7 @@ def query_cities(country_name):
         # Save the result in city.txt
         with open(city_file, "w") as file:
             file.write(response_content.strip())
-        print(f"Cities saved in {city_file}\n")
+        print(f"Administrative divisions saved in {city_file}\n")
 
         # Commit and push the updated city.txt to the repository
         subprocess.run(["git", "add", city_file])
@@ -56,7 +57,7 @@ def query_cities(country_name):
 
 def process_country():
     """
-    Process the first country from country.txt, fetch its cities, and save them in city.txt.
+    Process the first country from country.txt, fetch its first-level administrative divisions, and save them in city.txt.
     """
     try:
         # Read the first country name
@@ -67,8 +68,8 @@ def process_country():
             first_country = countries[0]
             print(f"Processing first country: {first_country}")
 
-            # Query cities for the first country
-            query_cities(first_country)
+            # Query administrative divisions for the first country
+            query_admin_divisions(first_country)
 
             # Remove the first country from the file
             with open(country_file, "w") as file:
@@ -83,28 +84,28 @@ def process_country():
 
 def process_city():
     """
-    Process the first city from city.txt and send it to the 'places' directory.
+    Process the first administrative division from city.txt and send it to the 'places' directory.
     """
     try:
-        # Read the first city name
+        # Read the first administrative division name
         with open(city_file, "r") as file:
-            cities = [line.strip() for line in file.readlines() if line.strip()]
+            divisions = [line.strip() for line in file.readlines() if line.strip()]
 
-        if cities:
-            first_city = cities[0]
-            print(f"Processing first city: {first_city}")
+        if divisions:
+            first_division = divisions[0]
+            print(f"Processing first administrative division: {first_division}")
 
-            # Save the city in the places directory
-            with open(os.path.join(places_dir, f"{first_city}.txt"), "w") as file:
-                file.write(first_city)
-            print(f"Saved {first_city} in {places_dir}\n")
+            # Save the administrative division in the places directory
+            with open(os.path.join(places_dir, f"{first_division}.txt"), "w") as file:
+                file.write(first_division)
+            print(f"Saved {first_division} in {places_dir}\n")
 
-            # Remove the first city from the file
+            # Remove the first administrative division from the file
             with open(city_file, "w") as file:
-                file.write("\n".join(cities[1:]))
-            print(f"Removed {first_city} from {city_file}\n")
+                file.write("\n".join(divisions[1:]))
+            print(f"Removed {first_division} from {city_file}\n")
         else:
-            print("No cities found in city.txt.")
+            print("No administrative divisions found in city.txt.")
             process_country()  # Process the first country if city.txt is empty
 
     except FileNotFoundError:
@@ -114,7 +115,7 @@ def process_city():
 
 def trigger_htl1():
     """
-    Run htl1.py after processing the city.
+    Run htl1.py after processing the administrative division.
     """
     try:
         os.system("python3 htl1.py")
@@ -126,7 +127,7 @@ def trigger_htl1():
 if __name__ == "__main__":
     # Check if city.txt has content
     if os.path.exists(city_file) and os.stat(city_file).st_size > 0:
-        process_city()  # Process the first city
+        process_city()  # Process the first administrative division
         trigger_htl1()  # Activate htl1.py
     else:
         # If city.txt is empty, process the first country
