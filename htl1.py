@@ -3,12 +3,53 @@ from groq import Groq
 
 # Initialize Groq client with your API key
 client = Groq(api_key="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")
+
 # Directories for saving results
 best = "best"
 cheap = "cheap"
+places_dir = "places"
+city_file = "files/city.txt"  # Path to city.txt in your files repo
+places_file = os.path.join(places_dir, "places.txt")
+
 # Ensure the directories exist
 os.makedirs(best, exist_ok=True)
 os.makedirs(cheap, exist_ok=True)
+os.makedirs(places_dir, exist_ok=True)
+
+def initialize_places():
+    """
+    Check if places.txt exists. If not, create it and add the first place from city.txt.
+    """
+    if not os.path.exists(places_file):
+        print(f"{places_file} not found. Creating and adding the first place from {city_file}.")
+
+        try:
+            # Read the first place from city.txt
+            with open(city_file, "r") as city:
+                cities = [line.strip() for line in city.readlines() if line.strip()]
+
+            if cities:
+                first_place = cities[0]
+
+                # Save the first place to places.txt
+                with open(places_file, "w") as places:
+                    places.write(first_place + "\n")
+
+                print(f"Saved {first_place} to {places_file}.")
+
+                # Remove the first place from city.txt
+                with open(city_file, "w") as city:
+                    city.write("\n".join(cities[1:]))
+
+                print(f"Removed {first_place} from {city_file}.")
+
+            else:
+                print(f"{city_file} is empty. Cannot populate {places_file}.")
+
+        except FileNotFoundError:
+            print(f"Error: {city_file} not found. Please ensure it exists.\n")
+        except Exception as e:
+            print(f"Error while initializing {places_file}: {e}\n")
 
 def query_hotels(place_name, query_type="best"):
     """
@@ -55,9 +96,6 @@ def process_places():
     """
     Read the place names from places.txt and query Groq for each place.
     """
-    places_file = "places/places.txt"
-
-    # Read place names from the file
     try:
         with open(places_file, "r") as file:
             places = [line.strip() for line in file.readlines() if line.strip()]
@@ -86,5 +124,6 @@ def trigger_htl2():
         print(f"Error while triggering htl2.py: {e}")
 
 if __name__ == "__main__":
-    process_places()
+    initialize_places()  # Ensure places.txt is initialized
+    process_places()  # Process places for hotel queries
     trigger_htl2()  # Activate htl2.py after the main process is completed
