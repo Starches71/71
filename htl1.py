@@ -10,7 +10,7 @@ best = "best"
 cheap = "cheap"
 places_dir = "places"
 files_dir = "files"
-city_file = os.path.join(files_dir, "city.txt")  # Path to city.txt
+city_file = os.path.join(files_dir, "city.txt")  # Path to city.txt (from repository)
 places_file = os.path.join(places_dir, "places.txt")
 
 # Ensure all directories exist
@@ -21,10 +21,11 @@ os.makedirs(files_dir, exist_ok=True)
 
 def initialize_files():
     """
-    Ensure necessary files exist and handle missing files gracefully.
+    Ensure necessary files exist and handle missing files gracefully. 
+    After moving the first city from city.txt to places.txt, it will be deleted from city.txt to avoid repetition.
     """
     if not os.path.exists(city_file):
-        print(f"Warning: {city_file} not found. Creating a placeholder file.")
+        print(f"Warning: {city_file} not found in the repository. Creating a placeholder file.")
         with open(city_file, "w") as city:
             city.write("ExampleCity\n")  # Add a default city if needed
 
@@ -44,8 +45,11 @@ def initialize_files():
                 print(f"Saved {first_place} to {places_file}.")
 
                 # Remove the first place from city.txt
+                cities.pop(0)  # Remove the first place from the list
+
+                # Save the updated city list back to city.txt
                 with open(city_file, "w") as city:
-                    city.write("\n".join(cities[1:]))
+                    city.write("\n".join(cities))
 
                 print(f"Removed {first_place} from {city_file}.")
             else:
