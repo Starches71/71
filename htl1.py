@@ -1,3 +1,4 @@
+
 import os
 from groq import Groq
 
@@ -8,23 +9,28 @@ client = Groq(api_key="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"
 best = "best"
 cheap = "cheap"
 places_dir = "places"
-city_file = "files/city.txt"  # Path to city.txt in your files repo
+files_dir = "files"
+city_file = os.path.join(files_dir, "city.txt")  # Path to city.txt
 places_file = os.path.join(places_dir, "places.txt")
 
-# Ensure the directories exist
+# Ensure all directories exist
 os.makedirs(best, exist_ok=True)
 os.makedirs(cheap, exist_ok=True)
 os.makedirs(places_dir, exist_ok=True)
+os.makedirs(files_dir, exist_ok=True)
 
-def initialize_places():
+def initialize_files():
     """
-    Check if places.txt exists. If not, create it and add the first place from city.txt.
+    Ensure necessary files exist and handle missing files gracefully.
     """
+    if not os.path.exists(city_file):
+        print(f"Warning: {city_file} not found. Creating a placeholder file.")
+        with open(city_file, "w") as city:
+            city.write("ExampleCity\n")  # Add a default city if needed
+
     if not os.path.exists(places_file):
         print(f"{places_file} not found. Creating and adding the first place from {city_file}.")
-
         try:
-            # Read the first place from city.txt
             with open(city_file, "r") as city:
                 cities = [line.strip() for line in city.readlines() if line.strip()]
 
@@ -42,14 +48,11 @@ def initialize_places():
                     city.write("\n".join(cities[1:]))
 
                 print(f"Removed {first_place} from {city_file}.")
-
             else:
                 print(f"{city_file} is empty. Cannot populate {places_file}.")
 
-        except FileNotFoundError:
-            print(f"Error: {city_file} not found. Please ensure it exists.\n")
         except Exception as e:
-            print(f"Error while initializing {places_file}: {e}\n")
+            print(f"Error while initializing files: {e}\n")
 
 def query_hotels(place_name, query_type="best"):
     """
@@ -124,6 +127,6 @@ def trigger_htl2():
         print(f"Error while triggering htl2.py: {e}")
 
 if __name__ == "__main__":
-    initialize_places()  # Ensure places.txt is initialized
+    initialize_files()  # Ensure necessary files exist
     process_places()  # Process places for hotel queries
     trigger_htl2()  # Activate htl2.py after the main process is completed
