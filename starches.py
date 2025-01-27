@@ -71,10 +71,19 @@ def process_country():
             # Query administrative divisions for the first country
             query_admin_divisions(first_country)
 
-            # Remove the first country from the file
+            # Remove the first country from the list
+            countries.pop(0)
+
+            # Write the updated list back to country.txt
             with open(country_file, "w") as file:
-                file.write("\n".join(countries[1:]))
+                file.write("\n".join(countries))
             print(f"Removed {first_country} from {country_file}\n")
+
+            # Commit and push the updated country.txt to the repository
+            subprocess.run(["git", "add", country_file])
+            subprocess.run(["git", "commit", "-m", f"Update country.txt after processing {first_country}"])
+            subprocess.run(["git", "push"])
+            print(f"Updated {country_file} pushed to the repository.\n")
         else:
             print("No countries found in country.txt.")
 
@@ -101,8 +110,11 @@ def process_city():
             print(f"Saved {first_division} in {places_dir}\n")
 
             # Remove the first administrative division from the file
+            divisions.pop(0)
+
+            # Write the updated list back to city.txt
             with open(city_file, "w") as file:
-                file.write("\n".join(divisions[1:]))
+                file.write("\n".join(divisions))
             print(f"Removed {first_division} from {city_file}\n")
         else:
             print("No administrative divisions found in city.txt.")
