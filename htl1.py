@@ -21,8 +21,7 @@ os.makedirs(files_dir, exist_ok=True)
 
 def initialize_files():
     """
-    Ensure necessary files exist and handle missing files gracefully. 
-    After moving the first city from city.txt to places.txt, it will be deleted from city.txt to avoid repetition.
+    Ensure necessary files exist and handle missing files gracefully.
     """
     if not os.path.exists(city_file):
         print(f"Warning: {city_file} not found in the repository. Creating a placeholder file.")
@@ -45,11 +44,8 @@ def initialize_files():
                 print(f"Saved {first_place} to {places_file}.")
 
                 # Remove the first place from city.txt
-                cities.pop(0)  # Remove the first place from the list
-
-                # Save the updated city list back to city.txt
                 with open(city_file, "w") as city:
-                    city.write("\n".join(cities))
+                    city.write("\n".join(cities[1:]))
 
                 print(f"Removed {first_place} from {city_file}.")
             else:
@@ -113,6 +109,18 @@ def process_places():
             # Query Groq for 'best' and 'cheap' halal hotels
             query_hotels(place, query_type="best")
             query_hotels(place, query_type="cheap")
+
+            # Remove the city from city.txt after processing it
+            with open(city_file, "r") as city:
+                cities = [line.strip() for line in city.readlines() if line.strip()]
+
+            if place in cities:
+                cities.remove(place)
+
+            with open(city_file, "w") as city:
+                city.write("\n".join(cities))
+
+            print(f"Removed {place} from {city_file}.")
 
         print("Hotel queries completed for all places.")
 
