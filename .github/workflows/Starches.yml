@@ -1,5 +1,5 @@
 
-name: Run htl1.py
+name: Run starches.py
 
 on:
   push:
@@ -41,8 +41,14 @@ jobs:
         mkdir -p places
         echo "Directories created successfully!"
 
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y torsocks ffmpeg
+        echo "System dependencies installed successfully!"
+
     - name: Install Python Dependencies
       run: pip install -r requirements.txt
 
-    - name: Run htl1.py
-      run: python3 htl1.py
+    - name: Run starches.py
+      run: python3 starches.py
