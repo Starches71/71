@@ -40,7 +40,7 @@ def generate_description_for_hotel(hotel_name, place_name):
     try:
         # Send the prompt to Groq API and get the response
         completion = client.chat.completions.create(
-            model="llama-3.1-70b-versatile",
+            model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
             temperature=1,
             max_tokens=6040,
