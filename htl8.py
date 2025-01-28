@@ -1,4 +1,3 @@
-
 import os
 import subprocess
 
@@ -17,6 +16,7 @@ for video_file in os.listdir(input_dir):
 
         # Remove audio
         silenced_video_path = os.path.join(output_dir, f"silenced_{video_file}")
+        subprocess.run([
             "ffmpeg", "-i", input_path, "-c", "copy", "-an", silenced_video_path, "-y"  # Overwrite if file exists
         ])
 
@@ -27,10 +27,9 @@ for video_file in os.listdir(input_dir):
             output_piece_name = f"{base_name}.{chr(97 + idx)}.mp4"  # Name: 2.B.a.mp4, 2.B.b.mp4, etc.
             output_piece_path = os.path.join(output_dir, output_piece_name)
 
+            subprocess.run([
                 "ffmpeg", "-i", silenced_video_path, "-ss", f"{start_time}", "-t", "10",
                 "-c", "copy", output_piece_path, "-y"  # Overwrite if file exists
             ])
 
         print(f"Processed: {video_file}")
-
-# After processing, run htl9.py (if required)
