@@ -1,4 +1,3 @@
-
 import os
 import subprocess
 
@@ -65,11 +64,3 @@ for links_file in links_files:
 
         except Exception as e:
             print(f"An error occurred while processing link {link}: {e}")
-
-# After completing the download, run htl8.py
-try:
-    print("\nRunning htl8.py...")
-    subprocess.run(["python", "htl8.py"], check=True)
-    print("htl8.py executed successfully.")
-except subprocess.CalledProcessError as e:
-    print(f"Error running htl8.py: {e}")
