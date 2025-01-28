@@ -1,12 +1,18 @@
 
-import os                               import subprocess                       
+import os
+import subprocess
+
 # Directory paths
-links_dir = "best_link"                 output_dir = "best_vid"
-                                        # Create output directory if it doesn't exist
-if not os.path.exists(output_dir):          os.makedirs(output_dir)
+links_dir = "best_link"
+output_dir = "best_vid"
+
+# Create output directory if it doesn't exist
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
 # Iterate through each .links.txt file in the links directory
-for links_file in os.listdir(links_dir):    if links_file.endswith('.links.txt'):
+for links_file in os.listdir(links_dir):
+    if links_file.endswith('.links.txt'):
         file_path = os.path.join(links_dir, links_file)
 
         # Read all links from the current file
@@ -23,11 +29,12 @@ for links_file in os.listdir(links_dir):    if links_file.endswith('.links.txt')
 
             # Define the section to download: *00:10-01:00 (45 seconds)
             command = [
-                'yt-dlp', '-o', os.path.join(output_dir, output_filename),
+                'torsocks', 'yt-dlp', '-o', os.path.join(output_dir, output_filename),
                 '--download-sections', '*00:10-01:00', link
             ]
 
             # Run the command
+            subprocess.run(command)
 
             print(f"Downloaded segment for {link} and saved as {output_filename}")
 
