@@ -23,10 +23,12 @@ def initialize_files():
     """
     Ensure necessary files exist and handle missing files gracefully.
     """
+    print("Initializing files...")
     if not os.path.exists(city_file):
         print(f"Warning: {city_file} not found in the repository. Creating a placeholder file.")
         with open(city_file, "w") as city:
             city.write("ExampleCity\n")  # Add a default city if needed
+        print(f"Created placeholder {city_file} with default city.")
 
     if not os.path.exists(places_file):
         print(f"{places_file} not found. Creating and adding the first place from {city_file}.")
@@ -40,13 +42,11 @@ def initialize_files():
                 # Save the first place to places.txt
                 with open(places_file, "w") as places:
                     places.write(first_place + "\n")
-
                 print(f"Saved {first_place} to {places_file}.")
 
                 # Remove the first place from city.txt
                 with open(city_file, "w") as city:
                     city.write("\n".join(cities[1:]))
-
                 print(f"Removed {first_place} from {city_file}.")
             else:
                 print(f"{city_file} is empty. Cannot populate {places_file}.")
@@ -59,6 +59,8 @@ def query_hotels(place_name, query_type="best"):
     Query Groq for the list of halal hotels based on the type ('best' or 'cheap') and place.
     Saves the result in the corresponding directory.
     """
+    print(f"Querying Groq for {query_type} hotels in {place_name}...")
+
     if query_type == "best":
         query = f"Mention me 7 best halal hotels (not resorts, inns etc) in {place_name}, mention me the hotels with high quality videos on youtube and with more online presence. Just mention, don't explain (i.e., mention hotels names only without any additional details; if it's not a hotel, don't include it in the list)."
         output_dir = best
@@ -71,6 +73,7 @@ def query_hotels(place_name, query_type="best"):
 
     try:
         # Make a request to Groq
+        print(f"Sending query to Groq: {query}")
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=conversation_history,
@@ -82,14 +85,12 @@ def query_hotels(place_name, query_type="best"):
 
         # Extract the response content directly from the completion
         response_content = completion.choices[0].message.content if completion.choices else "No content found"
-
         print(f"Groq Response for {place_name} ({query_type}):\n{response_content}")
 
         # Save the result in a file
         file_name = os.path.join(output_dir, f"{place_name.replace(' ', '_')}_{query_type}_hotels.txt")
         with open(file_name, "w") as file:
             file.write(response_content)
-
         print(f"Results saved in {file_name}\n")
 
     except Exception as e:
@@ -99,6 +100,8 @@ def process_places():
     """
     Read the place names from places.txt and query Groq for each place.
     """
+    print("Processing places...")
+
     try:
         with open(places_file, "r") as file:
             places = [line.strip() for line in file.readlines() if line.strip()]
@@ -131,6 +134,7 @@ def trigger_htl2():
     """
     Run htl2.py after all hotel queries are done.
     """
+    print("Triggering htl2.py script...")
     try:
         # Run htl2.py script
         os.system("python3 htl2.py")
@@ -139,6 +143,7 @@ def trigger_htl2():
         print(f"Error while triggering htl2.py: {e}")
 
 if __name__ == "__main__":
+    print("Starting the script...")
     initialize_files()  # Ensure necessary files exist
     process_places()  # Process places for hotel queries
     trigger_htl2()  # Activate htl2.py after the main process is completed
