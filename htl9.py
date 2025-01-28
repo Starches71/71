@@ -71,18 +71,6 @@ def concatenate_videos_reencode(input_videos, output_file):
     except subprocess.CalledProcessError as e:
         print(f"Error concatenating videos: {e}")
 
-# Function to activate another script, `htl10.py`
-def activate_htl10():
-    """
-    Activates the script `htl10.py` after processing all groups.
-    """
-    try:
-        print("Activating htl10.py...")
-        subprocess.run(["python3", "htl10.py"], check=True)
-        print("htl10.py activated successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error activating htl10.py: {e}")
-
 # Ensure the output directories exist
 os.makedirs('best_join', exist_ok=True)
 os.makedirs('scaled_videos', exist_ok=True)
@@ -130,8 +118,5 @@ def process_group(group_number):
 # Process all groups from 1 to 7
 for group_number in range(1, 8):
     process_group(group_number)
-
-# Activate htl10.py after processing
-activate_htl10()
 
 print("\nAll groups processed successfully.")
