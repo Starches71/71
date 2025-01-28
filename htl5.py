@@ -3,7 +3,6 @@ import os
 import asyncio
 import edge_tts  # Make sure you have installed edge_tts
 from pathlib import Path
-import subprocess  # For running external scripts
 
 # Directories
 best_intro_dir = "best_intro"
@@ -18,8 +17,12 @@ print(f"Ensured that the directory '{best_audio_dir}' exists or was created.")
 # Function to process each file and convert it to speech asynchronously
 async def process_text_to_speech(directory, prefix=""):
     # List all text files in the given directory
-    files = os.listdir(directory)
-    print(f"Found {len(files)} files in the directory '{directory}'.")
+    try:
+        files = os.listdir(directory)
+        print(f"Found {len(files)} files in the directory '{directory}'.")
+    except Exception as e:
+        print(f"Error listing files in directory '{directory}': {e}")
+        return
 
     for file_name in files:
         # Get the full file path
@@ -63,14 +66,6 @@ async def main():
     # Process best_clean
     print("Starting to process cleaned content files...")
     await process_text_to_speech(best_clean_dir, prefix="")
-
-    # Activate htl6.py after processing all files
-    try:
-        print("\nRunning htl6.py after processing all files...")
-        subprocess.run(["python", "htl6.py"], check=True)
-        print("htl6.py executed successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error running htl6.py: {e}")
 
 # Run the main async function
 if __name__ == "__main__":
