@@ -1,4 +1,3 @@
-
 import os
 from groq import Groq
 
@@ -16,25 +15,35 @@ client = Groq(api_key="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"
 
 def get_best_hotel_file():
     """Get the first hotel file in the 'best' directory."""
+    print("Fetching the first hotel file from the 'best' directory...")
     hotel_files = [f for f in os.listdir(best_dir) if f.endswith(".txt")]
     if hotel_files:
+        print(f"Hotel file found: {hotel_files[0]}")
         return os.path.join(best_dir, hotel_files[0])  # Return the first file
+    print("No hotel file found in the 'best' directory.")
     return None
 
 
 def get_first_place_from_places():
     """Get the first place from the 'places' directory."""
+    print("Fetching the first place from 'places.txt'...")
     places_file = os.path.join(places_dir, "places.txt")
     if os.path.exists(places_file):
         with open(places_file, "r") as f:
             first_place = f.readline().strip()  # Read the first line
-        return first_place
+        if first_place:
+            print(f"First place found: {first_place}")
+            return first_place
+        else:
+            print("The places.txt file is empty!")
+            return None
     print("Places file not found!")
     return None
 
 
 def generate_description_for_hotel(hotel_name, place_name):
     """Generate an essay summary using the Groq API with streaming."""
+    print(f"Generating description for hotel: {hotel_name} in {place_name}...")
     prompt = f"Write me an essay summary about {hotel_name} hotel in {place_name},essay should be 250words , dont include hotel features that are not allowed  Islam,dont add any opening or closing just the essay."
 
     try:
@@ -71,6 +80,7 @@ def generate_description_for_hotel(hotel_name, place_name):
 
 def process_hotel_file(hotel_file):
     """Process the hotel file from the 'best' directory."""
+    print(f"Processing hotel file: {hotel_file}...")
     with open(hotel_file, "r") as f:
         hotel_list = f.readlines()
 
@@ -110,10 +120,12 @@ def process_hotel_file(hotel_file):
 
 def main():
     """Main function to process the hotel file."""
+    print("Starting the process...")
+
     hotel_file = get_best_hotel_file()  # Get the hotel file in 'best' directory
 
     if not hotel_file:
-        print("No hotel file found in the 'best' directory.")
+        print("No hotel file found in the 'best' directory. Exiting process.")
         return
 
     process_hotel_file(hotel_file)
