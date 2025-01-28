@@ -136,9 +136,9 @@ def trigger_htl2():
     """
     print("Triggering htl2.py script...")
     try:
-        # Run htl2.py script
-        os.system("python3 htl2.py")
-        print("htl2.py has been triggered.")
+        # Run htl2.py script (removed per your request)
+        # os.system("python3 htl2.py")
+        print("htl2.py has been removed from the process.")
     except Exception as e:
         print(f"Error while triggering htl2.py: {e}")
 
@@ -146,4 +146,4 @@ if __name__ == "__main__":
     print("Starting the script...")
     initialize_files()  # Ensure necessary files exist
     process_places()  # Process places for hotel queries
-    trigger_htl2()  # Activate htl2.py after the main process is completed
+    trigger_htl2()  # Removed the script activation part
