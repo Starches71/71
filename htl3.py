@@ -1,6 +1,5 @@
 
 import os
-import subprocess
 
 places_dir = "places"  # Path to the places directory
 best_intro_dir = "best_intro"  # Path to the best_intro directory
@@ -58,15 +57,6 @@ def main():
         except Exception as e:
             print(f"Error writing to files: {e}")
             return
-
-        # After generating the intro and outro files, you can run the next script (e.g., htl4.py)
-        try:
-            # Assuming you want to run htl4.py after successful execution
-            print("Running htl4.py...")
-            subprocess.run(["python", "htl4.py"], check=True)
-            print("htl4.py executed successfully.")
-        except subprocess.CalledProcessError as e:
-            print(f"Error running htl4.py: {e}")
 
     else:
         print("No places found in the 'places' directory. Please add at least one place file.")
