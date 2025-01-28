@@ -1,9 +1,15 @@
 
-                import os                               import subprocess
-                                        # Configuration for consistent video properties
+import os
+import subprocess
+
+# Configuration for consistent video properties
 TARGET_WIDTH = 640
-TARGET_HEIGHT = 360                     FRAME_RATE = 30                         SAR = "1:1"
-                                        # Function to check if a file is valid for processing                           def check_and_add_file(file_path, valid_videos):
+TARGET_HEIGHT = 360
+FRAME_RATE = 30
+SAR = "1:1"
+
+# Function to check if a file is valid for processing
+def check_and_add_file(file_path, valid_videos):
     """
     Validates if the given file is a valid video:
     - File exists
@@ -13,6 +19,7 @@ TARGET_HEIGHT = 360                     FRAME_RATE = 30                         
     """
     if os.path.isfile(file_path) and os.path.getsize(file_path) > 0 and "silenced_" not in file_path:
         # Check if the file contains a video stream using FFmpeg
+        result = subprocess.run(
             ['ffmpeg', '-i', file_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
@@ -35,6 +42,7 @@ def scale_video(input_file, output_file):
         "-c:v", "libx264", "-crf", "23", "-preset", "fast", "-y",  # Re-encode video
         output_file
     ]
+    subprocess.run(command)
     print(f"Scaled video saved to: {output_file}")
 
 # Function to concatenate videos with re-encoding
@@ -51,6 +59,7 @@ def concatenate_videos_reencode(input_videos, output_file):
         command.extend(["-i", video])
     command.extend(["-filter_complex", filter_complex, "-map", "[outv]", output_file])
 
+    subprocess.run(command)
     print(f"Concatenated videos saved to: {output_file}")
 
 # Function to activate another script, `htl10.py`
@@ -60,6 +69,7 @@ def activate_htl10():
     """
     try:
         print("Activating htl10.py...")
+        subprocess.run(["python3", "htl10.py"], check=True)
         print("htl10.py activated successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error activating htl10.py: {e}")
