@@ -1,13 +1,17 @@
-
 import os
 import subprocess
 
-# Paths                                 descriptions_dir = "best_descriptions"
-places_dir = "places"                   links_dir = "best_link"
+# Paths
+descriptions_dir = "best_descriptions"
+places_dir = "places"
+links_dir = "best_link"
 
-# Create the links directory if it doesn't exist                                if not os.path.exists(links_dir):
+# Create the links directory if it doesn't exist
+if not os.path.exists(links_dir):
     os.makedirs(links_dir)
-                                        # Read the place name from the first line of the places file                    with open(os.path.join(places_dir, "places.txt"), "r") as f:
+
+# Read the place name from the first line of the places file
+with open(os.path.join(places_dir, "places.txt"), "r") as f:
     place_name = f.readline().strip()
 
 # Process each hotel file in the descriptions directory
@@ -22,7 +26,7 @@ for hotel_file in hotel_files:
 
     # yt-dlp command to search for 3 video links related to the hotel and place
     command = [
-        'yt-dlp', f"ytsearch3:{search_query}",
+        'torsocks', 'yt-dlp', f"ytsearch3:{search_query}",  # Use torsocks with yt-dlp
         '--print', 'id',  # Print only video IDs
         '--skip-download'  # Skip downloading videos
     ]
