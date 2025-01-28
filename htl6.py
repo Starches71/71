@@ -74,11 +74,3 @@ for hotel_file in hotel_files:
 
     except Exception as e:
         print(f"An error occurred while processing {hotel_file}: {e}")
-
-# Run htl7.py after the process
-try:
-    print("\nRunning htl7.py...")
-    subprocess.run(["python", "htl7.py"], check=True)
-    print("htl7.py executed successfully.")
-except subprocess.CalledProcessError as e:
-    print(f"Error running htl7.py: {e}")
