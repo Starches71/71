@@ -18,6 +18,7 @@ def check_and_add_file(file_path, valid_videos):
     - File contains a valid video stream
     """
     if os.path.isfile(file_path) and os.path.getsize(file_path) > 0 and "silenced_" not in file_path:
+        print(f"Checking video file: {file_path}")
         # Check if the file contains a video stream using FFmpeg
         result = subprocess.run(
             ['ffmpeg', '-i', file_path],
@@ -26,6 +27,7 @@ def check_and_add_file(file_path, valid_videos):
         )
         if b"Video:" in result.stderr:
             valid_videos.append(file_path)
+            print(f"Valid video found: {file_path}")
         else:
             print(f"Skipping file without video stream: {file_path}")
     else:
@@ -36,13 +38,17 @@ def scale_video(input_file, output_file):
     """
     Scales the input video to the target resolution, SAR, and frame rate.
     """
+    print(f"Scaling video: {input_file} -> {output_file}")
     command = [
         "ffmpeg", "-i", input_file,
         "-vf", f"scale={TARGET_WIDTH}:{TARGET_HEIGHT},setsar={SAR},fps={FRAME_RATE}",
-        "-c:v", "libx264", "-crf", "23", "-preset", "fast", "-y",  # Re-encode video
-        output_file
+        "-c:v", "libx264", "-crf", "23", "-preset", "fast", "-y"  # Re-encode video
     ]
-    print(f"Scaled video saved to: {output_file}")
+    try:
+        subprocess.run(command, check=True)
+        print(f"Scaled video saved: {output_file}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error scaling video {input_file}: {e}")
 
 # Function to concatenate videos with re-encoding
 def concatenate_videos_reencode(input_videos, output_file):
@@ -50,6 +56,7 @@ def concatenate_videos_reencode(input_videos, output_file):
     Concatenates a list of input videos into a single output file using FFmpeg.
     Re-encoding is applied to avoid duration mismatches.
     """
+    print(f"Concatenating {len(input_videos)} videos into {output_file}")
     filter_complex = "".join(f"[{i}:v:0]" for i in range(len(input_videos)))
     filter_complex += f"concat=n={len(input_videos)}:v=1:a=0[outv]"
 
@@ -58,7 +65,11 @@ def concatenate_videos_reencode(input_videos, output_file):
         command.extend(["-i", video])
     command.extend(["-filter_complex", filter_complex, "-map", "[outv]", output_file])
 
-    print(f"Concatenated videos saved to: {output_file}")
+    try:
+        subprocess.run(command, check=True)
+        print(f"Concatenated videos saved: {output_file}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error concatenating videos: {e}")
 
 # Function to activate another script, `htl10.py`
 def activate_htl10():
@@ -67,13 +78,15 @@ def activate_htl10():
     """
     try:
         print("Activating htl10.py...")
+        subprocess.run(["python3", "htl10.py"], check=True)
         print("htl10.py activated successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error activating htl10.py: {e}")
 
-# Ensure the output directory exists
+# Ensure the output directories exist
 os.makedirs('best_join', exist_ok=True)
 os.makedirs('scaled_videos', exist_ok=True)
+print("Directories 'best_join' and 'scaled_videos' are ready.")
 
 # Function to process each group of videos
 def process_group(group_number):
@@ -84,6 +97,7 @@ def process_group(group_number):
     - Concatenating valid videos
     - Writing the output to the 'best_join' directory
     """
+    print(f"\nProcessing group {group_number}...")
     scaled_videos = []
 
     # Define input files for the current group
@@ -117,5 +131,7 @@ def process_group(group_number):
 for group_number in range(1, 8):
     process_group(group_number)
 
-# After processing all groups, activate htl10.py
+# Activate htl10.py after processing
 activate_htl10()
+
+print("\nAll groups processed successfully.")
