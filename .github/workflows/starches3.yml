@@ -1,0 +1,110 @@
+
+name: Run starches.py and related scripts
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-python:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set Up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12  # Match the Python version in Termux
+
+    - name: Set Up Required Directories
+      run: |
+        mkdir -p best
+        mkdir -p best_20
+        mkdir -p best_audio
+        mkdir -p best_clean
+        mkdir -p best_clip
+        mkdir -p best_clip2
+        mkdir -p best_clip3
+        mkdir -p best_descriptions
+        mkdir -p best_dir
+        mkdir -p best_final
+        mkdir -p best_final2
+        mkdir -p best_intro
+        mkdir -p best_io
+        mkdir -p best_io2
+        mkdir -p best_io3
+        mkdir -p best_join
+        mkdir -p best_join_vid
+        mkdir -p best_link
+        mkdir -p best_outro
+        mkdir -p best_vid
+        mkdir -p best_vid_clean
+        mkdir -p places
+        echo "Directories created successfully!"
+
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y torsocks ffmpeg
+        echo "System dependencies installed successfully!"
+
+    - name: Install Python Dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run starches.py
+      run: python3 starches.py
+
+    - name: Run htl1.py
+      run: python3 htl1.py
+
+    - name: Run htl2.py
+      run: python3 htl2.py
+
+    - name: Run htl3.py
+      run: python3 htl3.py
+
+    - name: Run htl4.py
+      run: python3 htl4.py
+
+    - name: Run htl5.py
+      run: python3 htl5.py
+
+    - name: Run htl6.py
+      run: python3 htl6.py
+
+    - name: Run htl7.py
+      run: python3 htl7.py
+
+    - name: Run htl8.py
+      run: python3 htl8.py
+
+    - name: Run htl9.py
+      run: python3 htl9.py
+
+    - name: Run htl10.py
+      run: python3 htl10.py
+
+    - name: Run htl10a.py
+      run: python3 htl10a.py
+
+    - name: Run htl10aa.py
+      run: python3 htl10aa.py
+
+    - name: Run htl10b.py
+      run: python3 htl10b.py
+
+    - name: Run htl11.py
+      run: python3 htl11.py
+
+    - name: Run htl11a.py
+      run: python3 htl11a.py
+
+    - name: Run htl11b.py
+      run: python3 htl11b.py
+
+    - name: Run htl12.py
+      run: python3 htl12.py
