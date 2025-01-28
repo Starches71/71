@@ -1,3 +1,4 @@
+
 import os
 import subprocess
 
@@ -18,6 +19,7 @@ def check_and_add_file(file_path, valid_videos):
     """
     if os.path.isfile(file_path) and os.path.getsize(file_path) > 0 and "silenced_" not in file_path:
         # Check if the file contains a video stream using FFmpeg
+        result = subprocess.run(
             ['ffmpeg', '-i', file_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
