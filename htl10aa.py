@@ -18,9 +18,7 @@ for filename in os.listdir(input_dir):      if filename.endswith(".mp4"):
         ]
 
         # Execute the command
-        subprocess.run(command, check=True)
         print(f"Processed: {filename}")
 
 # Activate htl10b.py
 print("Activating htl10b.py...")
-subprocess.run(["python3", "htl10b.py"], check=True)

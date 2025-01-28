@@ -23,7 +23,6 @@ for video in os.listdir(best_join):
 
             # Combine video and audio
             try:
-                subprocess.run([
                     "ffmpeg", "-i", os.path.join(best_join, video),
                     "-i", audio_file, "-c:v", "copy", "-c:a", "aac", "-strict", "-2", output
                 ], check=True)
@@ -33,7 +32,6 @@ for video in os.listdir(best_join):
 
 # Activate `htl10a.py` script after all processing
 try:
-    subprocess.run(["python3", htl10a_script], check=True)
     print(f"Successfully activated {htl10a_script}.")
 except subprocess.CalledProcessError as e:
     print(f"Error running {htl10a_script}: {e}")

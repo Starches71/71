@@ -7,7 +7,6 @@ intro_audio = "intro_best_intro.txt.mp3"outro_audio = "outro_best_outro.txt.mp3"
                                         # Ensure output directory exists                                                os.makedirs(output_dir, exist_ok=True)
                                         def get_audio_duration(file_path):
     """Get the duration of an audio file using ffprobe."""
-    result = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", file_path],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -35,13 +34,11 @@ def combine_videos_with_audio(audio_file, output_file):
                     break
 
     # Combine videos
-    subprocess.run(
         ["ffmpeg", "-f", "concat", "-safe", "0", "-i", temp_video_list, "-c", "copy", "temp_combined.mp4", "-y"],
         check=True
     )
 
     # Trim the combined video to match the audio duration
-    subprocess.run(
         [
             "ffmpeg", "-i", "temp_combined.mp4", "-i", audio_path,
             "-c:v", "copy", "-c:a", "aac", "-shortest", output_path, "-y"
@@ -58,4 +55,3 @@ combine_videos_with_audio(intro_audio, "intro_best_intro.mp4")
 combine_videos_with_audio(outro_audio, "outro_best_outro.mp4")
 
 # Run htl11a.py
-subprocess.run(["python3", "htl11a.py"], check=True)

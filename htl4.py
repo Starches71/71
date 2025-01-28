@@ -61,4 +61,3 @@ for index, hotel_file in enumerate(hotel_files):
     print(f"Cleaned file saved: {cleaned_file_path}")
 
 # Run htl5.py after processing all the files
-subprocess.run(["python", "htl5.py"])  # Activate the htl5.py script

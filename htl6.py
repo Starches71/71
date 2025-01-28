@@ -32,7 +32,6 @@ for hotel_file in hotel_files:
     ]
 
     # Capture the output of yt-dlp (video IDs)
-    result = subprocess.run(command, capture_output=True, text=True)
 
     # Check for errors in yt-dlp execution
     if result.returncode != 0:
@@ -52,4 +51,3 @@ for hotel_file in hotel_files:
     print(f"Fetched URLs for {hotel_name} and saved to {links_file_path}")
 
 # After completing the process, run htl7.py
-subprocess.run(["python", "htl7.py"])

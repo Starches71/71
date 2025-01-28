@@ -51,7 +51,6 @@ with open(file_list, "w") as f:
 
 # Run the ffmpeg command
 try:
-    subprocess.run(ffmpeg_cmd, check=True)
     print(f"Final video saved at {final_output}")
 except subprocess.CalledProcessError as e:
     print("Error during video concatenation:", e)
@@ -60,7 +59,6 @@ except subprocess.CalledProcessError as e:
 # Activate htl13.py
 if os.path.exists(htl_script):
     try:
-        subprocess.run(["python", htl_script], check=True)
         print(f"{htl_script} executed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error executing {htl_script}:", e)

@@ -52,7 +52,6 @@ async def main():
     await process_text_to_speech(best_clean_dir, prefix="")
 
     # Activate htl6.py after processing all files
-    subprocess.run(["python", "htl6.py"])  # This runs the htl6.py script
 
 # Run the main async function
 if __name__ == "__main__":

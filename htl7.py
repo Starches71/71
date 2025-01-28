@@ -28,9 +28,7 @@ for links_file in os.listdir(links_dir):    if links_file.endswith('.links.txt')
             ]
 
             # Run the command
-            subprocess.run(command)
 
             print(f"Downloaded segment for {link} and saved as {output_filename}")
 
 # After completing the download, run htl8.py
-subprocess.run(["python", "htl8.py"])

@@ -13,7 +13,6 @@ def remove_silences(input_file, output_file):
         "-c:v", "copy", "-c:a", "aac", "-y", output_file
     ]
     try:
-        subprocess.run(command, check=True)
         print(f"Silences removed: {output_file}")
     except subprocess.CalledProcessError as e:
         print(f"Error processing {input_file}: {e}")
@@ -45,7 +44,6 @@ def main():
 
     # Activate htl10aa.py after processing
     try:
-        subprocess.run(["python3", htl10_script], check=True)
         print(f"Successfully activated {htl10_script}.")
     except subprocess.CalledProcessError as e:
         print(f"Error running {htl10_script}: {e}")

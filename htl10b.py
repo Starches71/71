@@ -49,7 +49,6 @@ def add_text_overlay(input_file, text1, text2, duration, output_file):
         "ffmpeg", "-i", input_file, "-vf", overlay_text,
         "-c:v", "libx264", "-crf", "23", "-preset", "fast", "-y", output_file
     ]
-    subprocess.run(command, check=True)
     print(f"Overlays added to: {output_file}")
 
 # Main function to process all videos
@@ -86,7 +85,6 @@ def main():
 
     # Activate `htl11.py` after applying text overlays
     try:
-        subprocess.run(["python3", htl11_script], check=True)
         print(f"Successfully activated {htl11_script}.")
     except subprocess.CalledProcessError as e:
         print(f"Error running {htl11_script}: {e}")

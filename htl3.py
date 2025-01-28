@@ -38,7 +38,6 @@ def main():
         print(f"Files have been created successfully in '{best_intro_dir}' and '{best_outro_dir}' directories.")
 
         # Activate htl4.py script after generating the intro and outro files
-        subprocess.run(["python3", "htl4.py"])  # Run the htl4.py script
 
     else:
         print("No places found in the 'places' directory. Please add at least one place file.")

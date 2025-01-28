@@ -19,7 +19,6 @@ def add_text_overlay(input_file, output_file, text):
         "ffmpeg", "-i", input_file, "-vf", overlay_filter,
         "-c:v", "libx264", "-crf", "23", "-preset", "fast", "-y", output_file
     ]
-    subprocess.run(command, check=True)
     print(f"Overlay added to: {output_file}")
 
 def main():
@@ -39,7 +38,6 @@ def main():
 
     # Activate htl12.py
     try:
-        subprocess.run(["python3", script_to_activate], check=True)
         print(f"Successfully activated {script_to_activate}.")
     except subprocess.CalledProcessError as e:
         print(f"Error running {script_to_activate}: {e}")
