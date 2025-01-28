@@ -1,12 +1,19 @@
-
 import os
 import subprocess
 
 places_dir = "places"  # Path to the places directory
-best_intro_dir = "best_intro"  # Path to the best_intro directory               best_outro_dir = "best_outro"  # Path to the best_outro directory               
+best_intro_dir = "best_intro"  # Path to the best_intro directory
+best_outro_dir = "best_outro"  # Path to the best_outro directory
+
+# Ensure directories exist
+os.makedirs(best_intro_dir, exist_ok=True)
+os.makedirs(best_outro_dir, exist_ok=True)
+
 # List all files in the places directory
-places = os.listdir(places_dir)         
-# Check if there are any files in the places directory                          if places:
+places = os.listdir(places_dir)
+
+# Check if there are any files in the places directory
+if places:
     # Get the first file in the list of places
     first_file = places[0]
 
@@ -29,7 +36,7 @@ places = os.listdir(places_dir)
     print(f"Files have been created successfully in '{best_intro_dir}' and '{best_outro_dir}' directories.")
 
     # Activate htl4.py script after generating the intro and outro files
-    subprocess.run(["python", "htl4.py"])  # Run the htl4.py script
+    subprocess.run(["python3", "htl4.py"])  # Run the htl4.py script
 
 else:
     print("No places found in the 'places' directory. Please add at least one place file.")
