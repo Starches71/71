@@ -1,3 +1,4 @@
+
 import os
 import subprocess
 
@@ -31,7 +32,8 @@ for hotel_file in hotel_files:
         '--skip-download'  # Skip downloading videos
     ]
 
-    # Capture the output of yt-dlp (video IDs)
+    # Run the command and capture the output
+    result = subprocess.run(command, capture_output=True, text=True)
 
     # Check for errors in yt-dlp execution
     if result.returncode != 0:
