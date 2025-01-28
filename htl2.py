@@ -130,15 +130,6 @@ def main():
 
     process_hotel_file(hotel_file)
 
-    # Now, run htl3.py at the end
-    try:
-        # Import and run the main function of htl3.py
-        import htl3  # Assuming htl3.py is in the same directory
-        print("Running htl3.py...")
-        htl3.main()  # Call the main function of htl3.py
-    except ImportError:
-        print("Error: htl3.py not found or unable to import.")
-
 
 if __name__ == "__main__":
     main()
