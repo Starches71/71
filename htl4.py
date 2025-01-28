@@ -29,35 +29,56 @@ outro_templates = [
 
 # Ensure the cleaned directory exists
 os.makedirs(cleaned_dir, exist_ok=True)
+print(f"Ensured that the directory '{cleaned_dir}' exists or was created.")
 
 # List all hotel description files in the directory
-hotel_files = os.listdir(descriptions_dir)
+try:
+    hotel_files = os.listdir(descriptions_dir)
+    print(f"Found {len(hotel_files)} hotel description files in the '{descriptions_dir}' directory.")
+except Exception as e:
+    print(f"Error listing files in the '{descriptions_dir}' directory: {e}")
+    hotel_files = []
 
 # Sort the hotel files to ensure they are processed in numerical order
 hotel_files.sort(key=lambda x: int(x.split(".")[0]))
 
 # Process each file in the descriptions directory
 for index, hotel_file in enumerate(hotel_files):
-    # Extract the hotel number from the filename (e.g., "1. Four Seasons Hotel Riyadh.txt")
-    hotel_number = int(hotel_file.split(".")[0])  # Extract the number (e.g., 1, 2, 3, etc.)
-    hotel_name = hotel_file.split(".")[1].strip()  # Extract the hotel name from the filename
+    print(f"\nProcessing file: {hotel_file}")
 
-    # Read the hotel description from the file
-    with open(os.path.join(descriptions_dir, hotel_file), "r") as file:
-        hotel_description = file.read().strip()  # Get the description and remove extra spaces/newlines
+    try:
+        # Extract the hotel number from the filename (e.g., "1. Four Seasons Hotel Riyadh.txt")
+        hotel_number = int(hotel_file.split(".")[0])  # Extract the number (e.g., 1, 2, 3, etc.)
+        hotel_name = hotel_file.split(".")[1].strip()  # Extract the hotel name from the filename
+        print(f"Hotel number: {hotel_number}, Hotel name: {hotel_name}")
+        
+        # Read the hotel description from the file
+        with open(os.path.join(descriptions_dir, hotel_file), "r") as file:
+            hotel_description = file.read().strip()  # Get the description and remove extra spaces/newlines
+        print(f"Read description for {hotel_name}.")
 
-    # Get the corresponding intro and outro for this hotel
-    intro = intro_templates[6 - index].replace("{Hotel Name}", hotel_name)  # Reverse the order for correct matching
-    outro = outro_templates[6 - index].replace("{Hotel Name}", hotel_name)  # Reverse the order for correct matching
+        # Get the corresponding intro and outro for this hotel
+        intro = intro_templates[6 - index].replace("{Hotel Name}", hotel_name)  # Reverse the order for correct matching
+        outro = outro_templates[6 - index].replace("{Hotel Name}", hotel_name)  # Reverse the order for correct matching
+        print(f"Intro: {intro}")
+        print(f"Outro: {outro}")
 
-    # Create the cleaned hotel description with intro, the hotel description, and outro
-    cleaned_content = f"{intro}\n\n{hotel_description}\n\n{outro}"
+        # Create the cleaned hotel description with intro, the hotel description, and outro
+        cleaned_content = f"{intro}\n\n{hotel_description}\n\n{outro}"
 
-    # Save the cleaned content in the 'best_clean' directory with '.clean' extension
-    cleaned_file_path = os.path.join(cleaned_dir, f"{hotel_number}. {hotel_name}.clean")
-    with open(cleaned_file_path, "w") as cleaned_file:
-        cleaned_file.write(cleaned_content)
+        # Save the cleaned content in the 'best_clean' directory with '.clean' extension
+        cleaned_file_path = os.path.join(cleaned_dir, f"{hotel_number}. {hotel_name}.clean")
+        with open(cleaned_file_path, "w") as cleaned_file:
+            cleaned_file.write(cleaned_content)
+        print(f"Cleaned file saved: {cleaned_file_path}")
 
-    print(f"Cleaned file saved: {cleaned_file_path}")
+    except Exception as e:
+        print(f"Error processing {hotel_file}: {e}")
 
 # Run htl5.py after processing all the files
+try:
+    print("\nRunning htl5.py after processing all hotel description files...")
+    subprocess.run(["python", "htl5.py"], check=True)
+    print("htl5.py executed successfully.")
+except subprocess.CalledProcessError as e:
+    print(f"Error running htl5.py: {e}")
