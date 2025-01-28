@@ -1,12 +1,19 @@
+
 import os
 import asyncio
-import edge_tts  # Make sure you have installed edge_tts                        from pathlib import Path
-import subprocess  # For running external scripts                               
-# Directories                           best_intro_dir = "best_intro"
-best_outro_dir = "best_outro"           best_clean_dir = "best_clean"
+import edge_tts  # Make sure you have installed edge_tts
+from pathlib import Path
+import subprocess  # For running external scripts
+
+# Directories
+best_intro_dir = "best_intro"
+best_outro_dir = "best_outro"
+best_clean_dir = "best_clean"
 best_audio_dir = "best_audio"
-                                        # Ensure the audio directory exists
-os.makedirs(best_audio_dir, exist_ok=True)                                      
+
+# Ensure the audio directory exists
+os.makedirs(best_audio_dir, exist_ok=True)
+
 # Function to process each file and convert it to speech asynchronously
 async def process_text_to_speech(directory, prefix=""):
     # List all text files in the given directory
