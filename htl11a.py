@@ -1,28 +1,33 @@
-
 import os
-import subprocess                       
+import subprocess
+
 # Directories
 input_dir = "best_io"
 output_dir = "best_io2"
-htl11_script = "htl11b.py"
 
 # Ensure output directory exists
 os.makedirs(output_dir, exist_ok=True)
+print(f"Output directory '{output_dir}' is ready.")
 
-# Function to remove silences from a video                                      def remove_silences(input_file, output_file):                                       # FFmpeg command to remove silence
+# Function to remove silences from a video
+def remove_silences(input_file, output_file):
+    """Removes silences from the input video file and saves it to the output file."""
+    print(f"Processing file to remove silences: {input_file}")
     command = [
         "ffmpeg", "-i", input_file,
-        "-af", "silenceremove=1:0:-50dB",
+        "-af", "silenceremove=start_periods=1:start_duration=0.5:start_threshold=-50dB",
         "-c:v", "copy", "-c:a", "aac", "-y", output_file
     ]
     try:
-        print(f"Silences removed: {output_file}")
+        subprocess.run(command, check=True)
+        print(f"Silences removed successfully. Saved to: {output_file}")
     except subprocess.CalledProcessError as e:
-        print(f"Error processing {input_file}: {e}")
+        print(f"Error processing file '{input_file}': {e}")
 
 # Main function to process intro and outro files
 def main():
     # List all files in input directory
+    print(f"Scanning input directory: {input_dir}")
     files = os.listdir(input_dir)
 
     # Filter for intro and outro files
@@ -44,12 +49,6 @@ def main():
         input_path = os.path.join(input_dir, outro_file)
         output_path = os.path.join(output_dir, outro_file)
         remove_silences(input_path, output_path)
-
-    # Activate htl11b.py after processing
-    try:
-        print(f"Successfully activated {htl11_script}.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error running {htl11_script}: {e}")
 
 if __name__ == "__main__":
     main()
