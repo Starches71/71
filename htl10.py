@@ -1,11 +1,15 @@
 
 import os
 import subprocess
-                                        # Directories
+
+# Directories
 best_join = "best_join"
-best_audio = "best_audio"               best_clip = "best_clip"
-htl10a_script = "htl10a.py"             
-# Create output directory if it doesn't exist                                   os.makedirs(best_clip, exist_ok=True)
+best_audio = "best_audio"
+best_clip = "best_clip"
+htl10a_script = "htl10a.py"
+
+# Create output directory if it doesn't exist
+os.makedirs(best_clip, exist_ok=True)
 
 # Loop through video files in `best_join` directory
 for video in os.listdir(best_join):
@@ -23,15 +27,18 @@ for video in os.listdir(best_join):
 
             # Combine video and audio
             try:
-                    "ffmpeg", "-i", os.path.join(best_join, video),
-                    "-i", audio_file, "-c:v", "copy", "-c:a", "aac", "-strict", "-2", output
-                ], check=True)
+                subprocess.run(
+                    ["ffmpeg", "-i", os.path.join(best_join, video),
+                    "-i", audio_file, "-c:v", "copy", "-c:a", "aac", "-strict", "-2", output],
+                    check=True
+                )
             except subprocess.CalledProcessError as e:
                 print(f"Error combining {video} with {audio_file}: {e}")
                 continue
 
 # Activate `htl10a.py` script after all processing
 try:
+    subprocess.run([htl10a_script], check=True)
     print(f"Successfully activated {htl10a_script}.")
 except subprocess.CalledProcessError as e:
     print(f"Error running {htl10a_script}: {e}")
