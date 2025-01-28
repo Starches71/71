@@ -1,4 +1,3 @@
-
 import os
 from groq import Groq
 
@@ -132,15 +131,9 @@ def process_places():
 
 def trigger_htl2():
     """
-    Run htl2.py after all hotel queries are done.
+    Run htl2.py after all hotel queries are done (This function is now removed).
     """
-    print("Triggering htl2.py script...")
-    try:
-        # Run htl2.py script (removed per your request)
-        # os.system("python3 htl2.py")
-        print("htl2.py has been removed from the process.")
-    except Exception as e:
-        print(f"Error while triggering htl2.py: {e}")
+    print("The activation of htl2.py has been removed from the process.")
 
 if __name__ == "__main__":
     print("Starting the script...")
