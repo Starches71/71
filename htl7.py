@@ -34,7 +34,6 @@ for links_file in os.listdir(links_dir):
             ]
 
             # Run the command
-            subprocess.run(command)
 
             print(f"Downloaded segment for {link} and saved as {output_filename}")
 
