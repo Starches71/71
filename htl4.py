@@ -1,6 +1,5 @@
 
 import os
-import subprocess
 
 # Paths for directories
 descriptions_dir = "best_descriptions"
@@ -74,11 +73,3 @@ for index, hotel_file in enumerate(hotel_files):
 
     except Exception as e:
         print(f"Error processing {hotel_file}: {e}")
-
-# Run htl5.py after processing all the files
-try:
-    print("\nRunning htl5.py after processing all hotel description files...")
-    subprocess.run(["python", "htl5.py"], check=True)
-    print("htl5.py executed successfully.")
-except subprocess.CalledProcessError as e:
-    print(f"Error running htl5.py: {e}")
