@@ -33,7 +33,6 @@ for hotel_file in hotel_files:
     ]
 
     # Run the command and capture the output
-    result = subprocess.run(command, capture_output=True, text=True)
 
     # Check for errors in yt-dlp execution
     if result.returncode != 0:
