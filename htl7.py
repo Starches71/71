@@ -1,4 +1,3 @@
-
 import os
 import subprocess
 
@@ -43,21 +42,50 @@ for links_file in links_files:
 
         print(f"🎬 Downloading: {link} -> {output_filename}")
 
-        # Force a new Tor identity before each download (optional)
-        subprocess.run(["torsocks", "curl", "--silent", "https://check.torproject.org/"])
+        # First, get the video duration
+        duration_command = ["yt-dlp", "--get-duration", link]
+        duration_result = subprocess.run(duration_command, capture_output=True, text=True)
+        duration_str = duration_result.stdout.strip()
+
+        if duration_result.returncode != 0 or not duration_str:
+            print(f"❌ Error getting duration for {link}: {duration_result.stderr.strip()}")
+            continue
+
+        # Convert duration to seconds
+        time_parts = list(map(int, duration_str.split(":")))
+        if len(time_parts) == 3:
+            duration_sec = time_parts[0] * 3600 + time_parts[1] * 60 + time_parts[2]
+        elif len(time_parts) == 2:
+            duration_sec = time_parts[0] * 60 + time_parts[1]
+        else:
+            duration_sec = time_parts[0]
+
+        # Decide download method based on video length
+        if duration_sec >= 60:
+            download_sections = "*00:10-01:00"
+        else:
+            download_sections = "*"  # Download full video
 
         # Use yt-dlp with torsocks
-        command = ["torsocks", "yt-dlp", "-o", output_path, "--download-sections", "*00:10-01:00", link]
+        command = [
+            "torsocks", "yt-dlp",
+            "-o", output_path,
+            "--download-sections", download_sections,
+            "--no-part", "--verbose",
+            link
+        ]
 
         result = subprocess.run(command, capture_output=True, text=True)
 
-        if result.returncode == 0:
-            if os.path.exists(output_path):
-                print(f"✅ Successfully downloaded and saved: {output_path}")
-            else:
-                print(f"❌ Downloaded but file is missing: {output_path}")
+        # DEBUG: Print yt-dlp output for troubleshooting
+        print(f"🔍 yt-dlp output: {result.stdout.strip()}")
+        print(f"⚠️ yt-dlp errors: {result.stderr.strip()}")
+
+        if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+            print(f"✅ Successfully downloaded and saved: {output_path}")
         else:
-            print(f"❌ Error downloading {link}: {result.stderr.strip()}")
+            print(f"❌ Download failed: {output_path}")
+            print(f"🔎 yt-dlp might have encountered an issue.")
 
 # Final check: list all downloaded files
 print("\n📂 Final check: Listing files in best_vid/")
