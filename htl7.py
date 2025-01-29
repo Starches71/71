@@ -1,3 +1,4 @@
+
 import os
 import subprocess
 
@@ -66,9 +67,10 @@ for links_file in links_files:
         else:
             download_sections = "*"  # Download full video
 
-        # Use yt-dlp with torsocks
+        # Use yt-dlp with Tor proxy
         command = [
-            "torsocks", "yt-dlp",
+            "yt-dlp",
+            "--proxy", "http://localhost:9150",  # Use Tor proxy
             "-o", output_path,
             "--download-sections", download_sections,
             "--no-part", "--verbose",
