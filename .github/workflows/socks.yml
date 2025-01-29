@@ -1,33 +1,28 @@
-name: Test yt-dlp with Tor
+
+name: Test yt-dlp-5 Video Download
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger
 
 jobs:
-  test_yt_dlp:
+  test-yt-dlp:
     runs-on: ubuntu-latest
+
     steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: 🛠️ Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y torsocks tor yt-dlp
-
-      - name: 🔄 Start Tor service
-        run: |
-          sudo systemctl start tor
-          sleep 10  # Wait for Tor to stabilize
-
-      - name: 🏃 Run socks.py test
-        run: python3 socks.py
-
-      - name: 📂 Upload video results (if any)
-        uses: actions/upload-artifact@v3
+      - name: 🛠️ Set Up Python
+        uses: actions/setup-python@v4
         with:
-          name: downloaded_videos
-          path: videos/
+          python-version: "3.9"
+
+      - name: 📦 Install Dependencies
+        run: |
+          pip install -U git+https://github.com/yt-dlp/yt-dlp.git@yt-dlp-5
+
+      - name: 🚀 Run yt-dlp-5 Test
+        run: python socks.py
+
+      - name: 📂 List Downloaded Videos
+        run: ls -lh videos || echo "No videos downloaded"
