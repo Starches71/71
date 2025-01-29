@@ -1,0 +1,25 @@
+name: Selenium YouTube Download Test
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  test-selenium:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Chrome & Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install selenium webdriver-manager
+
+      - name: Run Selenium Script
+        run: python selenium.py
