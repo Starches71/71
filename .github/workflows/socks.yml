@@ -1,0 +1,33 @@
+name: Test yt-dlp with Tor
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test_yt_dlp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🛠️ Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y torsocks tor yt-dlp
+
+      - name: 🔄 Start Tor service
+        run: |
+          sudo systemctl start tor
+          sleep 10  # Wait for Tor to stabilize
+
+      - name: 🏃 Run socks.py test
+        run: python3 socks.py
+
+      - name: 📂 Upload video results (if any)
+        uses: actions/upload-artifact@v3
+        with:
+          name: downloaded_videos
+          path: videos/
