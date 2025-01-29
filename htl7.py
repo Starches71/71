@@ -43,11 +43,11 @@ for links_file in links_files:
 
         print(f"🎬 Downloading: {link} -> {output_filename}")
 
-        # yt-dlp command
-        command = [
-            "yt-dlp", "-o", output_path,
-            "--download-sections", "*00:10-01:00", link
-        ]
+        # Force a new Tor identity before each download (optional)
+        subprocess.run(["torsocks", "curl", "--silent", "https://check.torproject.org/"])
+
+        # Use yt-dlp with torsocks
+        command = ["torsocks", "yt-dlp", "-o", output_path, "--download-sections", "*00:10-01:00", link]
 
         result = subprocess.run(command, capture_output=True, text=True)
 
