@@ -1,3 +1,4 @@
+
 name: Selenium YouTube Download Test
 
 on:
@@ -22,4 +23,4 @@ jobs:
           pip install selenium webdriver-manager
 
       - name: Run Selenium Script
-        run: python selenium.py
+        run: python video_downloader.py
