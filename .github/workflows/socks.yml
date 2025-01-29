@@ -1,28 +1,31 @@
 
-name: Test yt-dlp-5 Video Download
+name: Test yt-dlp Bypass
 
-on:
-  workflow_dispatch:  # Manual trigger
+on: [push]
 
 jobs:
-  test-yt-dlp:
+  test-bypass:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: 🛠️ Set Up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.9"
-
-      - name: 📦 Install Dependencies
+      - name: Install yt-dlp
         run: |
-          pip install -U git+https://github.com/yt-dlp/yt-dlp.git@yt-dlp-5
+          sudo apt update
+          sudo apt install -y ffmpeg
+          pip install yt-dlp
 
-      - name: 🚀 Run yt-dlp-5 Test
+      - name: Create videos directory
+        run: mkdir -p videos
+
+      - name: Run socks.py
         run: python socks.py
 
-      - name: 📂 List Downloaded Videos
-        run: ls -lh videos || echo "No videos downloaded"
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: downloaded-videos
+          path: videos/
