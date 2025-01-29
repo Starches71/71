@@ -2,58 +2,47 @@
 import os
 import subprocess
 
-# Search term
-search_query = "Hilton Hotel"
+# Install yt-dlp-5 if not installed
+try:
+    import yt_dlp
+except ImportError:
+    print("Installing yt-dlp-5...")
+    subprocess.run(["pip", "install", "-U", "git+https://github.com/yt-dlp/yt-dlp.git@yt-dlp-5"], check=True)
 
 # Output directory
 output_dir = "videos"
 os.makedirs(output_dir, exist_ok=True)
 
-# Video filenames
-video_files = [f"{output_dir}/video{i+1}.mp4" for i in range(3)]
+# Search term
+search_term = "Hilton Hotel"
 
-# Download commands
-commands = {
-    "torsocks": [
-        "torsocks", "yt-dlp", f"ytsearch3:{search_query}",
-        "-o", f"{output_dir}/video%(search_index)s.mp4",
-        "--no-part"
-    ],
-    "tor_proxy": [
-        "yt-dlp", "--proxy", "socks5h://localhost:9050",
-        f"ytsearch3:{search_query}",
-        "-o", f"{output_dir}/video%(search_index)s.mp4",
-        "--no-part"
-    ]
-}
+# yt-dlp-5 command to search and download 3 videos
+command = [
+    "yt-dlp", 
+    f"ytsearch3:{search_term}",  # Search for 3 videos
+    "-o", os.path.join(output_dir, "video%(search_index)s.mp4"),  # Save as video1.mp4, video2.mp4, etc.
+    "--format", "best",  # Best available format
+    "--no-warnings", "--quiet",  # Reduce logs
+    "--no-part"  # Prevents temporary files
+]
 
-# Run tests
-results = {}
+print(f"Running command: {' '.join(command)}")
 
-for method, command in commands.items():
-    print(f"\n🔍 Testing {method.upper()} method...\n{'='*40}")
-    result = subprocess.run(command, capture_output=True, text=True)
+# Run yt-dlp-5
+result = subprocess.run(command, capture_output=True, text=True)
 
-    # Save results
-    results[method] = {
-        "stdout": result.stdout.strip(),
-        "stderr": result.stderr.strip(),
-        "success": result.returncode == 0
-    }
+# Print stdout and stderr
+print("\n✅ STDOUT:")
+print(result.stdout.strip())
 
-    print(f"✅ STDOUT:\n{result.stdout.strip()}\n")
-    print(f"❌ STDERR:\n{result.stderr.strip()}\n")
+print("\n❌ STDERR:")
+print(result.stderr.strip())
 
-# Final check: Which videos were downloaded
-print("\n📂 Checking downloaded videos...\n" + "="*40)
-for file in video_files:
-    if os.path.exists(file) and os.path.getsize(file) > 0:
-        print(f"✅ Success: {file} downloaded")
+# Check if videos were downloaded successfully
+print("\n📂 Checking downloaded videos...")
+for i in range(1, 4):
+    video_path = os.path.join(output_dir, f"video{i}.mp4")
+    if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
+        print(f"✅ Success: {video_path}")
     else:
-        print(f"❌ Failed: {file} not found or empty")
-
-# Print summary
-print("\n🔍 Test Summary:\n" + "="*40)
-for method, result in results.items():
-    status = "✅ Success" if result["success"] else "❌ Failed"
-    print(f"{method.upper()}: {status}")
+        print(f"❌ Failed: {video_path} not found or empty")
