@@ -6,7 +6,7 @@ VIDEO_PATH = "videos/video1.mp4"
 
 # yt-dlp command with extractor args
 command_extractor_args = [
-    "yt-dlp", f"ytsearch3:{hilton_hotel}",
+    "yt-dlp", f"ytsearch3:{SEARCH_TERM}",
     "-o", "videos/video%(search_index)s.mp4",
     "--format", "best",
     "--extractor-args", "youtube:player_client=android"
@@ -14,7 +14,7 @@ command_extractor_args = [
 
 # yt-dlp command with spoofed headers
 command_spoof_headers = [
-    "yt-dlp", f"ytsearch3:{hilton_hotel}",
+    "yt-dlp", f"ytsearch3:{SEARCH_TERM}",
     "-o", "videos/video%(search_index)s.mp4",
     "--format", "best",
     "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
