@@ -1,13 +1,14 @@
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 import time
 
-# YouTube video link (Replace with any valid YouTube URL)
+# YouTube video link (replace with any valid YouTube URL)
 YT_LINK = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
-# Choose an online downloader (change if needed)
+# Choose an online downloader (update if needed)
 DOWNLOADER_URL = "https://ssyoutube.com"
 
 # Setup Chrome options for headless mode (required for GitHub Actions)
