@@ -1,40 +1,17 @@
 
 import os
 import subprocess
-import time
-
-# Function to restart Tor
-def restart_tor():
-    print("🔄 Restarting Tor service...")
-    subprocess.run(["sudo", "systemctl", "restart", "tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(5)  # Wait for Tor to restart
-
-# Function to check if torsocks is working
-def test_torsocks():
-    print("🛠️ Checking Tor connection...")
-    test_cmd = ["torsocks", "curl", "--silent", "https://check.torproject.org/"]
-    result = subprocess.run(test_cmd, capture_output=True, text=True)
-    if "Congratulations" in result.stdout:
-        print("✅ Tor is working!")
-        return True
-    else:
-        print("❌ Tor is NOT working! Check your configuration.")
-        return False
-
-# Restart Tor and test connection
-restart_tor()
-if not test_torsocks():
-    print("🚨 Exiting: Tor is not working.")
-    exit(1)
 
 # Directory paths
 links_dir = "best_link"
 output_dir = "best_vid"
 
+# Ensure output directory exists
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
     print(f"📁 Created output directory: {output_dir}")
 
+# Get all .links.txt files
 links_files = [f for f in os.listdir(links_dir) if f.endswith('.links.txt')]
 if not links_files:
     print(f"🚨 No '.links.txt' files found in {links_dir}")
@@ -63,19 +40,29 @@ for links_file in links_files:
         suffix = chr(65 + idx)  # 'A', 'B', 'C', etc.
         output_filename = f"{links_file.split('.')[0]}{suffix}.mp4"
         output_path = os.path.join(output_dir, output_filename)
+
         print(f"🎬 Downloading: {link} -> {output_filename}")
 
-        # Force a new Tor identity before each download (optional)
-        subprocess.run(["torsocks", "curl", "--silent", "https://check.torproject.org/"])
-
-        # yt-dlp command with torsocks
+        # yt-dlp command
         command = [
-            "torsocks", "yt-dlp", "-o", output_path,
+            "yt-dlp", "-o", output_path,
             "--download-sections", "*00:10-01:00", link
         ]
 
         result = subprocess.run(command, capture_output=True, text=True)
+
         if result.returncode == 0:
-            print(f"✅ Successfully downloaded: {output_filename}")
+            if os.path.exists(output_path):
+                print(f"✅ Successfully downloaded and saved: {output_path}")
+            else:
+                print(f"❌ Downloaded but file is missing: {output_path}")
         else:
             print(f"❌ Error downloading {link}: {result.stderr.strip()}")
+
+# Final check: list all downloaded files
+print("\n📂 Final check: Listing files in best_vid/")
+saved_files = os.listdir(output_dir)
+if saved_files:
+    print("\n".join(saved_files))
+else:
+    print("🚨 No files found in best_vid!")
