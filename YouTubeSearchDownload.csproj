@@ -2,12 +2,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework> <!-- You can change this if you're using a different .NET version -->
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>YouTubeSearchDownload</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="YouTubeExplode" Version="5.0.0" />
+    <PackageReference Include="YouTubeExplode" Version="5.0.0" /> <!-- Ensure correct version of YouTubeExplode -->
   </ItemGroup>
 
 </Project>
