@@ -1,6 +1,6 @@
 
 import os
-import subprocess
+from pytube import YouTube
 
 # Directory paths
 links_dir = "best_link"
@@ -43,51 +43,23 @@ for links_file in links_files:
 
         print(f"🎬 Downloading: {link} -> {output_filename}")
 
-        # First, get the video duration
-        duration_command = ["yt-dlp", "--get-duration", link]
-        duration_result = subprocess.run(duration_command, capture_output=True, text=True)
-        duration_str = duration_result.stdout.strip()
+        try:
+            # Create a YouTube object
+            yt = YouTube(link)
 
-        if duration_result.returncode != 0 or not duration_str:
-            print(f"❌ Error getting duration for {link}: {duration_result.stderr.strip()}")
-            continue
+            # Choose the stream with the highest resolution and progressive download (audio+video)
+            stream = yt.streams.filter(progressive=True, file_extension="mp4").get_highest_resolution()
 
-        # Convert duration to seconds
-        time_parts = list(map(int, duration_str.split(":")))
-        if len(time_parts) == 3:
-            duration_sec = time_parts[0] * 3600 + time_parts[1] * 60 + time_parts[2]
-        elif len(time_parts) == 2:
-            duration_sec = time_parts[0] * 60 + time_parts[1]
-        else:
-            duration_sec = time_parts[0]
+            # Download the video to the output path
+            stream.download(output_path=output_dir, filename=output_filename)
 
-        # Decide download method based on video length
-        if duration_sec >= 60:
-            download_sections = "*00:10-01:00"
-        else:
-            download_sections = "*"  # Download full video
-
-        # Use yt-dlp with Tor proxy
-        command = [
-            "yt-dlp",
-            "--proxy", "http://localhost:9150",  # Use Tor proxy
-            "-o", output_path,
-            "--download-sections", download_sections,
-            "--no-part", "--verbose",
-            link
-        ]
-
-        result = subprocess.run(command, capture_output=True, text=True)
-
-        # DEBUG: Print yt-dlp output for troubleshooting
-        print(f"🔍 yt-dlp output: {result.stdout.strip()}")
-        print(f"⚠️ yt-dlp errors: {result.stderr.strip()}")
-
-        if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-            print(f"✅ Successfully downloaded and saved: {output_path}")
-        else:
-            print(f"❌ Download failed: {output_path}")
-            print(f"🔎 yt-dlp might have encountered an issue.")
+            # Check if download was successful
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                print(f"✅ Successfully downloaded and saved: {output_path}")
+            else:
+                print(f"❌ Download failed: {output_path}")
+        except Exception as e:
+            print(f"❌ Error downloading {link}: {e}")
 
 # Final check: list all downloaded files
 print("\n📂 Final check: Listing files in best_vid/")
