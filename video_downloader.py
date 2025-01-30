@@ -3,15 +3,17 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
-# YouTube video link (replace with any valid YouTube URL)
+# YouTube video link
 YT_LINK = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
-# Choose an online downloader (update if needed)
+# YouTube downloader site
 DOWNLOADER_URL = "https://ssyoutube.com"
 
-# Setup Chrome options for headless mode (required for GitHub Actions)
+# Setup Chrome options for headless mode (for GitHub Actions)
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
@@ -25,20 +27,26 @@ driver = webdriver.Chrome(options=chrome_options)
 try:
     # Open the YouTube downloader site
     driver.get(DOWNLOADER_URL)
-    time.sleep(3)  # Allow page to load
 
-    # Find the input box and paste YouTube link
-    input_box = driver.find_element(By.NAME, "q")  # Might need to update selector
+    # Wait for the input box to appear
+    input_box = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='text']"))  # Update selector if needed
+    )
+    
+    # Paste the YouTube link
     input_box.send_keys(YT_LINK)
     input_box.send_keys(Keys.RETURN)
 
-    time.sleep(5)  # Wait for processing
-
-    # Find the download button
-    download_button = driver.find_element(By.XPATH, "//a[contains(@class, 'download-button')]")  # Might need updating
+    # Wait for the download button to appear
+    download_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, "//a[contains(@class, 'download')]"))  # Update selector if needed
+    )
+    
+    # Click the download button
     download_button.click()
 
     print("✅ Download Successful!")
+
 except Exception as e:
     print(f"❌ Download failed: {e}")
 
