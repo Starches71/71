@@ -1,37 +1,31 @@
-name: YouTube Search and Download with YouTubeExplode
+name: Build and Run YouTubeSearchDownload
 
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - main  # Trigger the workflow on push to the main branch
 
 jobs:
-  download_video:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
-    
-    - name: Set up .NET SDK
-      uses: actions/setup-dotnet@v2
+      uses: actions/checkout@v2  # Checkout the repository's code
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '6.0'
+        dotnet-version: '6.x'  # Use the .NET version your project is using
 
     - name: Restore .NET dependencies
       run: |
-        dotnet restore
+        dotnet restore YouTubeSearchDownload.csproj  # Restore dependencies from the .csproj file in the root directory
 
-    - name: Build C# program (YouTubeSearchDownload)
+    - name: Build the project
       run: |
-        dotnet build src/YouTubeSearchDownload/YouTubeSearchDownload.csproj
+        dotnet build YouTubeSearchDownload.csproj  # Build the project using the .csproj file in the root directory
 
-    - name: Run C# program to search and download video
+    - name: Run the program
       run: |
-        mkdir -p best_vid
-        dotnet run --project src/YouTubeSearchDownload/YouTubeSearchDownload.csproj "Sherstin hotels Jeddah" "best_vid/video.mp4"
-
-    - name: Check if video was downloaded
-      run: |
-        ls -l best_vid/
+        dotnet run --project YouTubeSearchDownload.csproj "Sherstin hotels Jeddah" "best_vid/video.mp4"  # Run with the search term and output path
