@@ -2,3 +2,4 @@ ffmpeg-python
 yt-dlp
 edge-tts
 groq
+pytube
