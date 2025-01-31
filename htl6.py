@@ -5,7 +5,6 @@ import subprocess
 descriptions_dir = "best_descriptions"
 places_dir = "places"
 links_dir = "best_link"
-cookies_file = "cookies.txt"  # Path to cookies file
 
 # Create the links directory if it doesn't exist
 if not os.path.exists(links_dir):
@@ -42,12 +41,14 @@ for hotel_file in hotel_files:
         search_query = f"{hotel_name} {place_name}"
         print(f"Search query: {search_query}")
 
+        # Ensure Tor is running (this is to ensure it is activated before using torsocks)
+        subprocess.run(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
         # yt-dlp command to search for 3 video links related to the hotel and place
         command = [
             'torsocks', 'yt-dlp', f"ytsearch3:{search_query}",  # Use torsocks with yt-dlp
             '--print', 'id',  # Print only video IDs
-            '--skip-download',  # Skip downloading videos
-            '--cookies', cookies_file  # Use cookies file
+            '--skip-download'  # Skip downloading videos
         ]
         print(f"Running command: {' '.join(command)}")
 
