@@ -5,6 +5,7 @@ import subprocess
 descriptions_dir = "best_descriptions"
 places_dir = "places"
 links_dir = "best_link"
+cookies_file = "cookies.txt"  # Path to cookies file
 
 # Create the links directory if it doesn't exist
 if not os.path.exists(links_dir):
@@ -45,7 +46,8 @@ for hotel_file in hotel_files:
         command = [
             'torsocks', 'yt-dlp', f"ytsearch3:{search_query}",  # Use torsocks with yt-dlp
             '--print', 'id',  # Print only video IDs
-            '--skip-download'  # Skip downloading videos
+            '--skip-download',  # Skip downloading videos
+            '--cookies', cookies_file  # Use cookies file
         ]
         print(f"Running command: {' '.join(command)}")
 
