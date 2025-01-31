@@ -1,50 +1,61 @@
 
 import subprocess
-
-SEARCH_TERM = "Hilton Hotel"
-VIDEO_PATH = "videos/video1.mp4"
-
-# yt-dlp command with extractor args
-command_extractor_args = [
-    "yt-dlp", f"ytsearch3:{SEARCH_TERM}",
-    "-o", "videos/video%(search_index)s.mp4",
-    "--format", "best",
-    "--extractor-args", "youtube:player_client=android"
-]
-
-# yt-dlp command with spoofed headers
-command_spoof_headers = [
-    "yt-dlp", f"ytsearch3:{SEARCH_TERM}",
-    "-o", "videos/video%(search_index)s.mp4",
-    "--format", "best",
-    "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-    "--referer", "https://www.youtube.com/"
-]
-
-def run_command(command, method_name):
-    try:
-        print(f"\n🔍 Testing {method_name}...")
-        result = subprocess.run(command, capture_output=True, text=True)
-        
-        if "ERROR" in result.stderr:
-            print(f"❌ {method_name} failed!\n{result.stderr}")
-            return False
-        else:
-            print(f"✅ {method_name} succeeded!")
-            return True
-    except Exception as e:
-        print(f"❌ {method_name} encountered an error: {str(e)}")
-        return False
-
-# Run both methods
-extractor_args_success = run_command(command_extractor_args, "Extractor Args")
-spoof_headers_success = run_command(command_spoof_headers, "Spoofed Headers")
-
-# Check if any videos were downloaded
 import os
-downloaded_files = os.listdir("videos") if os.path.exists("videos") else []
 
-if downloaded_files:
-    print("\n🎉 Some videos were successfully downloaded!")
-else:
-    print("\n❌ No videos were downloaded. Both methods failed.")
+# Function to activate Tor and run yt-dlp using torsocks
+def run_torsocks_yt_dlp():
+    try:
+        # Step 1: Start Tor service
+        print("Starting Tor...")
+        subprocess.run(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print("Tor started successfully!")
+
+        # Step 2: Search for the first video using yt-dlp with torsocks
+        search_term = "Sherston jeddah hotel"
+        print(f"Searching for video: {search_term}")
+        
+        # Run yt-dlp with torsocks to search for videos
+        command = [
+            "torsocks", "yt-dlp", f"ytsearch1:{search_term}",
+            "--print", "id",  # Print only video ID
+            "--skip-download"  # Don't download the video yet, just get the video ID
+        ]
+        result = subprocess.run(command, capture_output=True, text=True)
+
+        # Check for errors
+        if result.returncode != 0:
+            print(f"Error searching video: {result.stderr.strip()}")
+            return
+        
+        # Extract video ID from the output
+        video_id = result.stdout.strip()
+        if not video_id:
+            print(f"No video found for the search term '{search_term}'")
+            return
+        
+        print(f"Found video ID: {video_id}")
+
+        # Step 3: Download the first video using yt-dlp with torsocks
+        video_url = f"https://youtu.be/{video_id}"
+        print(f"Downloading video: {video_url}")
+
+        # Define output file path
+        output_dir = "downloaded_videos"
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        output_filename = os.path.join(output_dir, f"{video_id}.mp4")
+
+        # Run yt-dlp to download the video
+        command = [
+            "torsocks", "yt-dlp", "-o", output_filename, video_url
+        ]
+        subprocess.run(command)
+        print(f"Downloaded video and saved as: {output_filename}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+# Run the function
+if __name__ == "__main__":
+    run_torsocks_yt_dlp()
