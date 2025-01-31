@@ -1,31 +1,27 @@
+name: Run socks.py
 
-name: Test yt-dlp Bypass
-
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  test-bypass:
+  run-python:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-      - name: Install yt-dlp
-        run: |
-          sudo apt update
-          sudo apt install -y ffmpeg
-          pip install yt-dlp
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y tor torsocks ffmpeg
+        echo "System dependencies installed successfully!"
 
-      - name: Create videos directory
-        run: mkdir -p videos
+    - name: Install Python Dependencies
+      run: pip install -r requirements.txt
 
-      - name: Run socks.py
-        run: python socks.py
-
-      - name: Upload results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: downloaded-videos
-          path: videos/
+    - name: Run socks.py
+      run: python3 socks.py
