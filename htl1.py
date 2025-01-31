@@ -74,7 +74,7 @@ def query_hotels(place_name, query_type="best"):
         # Make a request to Groq
         print(f"Sending query to Groq: {query}")
         completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="Llama3-8b-8192",
             messages=conversation_history,
             temperature=0,
             max_tokens=1024,
