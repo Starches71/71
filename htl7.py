@@ -1,9 +1,11 @@
+
 import os
 import subprocess
 
 # Directory paths
 links_dir = "best_link"
 output_dir = "best_vid"
+cookies_file = "cookies.txt"  # Path to cookies file
 
 # Create output directory if it doesn't exist
 if not os.path.exists(output_dir):
@@ -29,7 +31,9 @@ for links_file in os.listdir(links_dir):
             # Define the section to download: *00:10-01:00 (45 seconds)
             command = [
                 'proxychains4', 'yt-dlp', '-o', os.path.join(output_dir, output_filename),
-                '--download-sections', '*00:10-01:00', link
+                '--download-sections', '*00:10-01:00',
+                '--cookies', cookies_file,  # Use cookies file
+                link
             ]
 
             # Run the command
