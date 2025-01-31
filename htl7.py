@@ -5,7 +5,6 @@ import subprocess
 # Directory paths
 links_dir = "best_link"
 output_dir = "best_vid"
-cookies_file = "cookies.txt"  # Path to cookies file
 
 # Create output directory if it doesn't exist
 if not os.path.exists(output_dir):
@@ -28,11 +27,13 @@ for links_file in os.listdir(links_dir):
             suffix = chr(65 + idx)  # Converts 0 to 'A', 1 to 'B', etc.
             output_filename = f"{links_file.split('.')[0]}{suffix}.mp4"
 
+            # Ensure Tor is running (this is to ensure it is activated before using torsocks)
+            subprocess.run(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
             # Define the section to download: *00:10-01:00 (45 seconds)
             command = [
-                'proxychains4', 'yt-dlp', '-o', os.path.join(output_dir, output_filename),
+                'torsocks', 'yt-dlp', '-o', os.path.join(output_dir, output_filename),
                 '--download-sections', '*00:10-01:00',
-                '--cookies', cookies_file,  # Use cookies file
                 link
             ]
 
