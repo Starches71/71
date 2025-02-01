@@ -28,10 +28,13 @@ def add_text_overlay(input_file, text1, text2, duration, output_file):
     # Define reveal speed (0.5 seconds for each text)
     reveal_speed = 0.5
 
+    # Define the font file path (adjust this to the actual location of your font)
+    font_path = "./FontsFree-Net-Proxima-Nova-Bold-It.otf (1).ttf"
+
     # Overlay for the first text (hotel name with typing effect)
     first_text_duration = reveal_speed
     first_half_overlay = (
-        f"drawtext=text='{text1}':fontfile=/storage/emulated/0/Download/FontsFree-Net-Proxima-Nova-Bold-It.otf.ttf:"
+        f"drawtext=text='{text1}':fontfile={font_path}:"
         f"fontsize=30:fontcolor=white:shadowcolor=black:shadowx=3:shadowy=3:"
         f"x='if(lt(t,{first_text_duration}),-tw+(t*tw/{first_text_duration}),10)':"
         f"y=H-50:enable='lt(t,{duration / 2})'"
@@ -41,7 +44,7 @@ def add_text_overlay(input_file, text1, text2, duration, output_file):
     second_text_start = duration / 2
     second_text_duration = second_text_start + reveal_speed
     second_half_overlay = (
-        f"drawtext=text='{text2}':fontfile=/storage/emulated/0/Download/FontsFree-Net-Proxima-Nova-Bold-It.otf.ttf:"
+        f"drawtext=text='{text2}':fontfile={font_path}:"
         f"fontsize=30:fontcolor=white:shadowcolor=black:shadowx=3:shadowy=3:"
         f"x='if(lt(t,{second_text_duration}),-tw+((t-{second_text_start})*tw/{reveal_speed}),10)':"
         f"y=H-50:enable='gte(t,{second_text_start})'"
