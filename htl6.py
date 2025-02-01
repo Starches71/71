@@ -1,3 +1,4 @@
+
 import os
 import subprocess
 import time
@@ -31,10 +32,22 @@ if not hotel_files:
 else:
     print(f"Found {len(hotel_files)} files in '{descriptions_dir}'")
 
-# **Start Tor Service**
-print("Starting Tor service...")
-tor_process = subprocess.Popen(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-time.sleep(5)  # Wait for Tor to initialize
+# Function to start Tor
+def start_tor():
+    print("Starting Tor service...")
+    tor_process = subprocess.Popen(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(10)  # Give Tor enough time to initialize
+    return tor_process
+
+# Function to stop Tor
+def stop_tor(process):
+    if process:
+        print("Stopping Tor service...")
+        process.terminate()
+        process.wait()
+
+# Start Tor initially
+tor_process = start_tor()
 
 # Process each hotel file in the descriptions directory
 for hotel_file in hotel_files:
@@ -47,21 +60,35 @@ for hotel_file in hotel_files:
         search_query = f"{hotel_name} {place_name}"
         print(f"Search query: {search_query}")
 
-        # yt-dlp command to search for 3 video links related to the hotel and place
-        command = [
-            'torsocks', 'yt-dlp', f"ytsearch3:{search_query}",  # Use torsocks with yt-dlp
-            '--print', 'id',  # Print only video IDs
-            '--skip-download'  # Skip downloading videos
-        ]
-        print(f"Running command: {' '.join(command)}")
+        # Retry mechanism if an error occurs
+        max_retries = 3
+        retry_count = 0
+        while retry_count < max_retries:
+            # yt-dlp command to search for 3 video links related to the hotel and place
+            command = [
+                'torsocks', 'yt-dlp', f"ytsearch3:{search_query}",  # Use torsocks with yt-dlp
+                '--print', 'id',  # Print only video IDs
+                '--skip-download'  # Skip downloading videos
+            ]
+            print(f"Running command: {' '.join(command)}")
 
-        # Run the command and capture the output
-        result = subprocess.run(command, capture_output=True, text=True)
+            # Run the command and capture the output
+            result = subprocess.run(command, capture_output=True, text=True)
 
-        # Check for errors in yt-dlp execution
-        if result.returncode != 0:
-            print(f"Error fetching videos for {hotel_name}: {result.stderr.strip()}")
-            continue
+            # Check for errors in yt-dlp execution
+            if result.returncode == 0:
+                break  # Success, exit retry loop
+            else:
+                print(f"Error fetching videos for {hotel_name}: {result.stderr.strip()}")
+                retry_count += 1
+
+                if retry_count < max_retries:
+                    print(f"Retrying with new Tor circuit... (Attempt {retry_count + 1}/{max_retries})")
+                    stop_tor(tor_process)  # Stop current Tor instance
+                    tor_process = start_tor()  # Start new Tor instance
+                else:
+                    print(f"Max retries reached for {hotel_name}. Skipping...")
+                    continue  # Skip to the next hotel
 
         # Process video IDs to construct YouTube URLs
         video_ids = result.stdout.strip().split('\n')
@@ -81,7 +108,5 @@ for hotel_file in hotel_files:
     except Exception as e:
         print(f"An error occurred while processing {hotel_file}: {e}")
 
-# **Stop Tor process after execution**
-print("Stopping Tor service...")
-tor_process.terminate()
-tor_process.wait()
+# Stop Tor after execution
+stop_tor(tor_process)
