@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 
 # Paths
 descriptions_dir = "best_descriptions"
@@ -30,6 +31,11 @@ if not hotel_files:
 else:
     print(f"Found {len(hotel_files)} files in '{descriptions_dir}'")
 
+# **Start Tor Service**
+print("Starting Tor service...")
+tor_process = subprocess.Popen(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+time.sleep(5)  # Wait for Tor to initialize
+
 # Process each hotel file in the descriptions directory
 for hotel_file in hotel_files:
     try:
@@ -40,9 +46,6 @@ for hotel_file in hotel_files:
         # Construct the search query
         search_query = f"{hotel_name} {place_name}"
         print(f"Search query: {search_query}")
-
-        # Ensure Tor is running (this is to ensure it is activated before using torsocks)
-        subprocess.run(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         # yt-dlp command to search for 3 video links related to the hotel and place
         command = [
@@ -77,3 +80,8 @@ for hotel_file in hotel_files:
 
     except Exception as e:
         print(f"An error occurred while processing {hotel_file}: {e}")
+
+# **Stop Tor process after execution**
+print("Stopping Tor service...")
+tor_process.terminate()
+tor_process.wait()
