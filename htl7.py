@@ -25,8 +25,29 @@ def stop_tor(process):
         process.terminate()
         process.wait()
 
+# Function to verify Tor connection
+def verify_tor_connection():
+    print("Verifying Tor connection...")
+    # Run curl with torsocks to check if the connection goes through Tor
+    command = ["torsocks", "curl", "https://check.torproject.org"]
+    result = subprocess.run(command, capture_output=True, text=True)
+
+    # Check if the connection was successful
+    if "Congratulations" in result.stdout:
+        print("Tor is successfully routed through the network!")
+        return True
+    else:
+        print("Failed to verify Tor connection.")
+        return False
+
 # Start Tor initially
 tor_process = start_tor()
+
+# Verify the Tor connection before proceeding
+if not verify_tor_connection():
+    print("Exiting due to failed Tor connection verification.")
+    stop_tor(tor_process)
+    exit()
 
 # Iterate through each .links.txt file in the links directory
 for links_file in os.listdir(links_dir):
