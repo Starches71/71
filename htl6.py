@@ -46,6 +46,22 @@ def stop_tor(process):
         process.terminate()
         process.wait()
 
+# Function to monitor torsocks usage and try different configurations
+def run_torsocks_with_verbosity(command):
+    print(f"Running command with torsocks: {' '.join(command)}")
+    # Run the command using torsocks and capture output
+    result = subprocess.run(command, capture_output=True, text=True)
+    
+    # Print verbose logs for debugging
+    print("Command output (stdout):", result.stdout)
+    print("Command error (stderr):", result.stderr)
+    
+    if result.returncode != 0:
+        print(f"Error with torsocks: {result.stderr.strip()}")
+        return None  # Return None to indicate failure
+    
+    return result.stdout  # Return successful output
+
 # Start Tor initially
 tor_process = start_tor()
 
@@ -68,20 +84,17 @@ for hotel_file in hotel_files:
             command = [
                 'torsocks', 'yt-dlp', f"ytsearch3:{search_query}",  # Use torsocks with yt-dlp
                 '--print', 'id',  # Print only video IDs
-                '--skip-download'  # Skip downloading videos
+                '--skip-download',  # Skip downloading videos
+                '-v'  # Add verbosity flag to yt-dlp
             ]
-            print(f"Running command: {' '.join(command)}")
 
-            # Run the command and capture the output
-            result = subprocess.run(command, capture_output=True, text=True)
+            # Run the command and capture the output using the defined function
+            result_output = run_torsocks_with_verbosity(command)
 
-            # Check for errors in yt-dlp execution
-            if result.returncode == 0:
+            if result_output is not None:  # Check if the command was successful
                 break  # Success, exit retry loop
             else:
-                print(f"Error fetching videos for {hotel_name}: {result.stderr.strip()}")
                 retry_count += 1
-
                 if retry_count < max_retries:
                     print(f"Retrying with new Tor circuit... (Attempt {retry_count + 1}/{max_retries})")
                     stop_tor(tor_process)  # Stop current Tor instance
@@ -91,7 +104,7 @@ for hotel_file in hotel_files:
                     continue  # Skip to the next hotel
 
         # Process video IDs to construct YouTube URLs
-        video_ids = result.stdout.strip().split('\n')
+        video_ids = result_output.strip().split('\n') if result_output else []
         video_urls = [f"https://youtu.be/{video_id}" for video_id in video_ids if video_id.strip()]
 
         if not video_urls:
