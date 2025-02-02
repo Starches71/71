@@ -6,6 +6,7 @@ import time
 # Directory paths
 links_dir = "best_link"
 output_dir = "best_vid"
+cookies_file = "cookies.txt"  # Path to the cookies.txt file
 
 # Create output directory if it doesn't exist
 if not os.path.exists(output_dir):
@@ -75,11 +76,12 @@ for links_file in os.listdir(links_dir):
             retry_count = 0
 
             while retry_count < max_retries:
-                # yt-dlp command to download the segment using torsocks, with verbosity
+                # curl command to download the segment using torsocks with cookies
                 command = [
-                    'torsocks', 'yt-dlp', '-v',  # -v for verbose output
+                    'torsocks', 'curl', '-L',  # -L to follow redirects
                     '-o', output_path,
-                    '--download-sections', "*10-55",  # Download segment from 10-55 seconds
+                    '--cookie', cookies_file,  # Use cookies.txt
+                    '--range', '10-55',  # Download segment from 10-55 seconds
                     link
                 ]
 
