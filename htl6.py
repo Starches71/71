@@ -1,7 +1,9 @@
+
 import os
 import subprocess
 import time
 import requests
+import traceback
 
 # Paths
 descriptions_dir = "best_descriptions"
@@ -91,6 +93,10 @@ for hotel_file in hotel_files:
                     print(f"Max retries reached for {hotel_name}. Skipping...")
                     continue  # Skip to the next hotel
 
+        if not video_ids:  # If no video IDs were found, continue to the next hotel
+            print(f"No video IDs found for {hotel_name}")
+            continue
+
         # Construct YouTube URLs
         video_urls = [f"https://youtu.be/{video_id}" for video_id in video_ids]
 
@@ -107,3 +113,5 @@ for hotel_file in hotel_files:
 
     except Exception as e:
         print(f"An error occurred while processing {hotel_file}: {e}")
+        print("Detailed error traceback:")
+        traceback.print_exc()
