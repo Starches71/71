@@ -1,4 +1,3 @@
-
 import os
 import subprocess
 import time
@@ -34,21 +33,7 @@ if not hotel_files:
 else:
     print(f"Found {len(hotel_files)} files in '{descriptions_dir}'")
 
-# Function to start Tor
-def start_tor():
-    print("Starting Tor service...")
-    tor_process = subprocess.Popen(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(10)  # Give Tor enough time to initialize
-    return tor_process
-
-# Function to stop Tor
-def stop_tor(process):
-    if process:
-        print("Stopping Tor service...")
-        process.terminate()
-        process.wait()
-
-# Function to simulate a search with curl and extract video links
+# Function to fetch video links using curl
 def fetch_video_links_via_curl(search_query):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -59,7 +44,7 @@ def fetch_video_links_via_curl(search_query):
 
     # Use curl with cookies and headers
     curl_command = [
-        'torsocks', 'curl', '-s',  # Use torsocks with curl
+        'curl', '-s',  # Use curl without torsocks
         '-b', cookies_file,  # Use cookies from cookies.txt
         '-A', headers['User-Agent'],  # Set the User-Agent header
         search_url
@@ -77,9 +62,6 @@ def fetch_video_links_via_curl(search_query):
     import re
     video_ids = re.findall(r'/"videoId":"([^"]+)"', result.stdout)
     return video_ids
-
-# Start Tor initially
-tor_process = start_tor()
 
 # Process each hotel file in the descriptions directory
 for hotel_file in hotel_files:
@@ -104,9 +86,7 @@ for hotel_file in hotel_files:
             else:
                 retry_count += 1
                 if retry_count < max_retries:
-                    print(f"Retrying with new Tor circuit... (Attempt {retry_count + 1}/{max_retries})")
-                    stop_tor(tor_process)  # Stop current Tor instance
-                    tor_process = start_tor()  # Start new Tor instance
+                    print(f"Retrying... (Attempt {retry_count + 1}/{max_retries})")
                 else:
                     print(f"Max retries reached for {hotel_name}. Skipping...")
                     continue  # Skip to the next hotel
@@ -127,6 +107,3 @@ for hotel_file in hotel_files:
 
     except Exception as e:
         print(f"An error occurred while processing {hotel_file}: {e}")
-
-# Stop Tor after execution
-stop_tor(tor_process)
