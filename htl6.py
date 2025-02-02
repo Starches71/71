@@ -2,11 +2,13 @@
 import os
 import subprocess
 import time
+import requests
 
 # Paths
 descriptions_dir = "best_descriptions"
 places_dir = "places"
 links_dir = "best_link"
+cookies_file = "cookies.txt"  # Define cookies.txt location
 
 # Create the links directory if it doesn't exist
 if not os.path.exists(links_dir):
@@ -46,21 +48,35 @@ def stop_tor(process):
         process.terminate()
         process.wait()
 
-# Function to monitor torsocks usage and try different configurations
-def run_torsocks_with_verbosity(command):
-    print(f"Running command with torsocks: {' '.join(command)}")
-    # Run the command using torsocks and capture output
-    result = subprocess.run(command, capture_output=True, text=True)
-    
-    # Print verbose logs for debugging
-    print("Command output (stdout):", result.stdout)
-    print("Command error (stderr):", result.stderr)
-    
+# Function to simulate a search with curl and extract video links
+def fetch_video_links_via_curl(search_query):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+
+    # Construct the search URL (YouTube search)
+    search_url = f"https://www.youtube.com/results?search_query={search_query}"
+
+    # Use curl with cookies and headers
+    curl_command = [
+        'torsocks', 'curl', '-s',  # Use torsocks with curl
+        '-b', cookies_file,  # Use cookies from cookies.txt
+        '-A', headers['User-Agent'],  # Set the User-Agent header
+        search_url
+    ]
+
+    # Run curl command
+    result = subprocess.run(curl_command, capture_output=True, text=True)
+
+    # Check if the command was successful
     if result.returncode != 0:
-        print(f"Error with torsocks: {result.stderr.strip()}")
-        return None  # Return None to indicate failure
-    
-    return result.stdout  # Return successful output
+        print(f"Error fetching links: {result.stderr}")
+        return None
+
+    # Extract video IDs from the HTML response using a regex pattern
+    import re
+    video_ids = re.findall(r'/"videoId":"([^"]+)"', result.stdout)
+    return video_ids
 
 # Start Tor initially
 tor_process = start_tor()
@@ -80,18 +96,10 @@ for hotel_file in hotel_files:
         max_retries = 3
         retry_count = 0
         while retry_count < max_retries:
-            # yt-dlp command to search for 3 video links related to the hotel and place
-            command = [
-                'torsocks', 'yt-dlp', f"ytsearch3:{search_query}",  # Use torsocks with yt-dlp
-                '--print', 'id',  # Print only video IDs
-                '--skip-download',  # Skip downloading videos
-                '-v'  # Add verbosity flag to yt-dlp
-            ]
+            # Fetch video links using curl with cookies
+            video_ids = fetch_video_links_via_curl(search_query)
 
-            # Run the command and capture the output using the defined function
-            result_output = run_torsocks_with_verbosity(command)
-
-            if result_output is not None:  # Check if the command was successful
+            if video_ids:  # Check if we fetched video IDs successfully
                 break  # Success, exit retry loop
             else:
                 retry_count += 1
@@ -103,9 +111,8 @@ for hotel_file in hotel_files:
                     print(f"Max retries reached for {hotel_name}. Skipping...")
                     continue  # Skip to the next hotel
 
-        # Process video IDs to construct YouTube URLs
-        video_ids = result_output.strip().split('\n') if result_output else []
-        video_urls = [f"https://youtu.be/{video_id}" for video_id in video_ids if video_id.strip()]
+        # Construct YouTube URLs
+        video_urls = [f"https://youtu.be/{video_id}" for video_id in video_ids]
 
         if not video_urls:
             print(f"No video URLs found for {hotel_name}")
