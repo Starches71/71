@@ -75,16 +75,17 @@ for links_file in os.listdir(links_dir):
             retry_count = 0
 
             while retry_count < max_retries:
-                # yt-dlp command to download the segment using torsocks
+                # yt-dlp command to download the segment using torsocks, with verbosity
                 command = [
-                    'torsocks', 'yt-dlp', '-o', output_path,
-                    '--download-sections', "*10-55",
+                    'torsocks', 'yt-dlp', '-v',  # -v for verbose output
+                    '-o', output_path,
+                    '--download-sections', "*10-55",  # Download segment from 10-55 seconds
                     link
                 ]
 
                 print(f"Downloading {link} (Attempt {retry_count + 1}/{max_retries})...")
 
-                # Run the command
+                # Run the command and capture the output
                 result = subprocess.run(command, capture_output=True, text=True)
 
                 # Check if the download was successful
@@ -93,6 +94,7 @@ for links_file in os.listdir(links_dir):
                     break  # Exit retry loop on success
                 else:
                     print(f"Error downloading {link}: {result.stderr.strip()}")
+                    print(f"stdout: {result.stdout.strip()}")  # Output from the command
                     retry_count += 1
 
                     if retry_count < max_retries:
