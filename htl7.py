@@ -15,7 +15,7 @@ if not os.path.exists(output_dir):
 def start_tor():
     print("Starting Tor service...")
     tor_process = subprocess.Popen(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(10)  # Give Tor enough time to initialize
+    time.sleep(15)  # Give Tor more time to initialize
     return tor_process
 
 # Function to stop Tor
@@ -40,10 +40,13 @@ for links_file in os.listdir(links_dir):
         # For each link, download a 45-second segment starting from 10 seconds
         for idx, link in enumerate(links):
             link = link.strip()
+            if not link:
+                continue
 
             # Construct the output file name with suffixes like A, B, C
+            filename_base, _ = os.path.splitext(links_file)  # Better filename handling
             suffix = chr(65 + idx)  # Converts 0 to 'A', 1 to 'B', etc.
-            output_filename = f"{links_file.split('.')[0]}{suffix}.mp4"
+            output_filename = f"{filename_base}{suffix}.mp4"
             output_path = os.path.join(output_dir, output_filename)
 
             # Retry mechanism if an error occurs
@@ -54,7 +57,7 @@ for links_file in os.listdir(links_dir):
                 # yt-dlp command to download the segment using torsocks
                 command = [
                     'torsocks', 'yt-dlp', '-o', output_path,
-                    '--download-sections', '*00:10-01:00',
+                    '--download-sections', "*10-55",
                     link
                 ]
 
@@ -72,9 +75,8 @@ for links_file in os.listdir(links_dir):
                     retry_count += 1
 
                     if retry_count < max_retries:
-                        print(f"Retrying with a new Tor circuit... (Attempt {retry_count + 1}/{max_retries})")
-                        stop_tor(tor_process)  # Stop current Tor instance
-                        tor_process = start_tor()  # Start new Tor instance
+                        print(f"Retrying in 10 seconds... (Attempt {retry_count + 1}/{max_retries})")
+                        time.sleep(10)  # Wait before retrying
                     else:
                         print(f"Max retries reached for {link}. Skipping...")
 
