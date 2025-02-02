@@ -1,4 +1,3 @@
-
 name: Run starches.py and related scripts
 
 on:
@@ -49,7 +48,7 @@ jobs:
     - name: Install System Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y torsocks ffmpeg
+        sudo apt-get install -y curl torsocks ffmpeg  # Added curl installation
         echo "System dependencies installed successfully!"
 
     - name: Install Python Dependencies
