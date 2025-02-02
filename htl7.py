@@ -1,6 +1,8 @@
+
 import os
 import subprocess
 import time
+import traceback
 
 # Directory paths
 links_dir = "best_link"
@@ -78,19 +80,24 @@ for links_file in os.listdir(links_dir):
                 print(f"Downloading {link} (Attempt {retry_count + 1}/{max_retries})...")
 
                 # Run the command and capture the output
-                result = subprocess.run(command, capture_output=True, text=True)
+                try:
+                    result = subprocess.run(command, capture_output=True, text=True)
 
-                # Check if the download was successful
-                if result.returncode == 0 and os.path.exists(output_path):
-                    print(f"Downloaded {output_filename} successfully!")
-                    break  # Exit retry loop on success
-                else:
-                    print(f"Error downloading {link}: {result.stderr.strip()}")
-                    print(f"stdout: {result.stdout.strip()}")  # Output from the command
-                    retry_count += 1
-
-                    if retry_count < max_retries:
-                        print(f"Retrying in 10 seconds... (Attempt {retry_count + 1}/{max_retries})")
-                        time.sleep(10)  # Wait before retrying
+                    # Check if the download was successful
+                    if result.returncode == 0 and os.path.exists(output_path):
+                        print(f"Downloaded {output_filename} successfully!")
+                        break  # Exit retry loop on success
                     else:
-                        print(f"Max retries reached for {link}. Skipping...")
+                        print(f"Error downloading {link}: {result.stderr.strip()}")
+                        print(f"stdout: {result.stdout.strip()}")  # Output from the command
+                        retry_count += 1
+
+                        if retry_count < max_retries:
+                            print(f"Retrying in 10 seconds... (Attempt {retry_count + 1}/{max_retries})")
+                            time.sleep(10)  # Wait before retrying
+                        else:
+                            print(f"Max retries reached for {link}. Skipping...")
+                except Exception as e:
+                    print(f"An error occurred while downloading {link}: {e}")
+                    print("Detailed error traceback:")
+                    traceback.print_exc()
