@@ -1,4 +1,3 @@
-
 import os
 import subprocess
 import time
@@ -12,7 +11,7 @@ cookies_file = "cookies.txt"  # Path to the cookies.txt file
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
-# Function to start Tor
+# Function to start Tor (if needed)
 def start_tor():
     print("Starting Tor service...")
     tor_process = subprocess.Popen(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -26,11 +25,11 @@ def stop_tor(process):
         process.terminate()
         process.wait()
 
-# Function to verify Tor connection
+# Function to verify Tor connection (if using Tor)
 def verify_tor_connection():
     print("Verifying Tor connection...")
-    # Run curl with torsocks to check if the connection goes through Tor
-    command = ["torsocks", "curl", "https://check.torproject.org"]
+    # Run curl to check if the connection goes through Tor (only if Tor is enabled)
+    command = ["curl", "https://check.torproject.org"]
     result = subprocess.run(command, capture_output=True, text=True)
 
     # Check if the connection was successful
@@ -40,15 +39,6 @@ def verify_tor_connection():
     else:
         print("Failed to verify Tor connection.")
         return False
-
-# Start Tor initially
-tor_process = start_tor()
-
-# Verify the Tor connection before proceeding
-if not verify_tor_connection():
-    print("Exiting due to failed Tor connection verification.")
-    stop_tor(tor_process)
-    exit()
 
 # Iterate through each .links.txt file in the links directory
 for links_file in os.listdir(links_dir):
@@ -76,9 +66,9 @@ for links_file in os.listdir(links_dir):
             retry_count = 0
 
             while retry_count < max_retries:
-                # curl command to download the segment using torsocks with cookies
+                # curl command to download the segment using cookies
                 command = [
-                    'torsocks', 'curl', '-L',  # -L to follow redirects
+                    'curl', '-L',  # -L to follow redirects
                     '-o', output_path,
                     '--cookie', cookies_file,  # Use cookies.txt
                     '--range', '10-55',  # Download segment from 10-55 seconds
@@ -104,6 +94,3 @@ for links_file in os.listdir(links_dir):
                         time.sleep(10)  # Wait before retrying
                     else:
                         print(f"Max retries reached for {link}. Skipping...")
-
-# Stop Tor after execution
-stop_tor(tor_process)
