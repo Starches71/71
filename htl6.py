@@ -36,12 +36,12 @@ else:
 def fetch_video_links_via_rapidapi(search_query):
     url = "https://youtube-search.p.rapidapi.com/search"
     querystring = {
-        "key": "AIzaSyAOsteuaW5ifVvA_RkLXh0mYs6GLAD6ykc",  # Replace with your actual API key
+        "key": "AIzaSyAOsteuaW5ifVvA_RkLXh0mYs6GLAD6ykc",
         "part": "snippet",
         "q": search_query
     }
     headers = {
-        "x-rapidapi-key": "00181c98c6mshb28efee02d1aa4cp101a3bjsn810e9f1a5717",  # Replace with your actual RapidAPI key
+        "x-rapidapi-key": "cfb23850e4msh938d8d31212b669p180be8jsnfb2af52d947e",
         "x-rapidapi-host": "youtube-search.p.rapidapi.com"
     }
 
@@ -53,7 +53,7 @@ def fetch_video_links_via_rapidapi(search_query):
 
     # Extract video IDs from the API response
     data = response.json()
-    video_ids = [item['id']['videoId'] for item in data['items']]
+    video_ids = [item['id']['videoId'] for item in data.get('items', []) if 'id' in item and 'videoId' in item['id']]
 
     return video_ids
 
