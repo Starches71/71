@@ -1,4 +1,3 @@
-
 import os
 import requests
 import traceback
@@ -7,6 +6,9 @@ import traceback
 descriptions_dir = "best_descriptions"
 places_dir = "places"
 links_dir = "best_link"
+
+# Your YouTube API Key
+YOUTUBE_API_KEY = "AIzaSyCOv3Fv5dPw9yDPKyssYo-Yz36HSJQdlqI"
 
 # Create the links directory if it doesn't exist
 if not os.path.exists(links_dir):
@@ -32,29 +34,19 @@ if not hotel_files:
 else:
     print(f"Found {len(hotel_files)} files in '{descriptions_dir}'")
 
-# Function to fetch video links using RapidAPI
-def fetch_video_links_via_rapidapi(search_query):
-    url = "https://youtube-search.p.rapidapi.com/search"
-    querystring = {
-        "key": "AIzaSyAOsteuaW5ifVvA_RkLXh0mYs6GLAD6ykc",
-        "part": "snippet",
-        "q": search_query
-    }
-    headers = {
-        "x-rapidapi-key": "cfb23850e4msh938d8d31212b669p180be8jsnfb2af52d947e",
-        "x-rapidapi-host": "youtube-search.p.rapidapi.com"
-    }
-
-    response = requests.get(url, headers=headers, params=querystring)
+# Function to fetch video links using YouTube API
+def fetch_video_links(search_query, max_results=3):
+    url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={search_query}&type=video&maxResults={max_results}&key={YOUTUBE_API_KEY}"
+    
+    response = requests.get(url)
     
     if response.status_code != 200:
         print(f"Error fetching video links: {response.text}")
         return None
 
-    # Extract video IDs from the API response
     data = response.json()
-    video_ids = [item['id']['videoId'] for item in data.get('items', []) if 'id' in item and 'videoId' in item['id']]
-
+    video_ids = [item["id"]["videoId"] for item in data.get("items", []) if "id" in item and "videoId" in item["id"]]
+    
     return video_ids
 
 # Process each hotel file in the descriptions directory
@@ -72,8 +64,8 @@ for hotel_file in hotel_files:
         max_retries = 3
         retry_count = 0
         while retry_count < max_retries:
-            # Fetch video links using RapidAPI
-            video_ids = fetch_video_links_via_rapidapi(search_query)
+            # Fetch video links using YouTube API
+            video_ids = fetch_video_links(search_query)
 
             if video_ids:  # Check if we fetched video IDs successfully
                 break  # Success, exit retry loop
