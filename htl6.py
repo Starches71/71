@@ -1,7 +1,5 @@
 
 import os
-import subprocess
-import time
 import requests
 import traceback
 
@@ -9,7 +7,6 @@ import traceback
 descriptions_dir = "best_descriptions"
 places_dir = "places"
 links_dir = "best_link"
-cookies_file = "cookies.txt"  # Define cookies.txt location
 
 # Create the links directory if it doesn't exist
 if not os.path.exists(links_dir):
@@ -35,34 +32,29 @@ if not hotel_files:
 else:
     print(f"Found {len(hotel_files)} files in '{descriptions_dir}'")
 
-# Function to fetch video links using curl
-def fetch_video_links_via_curl(search_query):
+# Function to fetch video links using RapidAPI
+def fetch_video_links_via_rapidapi(search_query):
+    url = "https://youtube-search.p.rapidapi.com/search"
+    querystring = {
+        "key": "AIzaSyAOsteuaW5ifVvA_RkLXh0mYs6GLAD6ykc",  # Replace with your actual API key
+        "part": "snippet",
+        "q": search_query
+    }
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        "x-rapidapi-key": "00181c98c6mshb28efee02d1aa4cp101a3bjsn810e9f1a5717",  # Replace with your actual RapidAPI key
+        "x-rapidapi-host": "youtube-search.p.rapidapi.com"
     }
 
-    # Construct the search URL (YouTube search)
-    search_url = f"https://www.youtube.com/results?search_query={search_query}"
-
-    # Use curl with cookies and headers
-    curl_command = [
-        'curl', '-s',  # Use curl without torsocks
-        '-b', cookies_file,  # Use cookies from cookies.txt
-        '-A', headers['User-Agent'],  # Set the User-Agent header
-        search_url
-    ]
-
-    # Run curl command
-    result = subprocess.run(curl_command, capture_output=True, text=True)
-
-    # Check if the command was successful
-    if result.returncode != 0:
-        print(f"Error fetching links: {result.stderr}")
+    response = requests.get(url, headers=headers, params=querystring)
+    
+    if response.status_code != 200:
+        print(f"Error fetching video links: {response.text}")
         return None
 
-    # Extract video IDs from the HTML response using a regex pattern
-    import re
-    video_ids = re.findall(r'/"videoId":"([^"]+)"', result.stdout)
+    # Extract video IDs from the API response
+    data = response.json()
+    video_ids = [item['id']['videoId'] for item in data['items']]
+
     return video_ids
 
 # Process each hotel file in the descriptions directory
@@ -80,8 +72,8 @@ for hotel_file in hotel_files:
         max_retries = 3
         retry_count = 0
         while retry_count < max_retries:
-            # Fetch video links using curl with cookies
-            video_ids = fetch_video_links_via_curl(search_query)
+            # Fetch video links using RapidAPI
+            video_ids = fetch_video_links_via_rapidapi(search_query)
 
             if video_ids:  # Check if we fetched video IDs successfully
                 break  # Success, exit retry loop
