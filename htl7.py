@@ -9,17 +9,17 @@ import traceback
 links_dir = "best_link"
 output_dir = "best_vid"
 cookies_file = "cookies.txt"  # Path to the cookies.txt file
-api_key = "00181c98c6mshb28efee02d1aa4cp101a3bjsn810e9f1a5717"  # Your RapidAPI key
-rapidapi_host = "youtube-search.p.rapidapi.com"
+api_key = "cfb23850e4msh938d8d31212b669p180be8jsnfb2af52d947e"  # Your new RapidAPI key
+rapidapi_host = "youtube-info-download-api.p.rapidapi.com"
 
 # Create output directory if it doesn't exist
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 # Function to fetch video download URL using RapidAPI
-def fetch_video_download_link(search_query):
-    url = "https://youtube-search.p.rapidapi.com/search"
-    querystring = {"key": "AIzaSyAOsteuaW5ifVvA_RkLXh0mYs6GLAD6ykc", "part": "snippet", "q": search_query}
+def fetch_video_download_link(video_id):
+    url = "https://youtube-info-download-api.p.rapidapi.com/ajax/progress.php"
+    querystring = {"id": video_id}
     headers = {
         "x-rapidapi-key": api_key,
         "x-rapidapi-host": rapidapi_host
@@ -35,13 +35,15 @@ def fetch_video_download_link(search_query):
     # Parse the response JSON
     video_data = response.json()
 
-    # Check if there are any results
-    if "items" in video_data:
-        video_id = video_data["items"][0]["id"]["videoId"]  # Get the first video ID
-        video_url = f"https://www.youtube.com/watch?v={video_id}"
-        return video_url
+    # Check if the response contains download links
+    if "video" in video_data and "downloads" in video_data["video"]:
+        download_links = video_data["video"]["downloads"]
+        # We can choose the best available quality for download (e.g., highest quality)
+        for download in download_links:
+            if download.get("quality") == "1080p":  # Choose 1080p or any quality you prefer
+                return download.get("url")
     else:
-        print("No videos found for query:", search_query)
+        print(f"No download links found for video ID: {video_id}")
         return None
 
 # Iterate through each .links.txt file in the links directory
@@ -59,6 +61,11 @@ for links_file in os.listdir(links_dir):
             if not link:
                 continue
 
+            # Extract the video ID from the link (YouTube video ID is in the URL)
+            video_id = link.split("v=")[-1]  # Extract video ID from YouTube URL
+            if "&" in video_id:
+                video_id = video_id.split("&")[0]  # In case there are additional parameters
+
             # Construct the output file name with suffixes like A, B, C
             filename_base, _ = os.path.splitext(links_file)  # Better filename handling
             suffix = chr(65 + idx)  # Converts 0 to 'A', 1 to 'B', etc.
@@ -71,7 +78,7 @@ for links_file in os.listdir(links_dir):
 
             while retry_count < max_retries:
                 # Fetch video download link using RapidAPI
-                download_link = fetch_video_download_link(link)
+                download_link = fetch_video_download_link(video_id)
 
                 if download_link:
                     # Use curl to download the video
