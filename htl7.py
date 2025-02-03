@@ -1,4 +1,3 @@
-
 import os
 import subprocess
 import time
@@ -34,14 +33,23 @@ def fetch_video_download_link(video_id):
 
     # Parse the response JSON
     video_data = response.json()
+    print(f"API response: {video_data}")  # Add this line for debugging
 
     # Check if the response contains download links
     if "video" in video_data and "downloads" in video_data["video"]:
         download_links = video_data["video"]["downloads"]
-        # We can choose the best available quality for download (e.g., highest quality)
+        
+        # Loop through available qualities and pick the best one (fallback if 1080p is not available)
         for download in download_links:
-            if download.get("quality") == "1080p":  # Choose 1080p or any quality you prefer
+            if download.get("quality") == "1080p":
                 return download.get("url")
+            elif download.get("quality") == "720p":  # Fallback if 1080p isn't available
+                print(f"Using 720p instead of 1080p for video ID: {video_id}")
+                return download.get("url")
+            elif download.get("quality") == "480p":  # Another fallback if 720p isn't available
+                print(f"Using 480p instead of 720p for video ID: {video_id}")
+                return download.get("url")
+        print(f"No suitable download link found for video ID: {video_id}")
     else:
         print(f"No download links found for video ID: {video_id}")
         return None
