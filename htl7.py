@@ -1,6 +1,9 @@
-
 import os
-import subprocess
+import requests
+import time
+
+# API details
+API_URL = "http://127.0.0.1:5000/download/best"  # Automatically selects the best format
 
 # Directory paths
 links_dir = "best_link"
@@ -19,21 +22,34 @@ for links_file in os.listdir(links_dir):
         with open(file_path, 'r') as f:
             links = f.readlines()
 
-        # For each link, download a 45-second segment starting from 10 seconds
+        # For each link, request video download
         for idx, link in enumerate(links):
             link = link.strip()
+            if not link:
+                continue  # Skip empty lines
 
-            # Construct the output file name with suffixes like A, B, C
+            # Construct output filename
             suffix = chr(65 + idx)  # Converts 0 to 'A', 1 to 'B', etc.
             output_filename = f"{links_file.split('.')[0]}{suffix}.mp4"
 
-            # Define the section to download: *00:10-01:00 (45 seconds)
-            command = [
-                'torsocks', 'yt-dlp', '-o', os.path.join(output_dir, output_filename),
-                '--download-sections', '*00:10-01:00', link
-            ]
+            # Attempt download (retry once on failure)
+            for attempt in range(2):
+                try:
+                    response = requests.post(API_URL, json={"url": link})
 
-            # Run the command
-            subprocess.run(command)
+                    if response.status_code == 200:
+                        print(f"Download started for {link} ({output_filename})")
+                        break  # Exit retry loop on success
+                    else:
+                        print(f"Error downloading {link}: {response.json()}")
+                        if attempt == 0:
+                            print("Retrying...")
+                            time.sleep(3)  # Wait before retrying
+                except requests.RequestException as e:
+                    print(f"Network error for {link}: {e}")
+                    if attempt == 0:
+                        print("Retrying...")
+                        time.sleep(3)  # Wait before retrying
 
-            print(f"Downloaded segment for {link} and saved as {output_filename}")
+            # Delay to prevent overloading API
+            time.sleep(2)
