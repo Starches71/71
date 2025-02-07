@@ -21,34 +21,13 @@ jobs:
 
     - name: Set Up Required Directories
       run: |
-        mkdir -p best
-        mkdir -p best_20
-        mkdir -p best_audio
-        mkdir -p best_clean
-        mkdir -p best_clip
-        mkdir -p best_clip2
-        mkdir -p best_clip3
-        mkdir -p best_descriptions
-        mkdir -p best_dir
-        mkdir -p best_final
-        mkdir -p best_final2
-        mkdir -p best_intro
-        mkdir -p best_io
-        mkdir -p best_io2
-        mkdir -p best_io3
-        mkdir -p best_join
-        mkdir -p best_join_vid
-        mkdir -p best_link
-        mkdir -p best_outro
-        mkdir -p best_vid
-        mkdir -p best_vid_clean
-        mkdir -p places
+        mkdir -p best best_20 best_audio best_clean best_clip best_clip2 best_clip3 best_descriptions best_dir best_final best_final2 best_intro best_io best_io2 best_io3 best_join best_join_vid best_link best_outro best_vid best_vid_clean places
         echo "Directories created successfully!"
 
     - name: Install System Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y curl torsocks ffmpeg  # Added curl installation
+        sudo apt-get install -y curl torsocks ffmpeg  # Added torsocks installation
         echo "System dependencies installed successfully!"
 
     - name: Install Python Dependencies
@@ -75,8 +54,18 @@ jobs:
     - name: Run htl6.py
       run: python3 htl6.py
 
-    - name: Run htl7.py
-      run: python3 htl7.py
+    - name: Start Tor in the Background
+      run: |
+        echo "Starting Tor in the background..."
+        tor &  # Start Tor and let it run in the background
+        sleep 10  # Wait 10 seconds to ensure Tor initializes
+        echo "Tor started successfully!"
+
+    - name: Run htl7.py with Torsocks
+      run: |
+        echo "Running htl7.py with torsocks..."
+        torsocks python3 htl7.py  # Ensures yt-dlp uses Tor
+        echo "htl7.py completed!"
 
     - name: Run htl8.py
       run: python3 htl8.py
