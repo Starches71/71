@@ -1,3 +1,4 @@
+
 name: Run starches.py and related scripts
 
 on:
@@ -17,7 +18,7 @@ jobs:
     - name: Set Up Python 3.12
       uses: actions/setup-python@v4
       with:
-        python-version: 3.12  # Match the Python version in Termux
+        python-version: 3.12
 
     - name: Set Up Required Directories
       run: |
@@ -27,45 +28,21 @@ jobs:
     - name: Install System Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y curl torsocks ffmpeg  # Added torsocks installation
+        sudo apt-get install -y curl ffmpeg  # Removed torsocks
         echo "System dependencies installed successfully!"
 
     - name: Install Python Dependencies
       run: pip install -r requirements.txt
 
-    - name: Run starches.py
-      run: python3 starches.py
-
-    - name: Run htl1.py
-      run: python3 htl1.py
-
-    - name: Run htl2.py
-      run: python3 htl2.py
-
-    - name: Run htl3.py
-      run: python3 htl3.py
-
-    - name: Run htl4.py
-      run: python3 htl4.py
-
-    - name: Run htl5.py
-      run: python3 htl5.py
-
-    - name: Run htl6.py
-      run: python3 htl6.py
-
-    - name: Start Tor in the Background
+    - name: Start YouTube Downloader API
       run: |
-        echo "Starting Tor in the background..."
-        tor &  # Start Tor and let it run in the background
-        sleep 10  # Wait 10 seconds to ensure Tor initializes
-        echo "Tor started successfully!"
+        echo "Starting YouTube Downloader API..."
+        nohup python3 main.py &  # Runs API in the background
+        sleep 10  # Wait 10 seconds to ensure API starts
+        echo "API started successfully!"
 
-    - name: Run htl7.py with Torsocks
-      run: |
-        echo "Running htl7.py with torsocks..."
-        torsocks python3 htl7.py  # Ensures yt-dlp uses Tor
-        echo "htl7.py completed!"
+    - name: Run htl7.py Using the API
+      run: python3 htl7.py  # Uses API instead of yt-dlp
 
     - name: Run htl8.py
       run: python3 htl8.py
