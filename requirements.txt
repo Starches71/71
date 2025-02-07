@@ -4,3 +4,4 @@ edge-tts
 groq
 pytube
 requests
+youtube-search-python
