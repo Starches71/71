@@ -37,6 +37,27 @@ jobs:
         pip install flask  # Add Flask installation
         echo "Python dependencies installed successfully!"
 
+    - name: Run starches.py
+      run: python3 starches.py  # Run starches.py
+
+    - name: Run htl1.py
+      run: python3 htl1.py  # Run htl1.py
+
+    - name: Run htl2.py
+      run: python3 htl2.py  # Run htl2.py
+
+    - name: Run htl3.py
+      run: python3 htl3.py  # Run htl3.py
+
+    - name: Run htl4.py
+      run: python3 htl4.py  # Run htl4.py
+
+    - name: Run htl5.py
+      run: python3 htl5.py  # Run htl5.py
+
+    - name: Run htl6.py
+      run: python3 htl6.py  # Run htl6.py
+
     - name: Start YouTube Downloader API
       run: |
         echo "Starting YouTube Downloader API..."
