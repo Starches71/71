@@ -1,0 +1,20 @@
+name: WireGuard Server
+on: [push]
+
+jobs:
+  setup-wireguard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install WireGuard
+        run: |
+          sudo apt update
+          sudo apt install -y wireguard
+
+      - name: Download WireGuard Configuration
+        run: |
+          echo "${{ secrets.WG_CONFIG }}" | base64 --decode | sudo tee /etc/wireguard/wg0.conf
+
+      - name: Start WireGuard Server
+        run: |
+          sudo wg-quick up wg0
+          curl ifconfig.me
