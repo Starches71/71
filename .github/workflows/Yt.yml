@@ -1,0 +1,30 @@
+
+name: Download YouTube Videos with yt-dlp
+
+on: 
+  workflow_dispatch:  # Allows manual triggering from GitHub Actions
+
+jobs:
+  download_videos:
+    runs-on: ubuntu-latest  # GitHub Actions uses an Ubuntu runner
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4  # Checks out the repository
+
+      - name: Install yt-dlp
+        run: |
+          sudo apt update
+          sudo apt install -y ffmpeg  # Required for processing video/audio
+          sudo apt install -y python3-pip
+          pip install yt-dlp
+
+      - name: Search and download first 2 videos
+        run: |
+          yt-dlp "ytsearch2:Samsung S25" -o "samsung_s25_%(title)s.%(ext)s" --format mp4
+
+      - name: Upload downloaded videos as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: samsung_s25_videos
+          path: samsung_s25_*.mp4
