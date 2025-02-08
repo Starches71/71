@@ -1,12 +1,12 @@
+
 from playwright.sync_api import sync_playwright
 import time
 
-# Hardcoded credentials (HIGHLY INSECURE – Use a safer method in real applications)
 EMAIL = "starches131@gmail.com"
 PASSWORD = "bajubwoy131#"
 
 with sync_playwright() as p:
-    browser = p.chromium.launch(headless=False)  # Set to False to see the process
+    browser = p.chromium.launch(headless=True)  # Set to True for GitHub Actions
     page = browser.new_page()
     
     # Navigate to Gmail login page
@@ -23,8 +23,5 @@ with sync_playwright() as p:
     time.sleep(3)
 
     print("Login attempted. Check browser for results.")
-    
-    # Keep the browser open for testing (remove if not needed)
-    time.sleep(10)
     
     browser.close()
