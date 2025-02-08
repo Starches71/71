@@ -1,29 +1,26 @@
 
-name: Download YouTube Videos with yt-dlp
+name: Download YouTube Videos with Docker
 
 on: 
-  workflow_dispatch:  # Allows manual triggering from GitHub Actions
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   download_videos:
-    runs-on: ubuntu-latest  # GitHub Actions uses an Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4  # Checks out the repository
+        uses: actions/checkout@v4
 
-      - name: Install yt-dlp
+      - name: Build Docker Image
         run: |
-          sudo apt update
-          sudo apt install -y ffmpeg  # Required for processing video/audio
-          sudo apt install -y python3-pip
-          pip install yt-dlp
+          docker build -t yt-dlp-container .
 
-      - name: Search and download first 2 videos
+      - name: Run yt-dlp in Docker
         run: |
-          yt-dlp "ytsearch2:Samsung S25" -o "samsung_s25_%(title)s.%(ext)s" --format mp4
+          docker run --rm -v "$(pwd):/app" yt-dlp-container
 
-      - name: Upload downloaded videos as artifacts
+      - name: Upload downloaded videos
         uses: actions/upload-artifact@v4
         with:
           name: samsung_s25_videos
