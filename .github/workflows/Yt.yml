@@ -1,4 +1,5 @@
-name: Download YouTube Videos with Tor
+
+name: Download YouTube Videos with Tor and Retry on Failure
 
 on:
   push:
@@ -23,26 +24,41 @@ jobs:
         sudo service tor start
         sleep 5  # Give Tor time to start
 
-    - name: Download YouTube Videos
+    - name: Download YouTube Videos with IP retries
       run: |
         search_term="sheraton hotel jeddah"
         video_count=0
+        start_time=$(date +%s)  # Get the start time in seconds
 
+        # Retry logic for 2 hours (120 minutes)
         while [ $video_count -lt 3 ]; do
+          current_time=$(date +%s)
+          elapsed_time=$((current_time - start_time))
+
+          # If elapsed time exceeds 2 hours (7200 seconds), stop retrying
+          if [ $elapsed_time -ge 7200 ]; then
+            echo "Failed to download videos within 2 hours. Exiting..."
+            exit 1
+          fi
+
           # Try to download the first video
           echo "Attempting download #$((video_count + 1))..."
-          
+
           # Print the public IP address from which the request is made
-          echo "Using IP address: $(curl -s https://ipinfo.io/ip)"
-          
-          # Use yt-dlp with torsocks
+          ip_address=$(curl -s https://ipinfo.io/ip)
+          echo "Using IP address: $ip_address"
+
+          # Use yt-dlp with torsocks to download
           torsocks yt-dlp "ytsearch1:${search_term}" --max-downloads 1 --output "%(title)s.%(ext)s"
-          
+
           # Check if yt-dlp succeeded
           if [ $? -eq 0 ]; then
-            echo "Download successful, IP: $(curl -s https://ipinfo.io/ip)"
+            echo "Download successful, IP: $ip_address"
             video_count=$((video_count + 1))
           else
-            echo "Download failed, retrying with a new IP..."
+            echo "Download failed with IP: $ip_address, retrying with a new IP..."
           fi
+
+          # Wait for a moment to ensure the next request uses a new IP from Tor
+          sleep 10
         done
