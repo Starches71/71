@@ -1,4 +1,3 @@
-
 name: YouTube Sign-Up Elements
 
 on:
@@ -28,6 +27,13 @@ jobs:
           sudo apt-get install -y tor
           sudo systemctl start tor
 
+      # Set up proxy environment variables with your IP
+      - name: Set Proxy for Browser
+        run: |
+          export http_proxy=http://196.249.106.199:8080
+          export https_proxy=http://196.249.106.199:8080
+
+      # Run Playwright Script
       - name: Run Playwright Script
         run: python yt_signup_elements.py
 
