@@ -19,11 +19,16 @@ def print_all_elements(page):
 with sync_playwright() as p:
     # Launch browser with no-sandbox flag for better compatibility in CI/CD
     browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
-    page = browser.new_page()
 
-    # Use a custom user-agent to simulate a real browser
-    page.set_user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-    
+    # Create a new browser context
+    context = browser.new_context()
+
+    # Set the user-agent for the context
+    context.set_user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+
+    # Open a new page within the context
+    page = context.new_page()
+
     # Navigate to Gmail login page
     page.goto("https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&hl=en&service=mail&flowName=GlifWebSignIn&flowEntry=AddSession")
 
