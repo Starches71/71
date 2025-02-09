@@ -1,45 +1,40 @@
-
-name: YouTube Download via Tor (Tanzania Exit)
+name: Download YouTube Video via Tor
 
 on:
-  workflow_dispatch  # Manual trigger
+  workflow_dispatch:  # Allows manual execution
 
 jobs:
   download-video:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up environment
+      - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y tor torsocks yt-dlp curl
-          
-          # Configure Tor to use only Tanzania (TZ) exit nodes
-          echo "ExitNodes {TZ}" | sudo tee -a /etc/tor/torrc
-          echo "StrictNodes 1" | sudo tee -a /etc/tor/torrc
-          echo "NewCircuitPeriod 10" | sudo tee -a /etc/tor/torrc
-          echo "MaxCircuitDirtiness 10" | sudo tee -a /etc/tor/torrc
+          sudo apt install -y tor yt-dlp curl
 
-          # Restart Tor to apply settings
-          sudo service tor restart
-          sleep 5  # Wait for Tor to stabilize
+      - name: Start Tor
+        run: |
+          echo "Starting Tor..."
+          sudo service tor start
+          sleep 10  # Give Tor time to connect
 
-      - name: Attempt to Download YouTube Video
+      - name: Download via SOCKS5 Proxy
         run: |
           while true; do
-              # Get current IP address
-              ip=$(torsocks curl -s https://ipinfo.io/ip)
+              # Get current IP address via Tor
+              ip=$(curl -s --socks5-hostname 127.0.0.1:9050 https://ipinfo.io/ip || echo "Failed to get IP")
               echo "Trying with IP: $ip"
 
-              # Attempt to download the first YouTube video matching the search
-              torsocks yt-dlp "ytsearch:sheraton hotel jeddah" --max-downloads 1
+              # Download video using SOCKS5 proxy
+              yt-dlp --proxy "socks5h://127.0.0.1:9050" "ytsearch:sheraton hotel jeddah" --max-downloads 1
 
               # Check if download was successful
               if [ $? -eq 0 ]; then
                   echo "✅ Success with IP: $ip"
-                  break  # Exit loop if successful
+                  break
               else
                   echo "❌ Blocked with IP: $ip, retrying..."
-                  sleep 10  # Wait before retrying with a new IP
+                  sleep 10
               fi
           done
