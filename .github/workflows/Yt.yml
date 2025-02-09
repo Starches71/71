@@ -1,3 +1,4 @@
+
 name: Download YouTube Videos with Tor and Retry on Failure
 
 on:
@@ -46,6 +47,7 @@ jobs:
             echo "Download successful, IP: $ip_address"
             video_count=$((video_count + 1))
           else
+            # If download fails, continue retrying and print the failed IP
             echo "Download failed with IP: $ip_address, retrying with a new IP..."
           fi
 
