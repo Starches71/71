@@ -1,4 +1,3 @@
-
 name: Download YouTube Videos with Tor and Retry on Failure
 
 on:
@@ -30,17 +29,8 @@ jobs:
         video_count=0
         start_time=$(date +%s)  # Get the start time in seconds
 
-        # Retry logic for 2 hours (120 minutes)
-        while [ $video_count -lt 3 ]; do
-          current_time=$(date +%s)
-          elapsed_time=$((current_time - start_time))
-
-          # If elapsed time exceeds 2 hours (7200 seconds), stop retrying
-          if [ $elapsed_time -ge 7200 ]; then
-            echo "Failed to download videos within 2 hours. Exiting..."
-            exit 1
-          fi
-
+        # Retry logic
+        while true; do
           # Try to download the first video
           echo "Attempting download #$((video_count + 1))..."
 
@@ -57,6 +47,12 @@ jobs:
             video_count=$((video_count + 1))
           else
             echo "Download failed with IP: $ip_address, retrying with a new IP..."
+          fi
+
+          # Exit condition when 3 videos have been downloaded
+          if [ $video_count -ge 3 ]; then
+            echo "Successfully downloaded 3 videos!"
+            break
           fi
 
           # Wait for a moment to ensure the next request uses a new IP from Tor
