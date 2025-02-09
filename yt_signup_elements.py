@@ -20,11 +20,10 @@ with sync_playwright() as p:
     # Launch browser with no-sandbox flag for better compatibility in CI/CD
     browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
 
-    # Create a new browser context
-    context = browser.new_context()
-
-    # Set the user-agent for the context
-    context.set_user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+    # Create a new browser context with a custom user-agent
+    context = browser.new_context(
+        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    )
 
     # Open a new page within the context
     page = context.new_page()
