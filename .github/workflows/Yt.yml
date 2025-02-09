@@ -1,27 +1,48 @@
+name: Download YouTube Videos with Tor
 
-name: Download YouTube Videos with Docker
-
-on: 
-  workflow_dispatch:  # Allows manual triggering
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   download_videos:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v2
 
-      - name: Build Docker Image
-        run: |
-          docker build -t yt-dlp-container .
+    - name: Set up Tor and Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y torsocks yt-dlp tor curl
 
-      - name: Run yt-dlp in Docker
-        run: |
-          docker run --rm -v "$(pwd):/app" yt-dlp-container
+    - name: Start Tor Service
+      run: |
+        sudo service tor start
+        sleep 5  # Give Tor time to start
 
-      - name: Upload downloaded videos
-        uses: actions/upload-artifact@v4
-        with:
-          name: samsung_s25_videos
-          path: samsung_s25_*.mp4
+    - name: Download YouTube Videos
+      run: |
+        search_term="sheraton hotel jeddah"
+        video_count=0
+
+        while [ $video_count -lt 3 ]; do
+          # Try to download the first video
+          echo "Attempting download #$((video_count + 1))..."
+          
+          # Print the public IP address from which the request is made
+          echo "Using IP address: $(curl -s https://ipinfo.io/ip)"
+          
+          # Use yt-dlp with torsocks
+          torsocks yt-dlp "ytsearch1:${search_term}" --max-downloads 1 --output "%(title)s.%(ext)s"
+          
+          # Check if yt-dlp succeeded
+          if [ $? -eq 0 ]; then
+            echo "Download successful, IP: $(curl -s https://ipinfo.io/ip)"
+            video_count=$((video_count + 1))
+          else
+            echo "Download failed, retrying with a new IP..."
+          fi
+        done
