@@ -1,31 +1,49 @@
-name: Build and Run YouTubeSearchDownload
+
+name: Download YouTube Videos with Tor
 
 on:
   push:
     branches:
-      - main  # Trigger the workflow on push to the main branch
+      - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
-    
+  download_videos:
+    runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2  # Checkout the repository's code
+    - name: Checkout Repository
+      uses: actions/checkout@v2
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '6.x'  # Use the .NET version your project is using
-
-    - name: Restore .NET dependencies
+    - name: Set up Tor and Install Dependencies
       run: |
-        dotnet restore YouTubeSearchDownload.csproj  # Restore dependencies from the .csproj file in the root directory
+        sudo apt-get update
+        sudo apt-get install -y torsocks yt-dlp tor curl
 
-    - name: Build the project
+    - name: Start Tor Service
       run: |
-        dotnet build YouTubeSearchDownload.csproj  # Build the project using the .csproj file in the root directory
+        sudo service tor start
+        sleep 5  # Give Tor time to start
 
-    - name: Run the program
+    - name: Download YouTube Videos
       run: |
-        dotnet run --project YouTubeSearchDownload.csproj "Sherstin hotels Jeddah" "best_vid/video.mp4"  # Run with the search term and output path
+        search_term="sheraton hotel jeddah"
+        video_count=0
+
+        while [ $video_count -lt 3 ]; do
+          # Try to download the first video
+          echo "Attempting download #$((video_count + 1))..."
+          
+          # Print the public IP address from which the request is made
+          echo "Using IP address: $(curl -s https://ipinfo.io/ip)"
+          
+          # Use yt-dlp with torsocks
+          torsocks yt-dlp "ytsearch1:${search_term}" --max-downloads 1 --output "%(title)s.%(ext)s"
+          
+          # Check if yt-dlp succeeded
+          if [ $? -eq 0 ]; then
+            echo "Download successful, IP: $(curl -s https://ipinfo.io/ip)"
+            video_count=$((video_count + 1))
+          else
+            echo "Download failed, retrying with a new IP..."
+          fi
+        done
