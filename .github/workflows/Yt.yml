@@ -1,62 +1,45 @@
 
-name: Download YouTube Videos with Tor and Retry on Failure
+name: YouTube Download via Tor (Tanzania Exit)
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch  # Manual trigger
 
 jobs:
-  download_videos:
+  download-video:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+      - name: Set up environment
+        run: |
+          sudo apt update
+          sudo apt install -y tor torsocks yt-dlp curl
+          
+          # Configure Tor to use only Tanzania (TZ) exit nodes
+          echo "ExitNodes {TZ}" | sudo tee -a /etc/tor/torrc
+          echo "StrictNodes 1" | sudo tee -a /etc/tor/torrc
+          echo "NewCircuitPeriod 10" | sudo tee -a /etc/tor/torrc
+          echo "MaxCircuitDirtiness 10" | sudo tee -a /etc/tor/torrc
 
-    - name: Set up Tor and Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y torsocks yt-dlp tor curl
+          # Restart Tor to apply settings
+          sudo service tor restart
+          sleep 5  # Wait for Tor to stabilize
 
-    - name: Start Tor Service
-      run: |
-        sudo service tor start
-        sleep 5  # Give Tor time to start
+      - name: Attempt to Download YouTube Video
+        run: |
+          while true; do
+              # Get current IP address
+              ip=$(torsocks curl -s https://ipinfo.io/ip)
+              echo "Trying with IP: $ip"
 
-    - name: Download YouTube Videos with IP retries
-      run: |
-        search_term="sheraton hotel jeddah"
-        video_count=0
-        start_time=$(date +%s)  # Get the start time in seconds
+              # Attempt to download the first YouTube video matching the search
+              torsocks yt-dlp "ytsearch:sheraton hotel jeddah" --max-downloads 1
 
-        # Retry logic
-        while true; do
-          # Try to download the first video
-          echo "Attempting download #$((video_count + 1))..."
-
-          # Print the public IP address from which the request is made
-          ip_address=$(curl -s https://ipinfo.io/ip)
-          echo "Using IP address: $ip_address"
-
-          # Use yt-dlp with torsocks to download
-          torsocks yt-dlp "ytsearch1:${search_term}" --max-downloads 1 --output "%(title)s.%(ext)s"
-
-          # Check if yt-dlp succeeded
-          if [ $? -eq 0 ]; then
-            echo "Download successful, IP: $ip_address"
-            video_count=$((video_count + 1))
-          else
-            # If download fails, continue retrying and print the failed IP
-            echo "Download failed with IP: $ip_address, retrying with a new IP..."
-          fi
-
-          # Exit condition when 3 videos have been downloaded
-          if [ $video_count -ge 3 ]; then
-            echo "Successfully downloaded 3 videos!"
-            break
-          fi
-
-          # Wait for a moment to ensure the next request uses a new IP from Tor
-          sleep 10
-        done
+              # Check if download was successful
+              if [ $? -eq 0 ]; then
+                  echo "✅ Success with IP: $ip"
+                  break  # Exit loop if successful
+              else
+                  echo "❌ Blocked with IP: $ip, retrying..."
+                  sleep 10  # Wait before retrying with a new IP
+              fi
+          done
