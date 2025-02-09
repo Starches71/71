@@ -1,3 +1,4 @@
+
 name: YouTube Sign-Up Elements
 
 on:
@@ -19,6 +20,13 @@ jobs:
         run: |
           pip install playwright
           playwright install
+          pip install undetected-chromedriver fake_useragent
+
+      - name: Start Tor (for IP Rotation)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tor
+          sudo systemctl start tor
 
       - name: Run Playwright Script
         run: python yt_signup_elements.py
