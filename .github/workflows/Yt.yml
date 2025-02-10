@@ -11,7 +11,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y tor yt-dlp curl netcat
+          sudo apt install -y tor yt-dlp curl netcat-openbsd  # Fixed package name for netcat
 
       - name: Configure Tor for IP Change
         run: |
@@ -20,7 +20,7 @@ jobs:
           sudo service tor restart
           sleep 10  # Give Tor time to reconnect
 
-      - name: Change IP Seven Times Before Downloading
+      - name: Change IP Seven Times
         run: |
           for i in {1..7}; do
               echo "Changing IP #$i..."
@@ -30,13 +30,9 @@ jobs:
               echo "New IP: $new_ip"
           done
 
-      - name: Download via SOCKS5 Proxy with IP Change on Failure
+      - name: Download via SOCKS5 Proxy
         run: |
-          attempt=0
           while true; do
-              ((attempt++))
-              echo "Attempt #$attempt"
-
               # Get current IP address via Tor
               ip=$(curl -s --socks5-hostname 127.0.0.1:9050 https://ipinfo.io/ip || echo "Failed to get IP")
               echo "Trying with IP: $ip"
@@ -49,8 +45,7 @@ jobs:
                   echo "✅ Success with IP: $ip"
                   break
               else
-                  echo "❌ Blocked with IP: $ip, changing IP and retrying..."
-                  echo -e 'authenticate "mypassword"\nsignal newnym\nquit' | nc localhost 9051
-                  sleep 10  # Wait for Tor to establish a new circuit
+                  echo "❌ Blocked with IP: $ip, retrying..."
+                  sleep 10
               fi
           done
