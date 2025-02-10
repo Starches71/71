@@ -13,11 +13,22 @@ jobs:
           sudo apt update
           sudo apt install -y tor yt-dlp curl
 
-      - name: Start Tor
+      - name: Configure Tor for IP Change
         run: |
-          echo "Starting Tor..."
-          sudo service tor start
-          sleep 10  # Give Tor time to connect
+          echo "ControlPort 9051" | sudo tee -a /etc/tor/torrc
+          echo "HashedControlPassword $(tor --hash-password 'mypassword')" | sudo tee -a /etc/tor/torrc
+          sudo service tor restart
+          sleep 10  # Give Tor time to reconnect
+
+      - name: Change IP Seven Times
+        run: |
+          for i in {1..7}; do
+              echo "Changing IP #$i..."
+              echo -e 'authenticate "mypassword"\nsignal newnym\nquit' | nc localhost 9051
+              sleep 10  # Wait for Tor to establish a new circuit
+              new_ip=$(curl -s --socks5-hostname 127.0.0.1:9050 https://ipinfo.io/ip || echo "Failed to get IP")
+              echo "New IP: $new_ip"
+          done
 
       - name: Download via SOCKS5 Proxy
         run: |
