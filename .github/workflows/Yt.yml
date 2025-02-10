@@ -1,52 +1,26 @@
 
-name: Download YouTube Video via Tor
+name: Download YouTube Videos
 
-on:
-  workflow_dispatch:  # Allows manual execution
+on: 
+  push:
+  workflow_dispatch:
 
 jobs:
-  download-video:
+  download_videos:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install Dependencies
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install yt-dlp
         run: |
           sudo apt update
-          sudo apt install -y tor yt-dlp curl netcat-openbsd  # Fixed package name for netcat
+          sudo apt install -y yt-dlp
 
-      - name: Configure Tor for IP Change
+      - name: Download videos without saving
         run: |
-          echo "ControlPort 9051" | sudo tee -a /etc/tor/torrc
-          echo "HashedControlPassword $(tor --hash-password 'mypassword')" | sudo tee -a /etc/tor/torrc
-          sudo service tor restart
-          sleep 10  # Give Tor time to reconnect
-
-      - name: Change IP Seven Times
-        run: |
-          for i in {1..7}; do
-              echo "Changing IP #$i..."
-              echo -e 'authenticate "mypassword"\nsignal newnym\nquit' | nc localhost 9051
-              sleep 10  # Wait for Tor to establish a new circuit
-              new_ip=$(curl -s --socks5-hostname 127.0.0.1:9050 https://check.torproject.org/api/ip || echo "Failed to get IP")
-              echo "New IP: $new_ip"
-          done
-
-      - name: Download via SOCKS5 Proxy
-        run: |
-          while true; do
-              # Get current IP address via Tor
-              ip=$(curl -s --socks5-hostname 127.0.0.1:9050 https://check.torproject.org/api/ip || echo "Failed to get IP")
-              echo "Trying with IP: $ip"
-
-              # Download video using SOCKS5 proxy
-              yt-dlp --proxy "socks5h://127.0.0.1:9050" "ytsearch:sheraton hotel jeddah" --max-downloads 1
-
-              # Check if download was successful
-              if [ $? -eq 0 ]; then
-                  echo "✅ Success with IP: $ip"
-                  break
-              else
-                  echo "❌ Blocked with IP: $ip, retrying..."
-                  sleep 10
-              fi
-          done
+          yt-dlp "ytsearch3:best hotels in Jeddah" \
+          --proxy "http://41.77.7.234:3129" \
+          --format best \
+          --exec "echo Downloaded: {} && rm {}"
