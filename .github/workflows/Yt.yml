@@ -1,3 +1,4 @@
+
 name: Download YouTube Video via Tor
 
 on:
@@ -26,7 +27,7 @@ jobs:
               echo "Changing IP #$i..."
               echo -e 'authenticate "mypassword"\nsignal newnym\nquit' | nc localhost 9051
               sleep 10  # Wait for Tor to establish a new circuit
-              new_ip=$(curl -s --socks5-hostname 127.0.0.1:9050 https://ipinfo.io/ip || echo "Failed to get IP")
+              new_ip=$(curl -s --socks5-hostname 127.0.0.1:9050 https://check.torproject.org/api/ip || echo "Failed to get IP")
               echo "New IP: $new_ip"
           done
 
@@ -34,7 +35,7 @@ jobs:
         run: |
           while true; do
               # Get current IP address via Tor
-              ip=$(curl -s --socks5-hostname 127.0.0.1:9050 https://ipinfo.io/ip || echo "Failed to get IP")
+              ip=$(curl -s --socks5-hostname 127.0.0.1:9050 https://check.torproject.org/api/ip || echo "Failed to get IP")
               echo "Trying with IP: $ip"
 
               # Download video using SOCKS5 proxy
