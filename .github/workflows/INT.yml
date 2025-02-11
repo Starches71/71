@@ -1,37 +1,34 @@
 
-name: Download YouTube Video via Tor
+name: Tor YouTube Download
 
-on: 
-  workflow_dispatch  # Manually trigger the workflow
+on: [push]
 
 jobs:
   download_video:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Set up Tor
-      run: |
-        sudo apt update
-        sudo apt install -y tor torsocks
-        sudo systemctl start tor
-        sleep 10  # Wait for Tor to establish a connection
-
-    - name: Verify Tor IP
-      run: |
-        torsocks curl --silent https://ifconfig.me
-        echo "Tor connection established."
-
-    - name: Install yt-dlp
-      run: |
-        sudo apt install -y yt-dlp  # Install latest yt-dlp
-        yt-dlp --version  # Verify installation
-
-    - name: Download YouTube Video via Tor
-      run: |
-        torsocks yt-dlp -o "video.mp4" "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-
-    - name: Upload Video as Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: downloaded-video
-        path: video.mp4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install Tor and yt-dlp
+        run: |
+          sudo apt update
+          sudo apt install -y tor yt-dlp
+          echo "SocksPort 9050" | sudo tee -a /etc/tor/torrc
+          sudo systemctl start tor
+          sleep 10  # Wait for Tor to start
+      
+      - name: Verify Tor connection
+        run: |
+          torsocks curl -s https://check.torproject.org/api/ip | jq .
+      
+      - name: Download YouTube Video via Tor
+        run: |
+          torsocks yt-dlp -o "video.mp4" "https://www.youtube.com/watch?v=VIDEO_ID"
+      
+      - name: Upload video artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: downloaded_video
+          path: video.mp4
