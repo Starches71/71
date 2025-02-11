@@ -1,15 +1,17 @@
-
-name: Fetch IP Address
-
-on:
-  workflow_dispatch:
-
 jobs:
-  get-ip:
+  test-yt-dlp:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Fetch Public IP
+      - name: Test Proxy Connection to YouTube
         run: |
-          IP=$(curl -s ifconfig.me)
-          echo "Public IP: $IP"
+          PROXY="socks5h://196.249.106.199:1080"
+          
+          # Check if YouTube is reachable via proxy
+          curl --proxy "$PROXY" -I https://www.youtube.com || echo "Proxy connection failed"
+          
+      - name: Test yt-dlp with Proxy
+        run: |
+          PROXY="socks5h://196.249.106.199:1080"
+          
+          # Try downloading a test video
+          yt-dlp --proxy "$PROXY" -f best "https://www.youtube.com/watch?v=3JZ_D3ELwOQ" || echo "yt-dlp failed"
