@@ -21,7 +21,7 @@ jobs:
           PROXY="socks5h://196.249.106.199:1080"
           
           # Search for "best hotels in Jeddah" and download the first 3 videos
-          yt-dlp --proxy $PROXY "ytsearch:best hotels in Jeddah" --max-results 3
+          yt-dlp --proxy $PROXY "ytsearch:best hotels in Jeddah" --noplaylist --quiet --output "%(title)s.%(ext)s"
           
           # Confirm that the videos were downloaded
           echo "Download complete: First 3 videos have been downloaded."
