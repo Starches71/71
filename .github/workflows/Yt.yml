@@ -1,26 +1,27 @@
 
-name: Download YouTube Videos
+name: Download Best Hotels in Jeddah Videos
 
-on: 
-  push:
+on:
   workflow_dispatch:
 
 jobs:
   download_videos:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
       - name: Install yt-dlp
-        run: |
-          sudo apt update
-          sudo apt install -y yt-dlp
+        run: sudo apt update && sudo apt install -y yt-dlp
 
-      - name: Download videos without saving
+      - name: Download first 3 videos using yt-dlp through SOCKS5 proxy
         run: |
-          yt-dlp "ytsearch3:best hotels in Jeddah" \
-          --proxy "http://41.77.7.234:3129" \
-          --format best \
-          --exec "echo Downloaded: {} && rm {}"
+          # Set the proxy using the IP of your Android device
+          PROXY="socks5h://196.249.106.199:1080"
+          
+          # Search for "best hotels in Jeddah" and download the first 3 videos
+          yt-dlp --proxy $PROXY "ytsearch:best hotels in Jeddah" --max-results 3
+          
+          # Confirm that the videos were downloaded
+          echo "Download complete: First 3 videos have been downloaded."
