@@ -1,25 +1,40 @@
-name: Test yt-dlp with Proxy
 
-on: push
+name: YouTube Download via Tor (No DNS Leak)
+
+on:
+  workflow_dispatch:
 
 jobs:
-  test-yt-dlp:
+  download-video:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Install Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y tor torsocks curl yt-dlp
 
-      - name: Install yt-dlp
-        run: sudo apt update && sudo apt install -y yt-dlp
+    - name: Start Tor Service
+      run: |
+        sudo service tor start
+        sleep 10  # Wait for Tor to start
 
-      - name: Test Proxy Connection to YouTube
-        run: |
-          PROXY="socks5h://196.249.106.199:1080"
-          echo "Testing proxy..."
-          curl --proxy "$PROXY" -I https://www.youtube.com || echo "Proxy connection failed"
+    - name: Test Tor IP
+      run: |
+        torsocks curl -s https://ifconfig.me > tor_ip.txt
+        echo "Your Tor IP: $(cat tor_ip.txt)"
 
-      - name: Test yt-dlp with Proxy
-        run: |
-          PROXY="socks5h://196.249.106.199:1080"
-          echo "Testing yt-dlp..."
-          yt-dlp --proxy "$PROXY" -f best "https://www.youtube.com/watch?v=3JZ_D3ELwOQ" || echo "yt-dlp failed"
+    - name: Test DNS Leak
+      run: |
+        torsocks curl -s https://dnsleaktest.com > dns_test.txt
+        echo "DNS Test Results: $(cat dns_test.txt)"
+
+    - name: Download YouTube Video via Tor
+      run: |
+        torsocks yt-dlp -o "video.mp4" "https://www.youtube.com/watch?v=VIDEO_ID"
+
+    - name: Upload Video as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: youtube-video
+        path: video.mp4
