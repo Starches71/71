@@ -1,27 +1,22 @@
-
-name: Download Best Hotels in Jeddah Videos
+name: Test yt-dlp with SOCKS5 Proxy
 
 on:
   workflow_dispatch:
 
 jobs:
-  download_videos:
+  test_yt_dlp:
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
 
+    steps:
       - name: Install yt-dlp
         run: sudo apt update && sudo apt install -y yt-dlp
 
-      - name: Download first 3 videos using yt-dlp through SOCKS5 proxy
+      - name: Test yt-dlp with Proxy
         run: |
-          # Set the proxy using the IP of your Android device
+          # Set the proxy using your Android device's IP
           PROXY="socks5h://196.249.106.199:1080"
-          
-          # Search for "best hotels in Jeddah" and download the first 3 videos
-          yt-dlp --proxy $PROXY "ytsearch:best hotels in Jeddah" --noplaylist --quiet --output "%(title)s.%(ext)s"
-          
-          # Confirm that the videos were downloaded
-          echo "Download complete: First 3 videos have been downloaded."
+
+          # Download a single test video
+          yt-dlp --proxy $PROXY https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+          echo "Download test completed."
