@@ -1,40 +1,37 @@
 
-name: YouTube Download via Tor (No DNS Leak)
+name: Download YouTube Video via Tor
 
-on:
-  workflow_dispatch:
+on: 
+  workflow_dispatch  # Manually trigger the workflow
 
 jobs:
-  download-video:
+  download_video:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install Dependencies
+    - name: Set up Tor
       run: |
         sudo apt update
-        sudo apt install -y tor torsocks curl yt-dlp
+        sudo apt install -y tor torsocks
+        sudo systemctl start tor
+        sleep 10  # Wait for Tor to establish a connection
 
-    - name: Start Tor Service
+    - name: Verify Tor IP
       run: |
-        sudo service tor start
-        sleep 10  # Wait for Tor to start
+        torsocks curl --silent https://ifconfig.me
+        echo "Tor connection established."
 
-    - name: Test Tor IP
+    - name: Install yt-dlp
       run: |
-        torsocks curl -s https://ifconfig.me > tor_ip.txt
-        echo "Your Tor IP: $(cat tor_ip.txt)"
-
-    - name: Test DNS Leak
-      run: |
-        torsocks curl -s https://dnsleaktest.com > dns_test.txt
-        echo "DNS Test Results: $(cat dns_test.txt)"
+        sudo apt install -y yt-dlp  # Install latest yt-dlp
+        yt-dlp --version  # Verify installation
 
     - name: Download YouTube Video via Tor
       run: |
-        torsocks yt-dlp -o "video.mp4" "https://www.youtube.com/watch?v=VIDEO_ID"
+        torsocks yt-dlp -o "video.mp4" "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
     - name: Upload Video as Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
-        name: youtube-video
+        name: downloaded-video
         path: video.mp4
