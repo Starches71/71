@@ -1,17 +1,25 @@
+name: Test yt-dlp with Proxy
+
+on: push
+
 jobs:
   test-yt-dlp:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install yt-dlp
+        run: sudo apt update && sudo apt install -y yt-dlp
+
       - name: Test Proxy Connection to YouTube
         run: |
           PROXY="socks5h://196.249.106.199:1080"
-          
-          # Check if YouTube is reachable via proxy
+          echo "Testing proxy..."
           curl --proxy "$PROXY" -I https://www.youtube.com || echo "Proxy connection failed"
-          
+
       - name: Test yt-dlp with Proxy
         run: |
           PROXY="socks5h://196.249.106.199:1080"
-          
-          # Try downloading a test video
+          echo "Testing yt-dlp..."
           yt-dlp --proxy "$PROXY" -f best "https://www.youtube.com/watch?v=3JZ_D3ELwOQ" || echo "yt-dlp failed"
