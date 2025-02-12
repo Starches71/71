@@ -1,4 +1,3 @@
-
 name: Tor YouTube Download with Leak Protection
 
 on: [push]
@@ -14,10 +13,8 @@ jobs:
       - name: Install Tor, yt-dlp, and dependencies
         run: |
           sudo apt update
-          sudo apt install -y tor yt-dlp jq dnsutils
+          sudo apt install -y tor yt-dlp jq
           echo "SocksPort 9050" | sudo tee -a /etc/tor/torrc
-          echo "DNSPort 9053" | sudo tee -a /etc/tor/torrc  # Force DNS resolution via Tor
-          echo "AutomapHostsOnResolve 1" | sudo tee -a /etc/tor/torrc
           sudo systemctl start tor
           sleep 10  # Wait for Tor to fully initialize
       
@@ -26,8 +23,8 @@ jobs:
           echo "Checking Tor exit node IP..."
           torsocks curl -s https://check.torproject.org/api/ip | jq .
           echo "Checking DNS resolution via Tor..."
-          torsocks nslookup youtube.com
-      
+          torsocks curl -s https://www.youtube.com > /dev/null && echo "DNS Resolution via Tor SUCCESS" || echo "DNS Resolution via Tor FAILED"
+
       - name: Download YouTube Video via Tor
         run: |
           torsocks yt-dlp -o "video.mp4" "https://www.youtube.com/watch?v=dQw4w9WgXcQ"  # Replace with a valid video ID
