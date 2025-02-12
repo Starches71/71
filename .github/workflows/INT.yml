@@ -1,34 +1,40 @@
-name: Tor YouTube Download with Leak Protection
+
+name: Tor YouTube Download
 
 on: [push]
 
 jobs:
   download_video:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      - name: Install Tor, yt-dlp, and dependencies
+
+      - name: Install Dependencies (Tor, yt-dlp, curl, jq)
         run: |
           sudo apt update
-          sudo apt install -y tor yt-dlp jq
+          sudo apt install -y tor yt-dlp curl jq dnsutils
           echo "SocksPort 9050" | sudo tee -a /etc/tor/torrc
           sudo systemctl start tor
-          sleep 10  # Wait for Tor to fully initialize
-      
-      - name: Verify Tor IP (Checking for leaks)
+          sleep 15  # Give Tor some time to initialize
+
+      - name: Verify Tor IP & DNS (Check for Leaks)
         run: |
           echo "Checking Tor exit node IP..."
           torsocks curl -s https://check.torproject.org/api/ip | jq .
+          
           echo "Checking DNS resolution via Tor..."
-          torsocks curl -s https://www.youtube.com > /dev/null && echo "DNS Resolution via Tor SUCCESS" || echo "DNS Resolution via Tor FAILED"
+          torsocks dig +short youtube.com
 
       - name: Download YouTube Video via Tor
         run: |
-          torsocks yt-dlp -o "video.mp4" "https://www.youtube.com/watch?v=dQw4w9WgXcQ"  # Replace with a valid video ID
-          
-      - name: Cleanup downloaded video
+          VIDEO_ID="dQw4w9WgXcQ"  # Replace with actual video ID
+          VIDEO_URL="https://www.youtube.com/watch?v=$VIDEO_ID"
+
+          echo "Downloading video: $VIDEO_URL"
+          torsocks yt-dlp --proxy socks5h://127.0.0.1:9050 -o "video.mp4" "$VIDEO_URL"
+
+      - name: Delete Video After Download
         run: |
-          rm -f video.mp4  # Deletes the video after download
+          rm -f video.mp4
