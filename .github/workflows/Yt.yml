@@ -1,22 +1,60 @@
-name: Test yt-dlp with SOCKS5 Proxy
+
+name: Download Videos via Tor
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main  # Trigger on push to main branch
 
 jobs:
-  test_yt_dlp:
+  download_videos:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install yt-dlp
-        run: sudo apt update && sudo apt install -y yt-dlp
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Test yt-dlp with Proxy
+      # Step 2: Install dependencies (Tor + yt-dlp)
+      - name: Install Tor and yt-dlp
         run: |
-          # Set the proxy using your Android device's IP
-          PROXY="socks5h://196.249.106.199:1080"
+          sudo apt-get update
+          sudo apt-get install tor curl
+          sudo service tor start
+          python3 -m pip install --upgrade yt-dlp
 
-          # Download a single test video
-          yt-dlp --proxy $PROXY https://www.youtube.com/watch?v=dQw4w9WgXcQ
+      # Step 3: Verify Tor exit node IP
+      - name: Check Tor exit node IP
+        run: |
+          echo "Checking Tor exit node IP..."
+          curl --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip
 
-          echo "Download test completed."
+      # Step 4: Resolve YouTube via Tor
+      - name: Resolve youtube.com via Tor
+        run: |
+          echo "Resolving youtube.com via Tor..."
+          curl --socks5 127.0.0.1:9050 https://dns.google.com/resolve?name=www.youtube.com&type=A
+
+      # Step 5: Search and download videos
+      - name: Download videos via yt-dlp
+        run: |
+          # Define search terms
+          SEARCH_TERMS=(
+            "Rosewood Jeddah"
+            "The Ritz-Carlton, Jeddah"
+            "Assila, a Luxury Collection Hotel"
+            "Park Hyatt Jeddah – Marina, Club and Spa"
+            "Waldorf Astoria Jeddah – Qasr Al Sharq"
+            "InterContinental Jeddah"
+            "Jeddah Marriott Hotel Madinah Road"
+          )
+
+          # Loop through search terms and download top 3 videos for each
+          for term in "${SEARCH_TERMS[@]}"; do
+            echo "Searching for: $term"
+            yt-dlp --proxy "socks5://127.0.0.1:9050" "ytsearch3:$term" -f bestvideo+bestaudio --merge-output-format mp4
+          done
+
+      # Step 6: Verify downloaded files
+      - name: List downloaded files
+        run: ls -lh
