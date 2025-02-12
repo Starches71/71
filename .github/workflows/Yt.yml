@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -23,7 +23,7 @@ jobs:
           sudo service tor start
           python3 -m pip install --upgrade yt-dlp
 
-      # Step 3: Verify Tor exit node IP
+      # Step 3: Check Tor exit node IP
       - name: Check Tor exit node IP
         run: |
           echo "Checking Tor exit node IP..."
@@ -35,10 +35,9 @@ jobs:
           echo "Resolving youtube.com via Tor..."
           curl --socks5 127.0.0.1:9050 https://dns.google.com/resolve?name=www.youtube.com&type=A
 
-      # Step 5: Search and download videos
-      - name: Download videos via yt-dlp
+      # Step 5: Download videos with retry logic
+      - name: Download videos via yt-dlp with retry
         run: |
-          # Define search terms
           SEARCH_TERMS=(
             "Rosewood Jeddah"
             "The Ritz-Carlton, Jeddah"
@@ -49,12 +48,40 @@ jobs:
             "Jeddah Marriott Hotel Madinah Road"
           )
 
-          # Loop through search terms and download top 3 videos for each
+          download_video() {
+            local term="$1"
+            local attempt=1
+            local max_attempts=3
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt: Searching for '$term'..."
+              yt-dlp --proxy "socks5://127.0.0.1:9050" "ytsearch3:$term" -f bestvideo+bestaudio --merge-output-format mp4
+              
+              if [ $? -eq 0 ]; then
+                echo "Download successful for '$term'"
+                return 0
+              else
+                echo "Download failed for '$term'. Retrying..."
+                attempt=$((attempt + 1))
+
+                echo "Restarting Tor for new IP..."
+                sudo systemctl restart tor
+                sleep 10  # Wait for new Tor circuit
+
+                echo "Flushing DNS cache..."
+                sudo systemd-resolve --flush-caches
+                
+                echo "Checking new Tor exit node IP..."
+                curl --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip
+              fi
+            done
+            echo "Failed to download '$term' after $max_attempts attempts."
+            return 1
+          }
+
           for term in "${SEARCH_TERMS[@]}"; do
-            echo "Searching for: $term"
-            yt-dlp --proxy "socks5://127.0.0.1:9050" "ytsearch3:$term" -f bestvideo+bestaudio --merge-output-format mp4
+            download_video "$term"
           done
 
-      # Step 6: Verify downloaded files
+      # Step 6: List downloaded files
       - name: List downloaded files
         run: ls -lh
