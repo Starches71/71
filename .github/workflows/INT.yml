@@ -1,53 +1,42 @@
-
-name: Fetch Top 3 Hotel Links in Jeddah
+name: Download YouTube Video via Tor
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-  search_hotels:
+  download_video:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Check out repository
-      uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-    - name: Set up Tor
+    - name: Update system packages
+      run: sudo apt-get update
+
+    - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install tor
-        sudo service tor start
+        sudo apt-get install -y tor torsocks libevent-2.1-7t64
+        python3 -m pip install --upgrade yt-dlp
 
-    - name: Update necessary packages
+    - name: Start Tor service
+      run: sudo systemctl start tor
+
+    - name: Check Tor IP
       run: |
-        sudo apt-get install curl jq
+        curl -s https://check.torproject.org/api/ip | jq
 
-    - name: Check Tor exit node IP
+    - name: Resolve YouTube via Tor
       run: |
-        echo "Checking Tor exit node IP..."
-        curl --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip
+        curl -s https://www.youtube.com --resolve youtube.com:443:127.0.0.1
 
-    - name: Resolve google.com via Tor
+    - name: Set proxy for yt-dlp
+      run: export http_proxy="http://127.0.0.1:8118"
+
+    - name: Download video
       run: |
-        echo "Resolving google.com via Tor..."
-        curl --socks5 127.0.0.1:9050 https://dns.google.com/resolve?name=www.google.com&type=A
+        yt-dlp https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
-    - name: Search for top hotels in Jeddah
-      run: |
-        SEARCH_TERM="best hotels in Jeddah"
-        QUERY="https://www.google.com/search?q=${SEARCH_TERM}"
-        echo "Fetching top hotels in Jeddah..."
-
-        # Using curl to search and parse links from the results
-        SEARCH_RESULTS=$(curl -s --socks5 127.0.0.1:9050 "${QUERY}")
-        TOP_3_LINKS=$(echo "${SEARCH_RESULTS}" | grep -oP 'https://[^\s"]+' | head -n 3)
-
-        echo "Top 3 hotel links in Jeddah:"
-        echo "${TOP_3_LINKS}"
-
-        # Saving links to a file
-        echo "${TOP_3_LINKS}" > top_hotels_jeddah.txt
-
-    - name: Display saved links
-      run: |
-        cat top_hotels_jeddah.txt
+    - name: Check if download succeeded
+      run: echo "Video download finished!"
