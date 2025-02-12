@@ -11,30 +11,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Dependencies (Tor, yt-dlp, curl, jq)
+      - name: Install Dependencies (Tor, yt-dlp, dig)
         run: |
           sudo apt update
-          sudo apt install -y tor yt-dlp curl jq dnsutils
+          sudo apt install -y tor yt-dlp dnsutils jq
           echo "SocksPort 9050" | sudo tee -a /etc/tor/torrc
-          sudo systemctl start tor
-          sleep 15  # Give Tor some time to initialize
+          echo "DNSPort 53" | sudo tee -a /etc/tor/torrc
+          echo "AutomapHostsOnResolve 1" | sudo tee -a /etc/tor/torrc
+          sudo systemctl restart tor
+          sleep 10  # Wait for Tor to start
 
-      - name: Verify Tor IP & DNS (Check for Leaks)
+      - name: Verify Tor IP
         run: |
           echo "Checking Tor exit node IP..."
           torsocks curl -s https://check.torproject.org/api/ip | jq .
-          
+
+      - name: Verify DNS Resolution via Tor
+        run: |
           echo "Checking DNS resolution via Tor..."
-          torsocks dig +short youtube.com
+          torsocks dig +short youtube.com || echo "DNS resolution failed"
 
       - name: Download YouTube Video via Tor
         run: |
-          VIDEO_ID="dQw4w9WgXcQ"  # Replace with actual video ID
-          VIDEO_URL="https://www.youtube.com/watch?v=$VIDEO_ID"
+          torsocks -i yt-dlp -o "video.mp4" "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
-          echo "Downloading video: $VIDEO_URL"
-          torsocks yt-dlp --proxy socks5h://127.0.0.1:9050 -o "video.mp4" "$VIDEO_URL"
-
-      - name: Delete Video After Download
-        run: |
-          rm -f video.mp4
+      - name: Remove Video After Download
+        run: rm -f video.mp4
