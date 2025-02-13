@@ -9,7 +9,7 @@ on:
 
 jobs:
   run-python:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04  # Changed from ubuntu-latest to ubuntu-20.04
 
     steps:
     - name: Checkout Repository
@@ -44,7 +44,7 @@ jobs:
     - name: Install System Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y torsocks ffmpeg
+        sudo apt-get install -y torsocks ffmpeg  # Ensure ffmpeg is installed
         echo "System dependencies installed successfully!"
 
     - name: Install Python Dependencies
@@ -71,8 +71,12 @@ jobs:
     - name: Run htl6.py
       run: python3 htl6.py
 
-    - name: Run htl7.py
-      run: python3 htl7.py
+    - name: Run htl7 Scripts
+      run: |
+        for i in {1..7}
+        do
+          python3 htl7_${i}.py
+        done
 
     - name: Run htl8.py
       run: python3 htl8.py
