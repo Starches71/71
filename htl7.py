@@ -4,19 +4,18 @@ import subprocess
 import time
 
 # Directory paths
-links_dir = "best_link"
+places_dir = "places"
 output_dir = "best_vid"
 
-# Create output directory if it doesn't exist
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+# Ensure output directory exists
+os.makedirs(output_dir, exist_ok=True)
 
 # Start Tor as a background process
 print("[INFO] Starting Tor service...")
-subprocess.run(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+tor_process = subprocess.Popen(["tor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 # Wait a few seconds for Tor to establish a connection
-time.sleep(5)
+time.sleep(10)
 
 # Check Tor exit node IP
 print("[INFO] Checking Tor exit node IP...")
@@ -27,39 +26,72 @@ print(f"[INFO] Tor IP: {tor_ip_check.stdout.strip()}")
 print("[INFO] Resolving youtube.com via Tor...")
 subprocess.run(["curl", "--socks5", "127.0.0.1:9050", "https://dns.google.com/resolve?name=www.youtube.com&type=A"], stdout=subprocess.DEVNULL)
 
-# Iterate through each .links.txt file in the links directory
-for links_file in os.listdir(links_dir):
-    if links_file.endswith('.links.txt'):
-        file_path = os.path.join(links_dir, links_file)
+# Read hotel names from the "places" directory
+for places_file in os.listdir(places_dir):
+    file_path = os.path.join(places_dir, places_file)
 
-        # Read all links from the current file
-        with open(file_path, 'r') as f:
-            links = f.readlines()
+    with open(file_path, "r") as f:
+        hotels = [line.strip() for line in f.readlines() if line.strip()]
 
-        # For each link, download the video using yt-dlp with Tor
-        for idx, link in enumerate(links):
-            link = link.strip()
+    for hotel in hotels:
+        print(f"[INFO] Searching YouTube for: {hotel}")
+
+        # Search YouTube for three video links
+        search_cmd = [
+            "yt-dlp",
+            "--proxy", "socks5://127.0.0.1:9050",
+            f"ytsearch3:{hotel}",
+            "--print", "%(webpage_url)s"
+        ]
+        result = subprocess.run(search_cmd, capture_output=True, text=True)
+        video_links = result.stdout.strip().split("\n")
+
+        # Download each video
+        for idx, link in enumerate(video_links):
             if not link:
-                continue  # Skip empty lines
+                continue  # Skip empty results
 
-            # Construct output filename
-            suffix = chr(65 + idx)  # Converts 0 to 'A', 1 to 'B', etc.
-            output_filename = f"{links_file.split('.')[0]}{suffix}.mp4"
+            suffix = chr(65 + idx)  # A, B, C
+            output_filename = f"{hotel.replace(' ', '_')}{suffix}.mp4"
             output_filepath = os.path.join(output_dir, output_filename)
 
             print(f"[INFO] Downloading {link} as {output_filename} via Tor...")
 
-            # Use yt-dlp with Tor proxy
-            cmd = [
-                "yt-dlp",
-                "--proxy", "socks5://127.0.0.1:9050",
-                "-f", "bestvideo+bestaudio",
-                "-o", output_filepath,
-                link
-            ]
-            subprocess.run(cmd)
+            # Download video with retry mechanism
+            max_attempts = 5
+            attempt = 1
 
-            # Delay to prevent detection
-            time.sleep(2)
+            while attempt <= max_attempts:
+                cmd = [
+                    "yt-dlp",
+                    "--proxy", "socks5://127.0.0.1:9050",
+                    "-f", "bestvideo+bestaudio",
+                    "--merge-output-format", "mp4",
+                    "-o", output_filepath,
+                    link
+                ]
+                result = subprocess.run(cmd)
+
+                if result.returncode == 0:
+                    print(f"[INFO] Successfully downloaded: {output_filename}")
+                    break
+                else:
+                    print(f"[ERROR] Failed attempt {attempt} for {link}. Retrying...")
+                    attempt += 1
+
+                    # Restart Tor to get a new IP
+                    print("[INFO] Restarting Tor for a new IP...")
+                    subprocess.run(["pkill", "-HUP", "tor"])
+                    time.sleep(10)  # Wait for a new Tor circuit
+
+                    # Check new Tor IP
+                    tor_ip_check = subprocess.run(["curl", "--socks5", "127.0.0.1:9050", "https://check.torproject.org/api/ip"], capture_output=True, text=True)
+                    print(f"[INFO] New Tor IP: {tor_ip_check.stdout.strip()}")
+
+            if attempt > max_attempts:
+                print(f"[ERROR] Failed to download {link} after {max_attempts} attempts.")
+
+        # Small delay to avoid detection
+        time.sleep(2)
 
 print("[INFO] All downloads completed successfully.")
