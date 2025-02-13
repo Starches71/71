@@ -8,7 +8,7 @@ on:
 
 jobs:
   download_videos:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Changed to match successful YML
 
     steps:
       # Step 1: Checkout repository
@@ -35,9 +35,11 @@ jobs:
           echo "Resolving youtube.com via Tor..."
           curl --socks5 127.0.0.1:9050 https://dns.google.com/resolve?name=www.youtube.com&type=A
 
-      # Step 5: Download videos with retry logic
-      - name: Download videos via yt-dlp with retry
+      # Step 5: Search YouTube and extract links before downloading
+      - name: Search YouTube for video links
+        id: search
         run: |
+          export http_proxy="http://127.0.0.1:8118"
           SEARCH_TERMS=(
             "Rosewood Jeddah"
             "The Ritz-Carlton, Jeddah"
@@ -48,40 +50,21 @@ jobs:
             "Jeddah Marriott Hotel Madinah Road"
           )
 
-          download_video() {
-            local term="$1"
-            local attempt=1
-            local max_attempts=3
-            while [ $attempt -le $max_attempts ]; do
-              echo "Attempt $attempt: Searching for '$term'..."
-              yt-dlp --proxy "socks5://127.0.0.1:9050" "ytsearch3:$term" -f bestvideo+bestaudio --merge-output-format mp4
-              
-              if [ $? -eq 0 ]; then
-                echo "Download successful for '$term'"
-                return 0
-              else
-                echo "Download failed for '$term'. Retrying..."
-                attempt=$((attempt + 1))
-
-                echo "Restarting Tor for new IP..."
-                sudo systemctl restart tor
-                sleep 10  # Wait for new Tor circuit
-
-                echo "Flushing DNS cache..."
-                sudo systemd-resolve --flush-caches
-                
-                echo "Checking new Tor exit node IP..."
-                curl --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip
-              fi
-            done
-            echo "Failed to download '$term' after $max_attempts attempts."
-            return 1
-          }
-
+          > search_results.txt  # Clear file before writing
           for term in "${SEARCH_TERMS[@]}"; do
-            download_video "$term"
+            echo "Searching: $term"
+            yt-dlp --proxy "socks5://127.0.0.1:9050" "ytsearch3:$term" --print "%(webpage_url)s" >> search_results.txt
           done
 
-      # Step 6: List downloaded files
+      # Step 6: Download videos from search results
+      - name: Download videos
+        run: |
+          export http_proxy="http://127.0.0.1:8118"
+          while IFS= read -r url; do
+            echo "Downloading: $url"
+            yt-dlp --proxy "socks5://127.0.0.1:9050" -f bestvideo+bestaudio "$url"
+          done < search_results.txt
+
+      # Step 7: List downloaded files
       - name: List downloaded files
         run: ls -lh
