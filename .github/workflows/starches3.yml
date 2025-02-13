@@ -1,4 +1,3 @@
-
 name: Run starches.py and related scripts
 
 on:
@@ -9,64 +8,78 @@ on:
 
 jobs:
   run-python:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04  # Use 20.04 for stability with yt-dlp and Tor
 
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - name: Set Up Python 3.12
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.12
-
     - name: Set Up Required Directories
       run: |
-        mkdir -p best best_20 best_audio best_clean best_clip best_clip2 best_clip3 best_descriptions best_dir best_final best_final2 best_intro best_io best_io2 best_io3 best_join best_join_vid best_link best_outro best_vid best_vid_clean places
+        mkdir -p best
+        mkdir -p best_20
+        mkdir -p best_audio
+        mkdir -p best_clean
+        mkdir -p best_clip
+        mkdir -p best_clip2
+        mkdir -p best_clip3
+        mkdir -p best_descriptions
+        mkdir -p best_dir
+        mkdir -p best_final
+        mkdir -p best_final2
+        mkdir -p best_intro
+        mkdir -p best_io
+        mkdir -p best_io2
+        mkdir -p best_io3
+        mkdir -p best_join
+        mkdir -p best_join_vid
+        mkdir -p best_outro
+        mkdir -p best_vid
+        mkdir -p best_vid_clean
+        mkdir -p places
         echo "Directories created successfully!"
 
     - name: Install System Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y curl ffmpeg
+        sudo apt-get install -y tor torsocks ffmpeg curl
         echo "System dependencies installed successfully!"
 
-    - name: Install Python Dependencies
+    - name: Install yt-dlp
       run: |
-        pip install -r requirements.txt
-        pip install flask  # Add Flask installation
-        echo "Python dependencies installed successfully!"
+        sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+        sudo chmod a+rx /usr/local/bin/yt-dlp
+        echo "yt-dlp installed successfully!"
+
+    - name: Install Python Dependencies
+      run: pip install -r requirements.txt
+
+    - name: Start Tor Service
+      run: |
+        sudo systemctl start tor
+        sleep 10  # Wait for Tor to establish a connection
+        echo "Tor service started!"
 
     - name: Run starches.py
-      run: python3 starches.py  # Run starches.py
+      run: python3 starches.py
 
     - name: Run htl1.py
-      run: python3 htl1.py  # Run htl1.py
+      run: python3 htl1.py
 
     - name: Run htl2.py
-      run: python3 htl2.py  # Run htl2.py
+      run: python3 htl2.py
 
     - name: Run htl3.py
-      run: python3 htl3.py  # Run htl3.py
+      run: python3 htl3.py
 
     - name: Run htl4.py
-      run: python3 htl4.py  # Run htl4.py
+      run: python3 htl4.py
 
     - name: Run htl5.py
-      run: python3 htl5.py  # Run htl5.py
+      run: python3 htl5.py
 
-    - name: Run htl6.py
-      run: python3 htl6.py  # Run htl6.py
-
-    - name: Start YouTube Downloader API
-      run: |
-        echo "Starting YouTube Downloader API..."
-        nohup python3 main.py &  # Runs API in the background
-        sleep 10  # Wait 10 seconds to ensure API starts
-        echo "API started successfully!"
-
-    - name: Run htl7.py Using the API
-      run: python3 htl7.py  # Uses API instead of yt-dlp
+    - name: Run htl7.py
+      run: python3 htl7.py
 
     - name: Run htl8.py
       run: python3 htl8.py
