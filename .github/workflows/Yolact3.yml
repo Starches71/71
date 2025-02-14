@@ -1,0 +1,55 @@
+
+name: Download and Process Samsung S25 Video
+
+on:
+  push:
+    branches:
+      - main  # Trigger when pushing to the main branch
+
+jobs:
+  download_and_detect:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tor ffmpeg
+          sudo service tor start
+          python3 -m pip install --upgrade yt-dlp ultralytics rembg opencv-python numpy torch torchvision torchaudio onnxruntime
+
+      - name: Check Tor exit node IP
+        run: |
+          curl --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip
+
+      - name: Resolve YouTube via Tor
+        run: |
+          curl --socks5 127.0.0.1:9050 https://dns.google.com/resolve?name=www.youtube.com&type=A
+
+      - name: Search and Download Samsung S25 Video
+        id: search
+        run: |
+          export http_proxy="http://127.0.0.1:8118"
+          yt-dlp --proxy "socks5://127.0.0.1:9050" "ytsearch1:Samsung S25" --print "%(webpage_url)s" | tee search_results.txt
+          url=$(head -n 1 search_results.txt)
+          echo "Downloading: $url"
+          yt-dlp --proxy "socks5://127.0.0.1:9050" -f bestvideo+bestaudio "$url" -o "downloaded_video.mp4"
+
+      - name: Debug Downloaded File
+        run: ls -lah downloaded_video.mp4 || echo "Download failed!"
+
+      - name: Process Video (Samsung S25 Detection)
+        run: python3 process_s25.py
+
+      - name: Verify Output File
+        run: ls -lah && [ -f output.mp4 ] && echo "Output file exists" || echo "Output file is missing!"
+
+      - name: Upload Processed Video
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: processed-video
+          path: output.mp4
