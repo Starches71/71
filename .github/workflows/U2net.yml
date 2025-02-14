@@ -1,0 +1,82 @@
+name: U^2-Net Background Removal for Samsung S25 Video
+
+on:
+  push:
+    branches:
+      - main  # Trigger when pushing to the main branch
+
+jobs:
+  download_and_process_video:
+    runs-on: ubuntu-24.04
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Install dependencies
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip install opencv-python numpy torch torchvision
+
+      # Step 3: Install Tor
+      - name: Install Tor
+        run: |
+          sudo apt-get install tor
+          sudo service tor start
+
+      # Step 4: Update yt-dlp to the latest version
+      - name: Update yt-dlp
+        run: |
+          python3 -m pip install --upgrade yt-dlp
+
+      # Step 5: Check the Tor exit node IP
+      - name: Check Tor exit node IP
+        run: |
+          echo "Checking Tor exit node IP..."
+          curl --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip
+
+      # Step 6: Resolve youtube.com via Tor
+      - name: Resolve youtube.com via Tor
+        run: |
+          echo "Resolving youtube.com via Tor..."
+          curl --socks5 127.0.0.1:9050 https://dns.google.com/resolve?name=www.youtube.com&type=A
+
+      # Step 7: Search YouTube for Samsung S25 and display 3 links
+      - name: Search YouTube for Samsung S25
+        id: search
+        run: |
+          yt-dlp --proxy "socks5://127.0.0.1:9050" "ytsearch3:Samsung S25" --print "%(webpage_url)s" | tee search_results.txt
+
+      # Step 8: Download the video from the search results
+      - name: Download videos
+        run: |
+          while IFS= read -r url; do
+            echo "Downloading: $url"
+            yt-dlp --proxy "socks5://127.0.0.1:9050" -f bestvideo+bestaudio "$url" -o "samsung_s25_video.mp4"
+          done < search_results.txt
+
+      # Step 9: Download U^2-Net model
+      - name: Download U^2-Net model
+        run: |
+          curl -L -o u2net.pth https://github.com/xuebinqin/U-2-Net/releases/download/v1.0/u2net.pth
+
+      # Step 10: Run U^2-Net for background removal
+      - name: Run U^2-Net for background removal
+        run: |
+          python3 u2net_infer.py --input_video "samsung_s25_video.mp4" --output_video "output_u2net.mp4"
+
+      # Step 11: Store the output as artifact
+      - name: Upload background-removed video as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: u2net_background_removed_video
+          path: output_u2net.mp4
+
+      # Step 12: Verify the output
+      - name: Verify the output
+        run: |
+          ls -lh
+          echo "Background removal with U^2-Net completed successfully."
