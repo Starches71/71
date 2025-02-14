@@ -1,3 +1,4 @@
+
 name: YOLACT Background Removal for Samsung S25 Video
 
 on:
@@ -18,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip
+          sudo apt-get install -y python3-pip git
           pip install opencv-python numpy torch torchvision
 
       # Step 3: Install Tor
@@ -44,14 +45,14 @@ jobs:
           echo "Resolving youtube.com via Tor..."
           curl --socks5 127.0.0.1:9050 https://dns.google.com/resolve?name=www.youtube.com&type=A
 
-      # Step 7: Search YouTube for Samsung S25 and display 3 links
+      # Step 7: Search YouTube for Samsung S25 and display 1 link
       - name: Search YouTube for Samsung S25
         id: search
         run: |
-          yt-dlp --proxy "socks5://127.0.0.1:9050" "ytsearch3:Samsung S25" --print "%(webpage_url)s" | tee search_results.txt
+          yt-dlp --proxy "socks5://127.0.0.1:9050" "ytsearch3:Samsung S25" --print "%(webpage_url)s" | head -n 1 > search_results.txt
 
-      # Step 8: Download the video from the search results
-      - name: Download videos
+      # Step 8: Download the single video from the search result
+      - name: Download video
         run: |
           while IFS= read -r url; do
             echo "Downloading: $url"
