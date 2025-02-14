@@ -59,15 +59,18 @@ jobs:
             yt-dlp --proxy "socks5://127.0.0.1:9050" -f bestvideo+bestaudio "$url" -o "samsung_s25_video.mp4"
           done < search_results.txt
 
-      # Step 9: Download U^2-Net model
-      - name: Download U^2-Net model
+      # Step 9: Clone U^2-Net repository and install dependencies
+      - name: Clone U^2-Net and install dependencies
         run: |
-          curl -L -o u2net.pth https://github.com/xuebinqin/U-2-Net/releases/download/v1.0/u2net.pth
+          git clone https://github.com/xuebinqin/U-2-Net.git
+          cd U-2-Net
+          pip install -r requirements.txt
 
       # Step 10: Run U^2-Net for background removal
       - name: Run U^2-Net for background removal
         run: |
-          python3 u2net_infer.py --input_video "samsung_s25_video.mp4" --output_video "output_u2net.mp4"
+          cd U-2-Net
+          python3 u2net_infer.py --input_video "../samsung_s25_video.mp4" --output_video "output_u2net.mp4"
 
       # Step 11: Store the output as artifact
       - name: Upload background-removed video as artifact
