@@ -41,7 +41,7 @@ jobs:
         run: python3 process_s25.py
 
       - name: Upload Processed Video
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: processed-video
           path: output.mp4
