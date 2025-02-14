@@ -74,7 +74,7 @@ jobs:
 
       # Step 11: Store the output as artifact
       - name: Upload background-removed video as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: yolact_background_removed_video
           path: output_yolact.mp4
