@@ -1,3 +1,4 @@
+
 name: Fetch Reddit Posts
 
 on:
@@ -11,29 +12,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # Step to checkout the repository
     - name: Checkout Repository
       uses: actions/checkout@v3
 
+    # Step to create the required directory for saving posts
     - name: Set Up Required Directories
       run: |
         mkdir -p post
         echo "Post directory created successfully!"
 
+    # Step to install system dependencies (including torsocks and ffmpeg)
     - name: Install System Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y torsocks ffmpeg
         echo "System dependencies installed successfully!"
 
+    # Step to install Python dependencies
     - name: Install Python Dependencies
       run: pip install -r requirements.txt
 
+    # Step to fetch Reddit posts using your Python script
     - name: Fetch Reddit Posts
       run: |
         python fetch_posts.py
 
+    # Step to upload saved posts as an artifact
     - name: Upload saved posts as artifact
-      uses: actions/upload-artifact@v2  # Downgraded to v2
+      uses: actions/upload-artifact@v3  # Upgraded to v3 (latest stable version)
       with:
         name: reddit-posts
-        path: ./post  # This will save the posts directory as an artifact
+        path: ./post  # Upload the post directory as an artifact
