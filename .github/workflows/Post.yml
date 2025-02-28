@@ -1,4 +1,3 @@
-
 name: Fetch Reddit Posts
 
 on:
@@ -34,7 +33,7 @@ jobs:
         python fetch_posts.py
 
     - name: Upload saved posts as artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2  # Downgraded to v2
       with:
         name: reddit-posts
         path: ./post  # This will save the posts directory as an artifact
