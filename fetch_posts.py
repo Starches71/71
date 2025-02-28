@@ -6,7 +6,7 @@ import os
 client_id = 'LtRwJ6xsayuj8lRjSS5K_w'
 client_secret = 'oGs66hSayCh0isCO9PwPyDHYhHoXMA'
 refresh_token = '2109084143196-YJTf4ACDTKCk-Z4kUugCThQUmNl89Q'
-user_agent = 'python:fetch_posts:v1.0 (by /u/your_username)'
+user_agent = 'python:fetch_posts:v1.0 (by /u/Majestic_Computer_64)'
 
 # Get access token using the refresh token
 def get_access_token():
