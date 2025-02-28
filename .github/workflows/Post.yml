@@ -1,0 +1,36 @@
+
+name: Fetch Reddit Posts
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to main branch
+  schedule:
+    - cron: '0 15 * * *'  # Trigger at 3 PM every day (UTC)
+
+jobs:
+  fetch-posts:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'  # or any version you prefer
+
+    - name: Install dependencies
+      run: |
+        pip install praw requests
+
+    - name: Fetch Reddit Posts
+      run: |
+        python fetch_posts.py
+
+    - name: Upload saved posts as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: reddit-posts
+        path: ./post  # This will save the posts directory as an artifact
