@@ -1,0 +1,29 @@
+
+name: Run Groq Query 20 Times
+
+on:
+  push:
+    branches:
+      - main  # Run this workflow on pushes to the main branch
+
+jobs:
+  run_queries:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'  # Use Python 3.9 or any compatible version
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install groq
+    
+    - name: Run the Python script to query Groq 20 times
+      run: |
+        python run_groq.py
