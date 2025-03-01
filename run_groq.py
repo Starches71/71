@@ -19,7 +19,7 @@ def query_groq():
             temperature=1,
             max_tokens=1024,
             top_p=1,
-            stream=False,
+            stream=True,
         )
         # Extract and print the response content
         response_content = completion.choices[0].message.content if completion.choices else "No content found"
