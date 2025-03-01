@@ -7,7 +7,7 @@ import time
 client = Groq(api_key="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")
 
 # Define the prompt to be used
-prompt = """Give me random gadget that will make me wonder, or unusual, or strange. Give me the gadget that will make people wonder its presence. The gadget must be on Amazon store, also it must be halal in Islam, not abusive, not offensive, etc. Mention just the name of the product, no description, just the name."""
+prompt = """Give me a gadget different from which you gave me earlier,Give me random gadget that will make me wonder, or unusual, or strange. Give me the gadget that will make people wonder its presence. The gadget must be on Amazon store, also it must be halal in Islam, not abusive, not offensive, etc. Mention just the name of the product, no description, just the name."""
 
 # Function to query Groq with the provided prompt
 def query_groq():
@@ -16,7 +16,7 @@ def query_groq():
         completion = client.chat.completions.create(
             model="Llama-3.3-70b-Versatile",
             messages=conversation_history,
-            temperature=2,
+            temperature=1,
             max_tokens=1024,
             top_p=0,
             stream=False,
