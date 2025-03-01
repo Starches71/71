@@ -18,7 +18,7 @@ def query_groq():
             messages=conversation_history,
             temperature=1,
             max_tokens=1024,
-            top_p=0,
+            top_p=1,
             stream=False,
         )
         # Extract and print the response content
