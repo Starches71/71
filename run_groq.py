@@ -16,7 +16,7 @@ def query_groq():
         completion = client.chat.completions.create(
             model="Llama-3.3-70b-Versatile",
             messages=conversation_history,
-            temperature=0,
+            temperature=2,
             max_tokens=1024,
             top_p=0,
             stream=False,
