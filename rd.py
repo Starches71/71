@@ -140,29 +140,36 @@ def save_llm_response(product, response):
 
 # Main function to run the process for a single product
 def process_product():
-    product = input("Enter a product name: ")  # Ask for a single product
-    print(f"Processing product: {product}")
+    # Load products from products.txt
+    products = load_products()
 
-    # Query the LLM and keep prompting until we get a valid response
-    response = None
-    while response not in ['p', 'c']:
-        response = query_llm(product)
-        if response not in ['p', 'c']:
-            print(f"Invalid response '{response}', prompting again...")
+    if products:
+        # Get the first product from the list
+        product = products[0]
+        print(f"Processing product: {product}")
 
-    print(f"Response from LLM: {response}")
-    
-    # Save the used product to GitHub
-    save_used_product_to_github(product)
+        # Query the LLM and keep prompting until we get a valid response
+        response = None
+        while response not in ['p', 'c']:
+            response = query_llm(product)
+            if response not in ['p', 'c']:
+                print(f"Invalid response '{response}', prompting again...")
 
-    # Save the product to the temporary directory
-    save_product_to_temp_dir(product)
+        print(f"Response from LLM: {response}")
+        
+        # Save the used product to GitHub
+        save_used_product_to_github(product)
 
-    # Save the LLM response to the content directory
-    save_llm_response(product, response)
+        # Save the product to the temporary directory
+        save_product_to_temp_dir(product)
 
-    # Optionally, sleep to avoid rate-limiting issues
-    time.sleep(2)
+        # Save the LLM response to the content directory
+        save_llm_response(product, response)
+
+        # Optionally, sleep to avoid rate-limiting issues
+        time.sleep(2)
+    else:
+        print("No products available to process.")
 
 if __name__ == "__main__":
     process_product()
