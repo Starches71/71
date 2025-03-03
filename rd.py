@@ -57,9 +57,9 @@ def query_llm(product):
         completion = client.chat.completions.create(
             model="Llama-3.3-70b-Versatile",
             messages=conversation_history,
-            temperature=1,
+            temperature=0,
             max_tokens=1024,
-            top_p=1,
+            top_p=0,
             stream=False,
         )
         response_content = completion.choices[0].message.content if completion.choices else "No content found"
