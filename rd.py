@@ -4,6 +4,7 @@ import re
 import requests
 from groq import Groq
 import time
+import base64
 
 # Initialize Groq client with your API key
 client = Groq(api_key="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")
@@ -20,6 +21,12 @@ TEMP_DIR = "rd"
 # Define the directory for saving content (LLM responses)
 CONTENT_DIR = "content"
 
+# Your GitHub Personal Access Token (hardcoded)
+GITHUB_TOKEN = "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"
+REPO_OWNER = "Starches71"  # Replace with your GitHub username
+REPO_NAME = "71"  # Replace with your GitHub repository name
+FILE_PATH = "prd_used.txt"
+
 # Load products from the GitHub file
 def load_products():
     try:
@@ -35,11 +42,41 @@ def load_products():
         print(f"Error while fetching products: {e}")
         return []
 
-# Save used product to prd_used.txt
-def save_used_product(product):
-    with open(USED_PRODUCTS_FILE, 'a') as file:
-        file.write(f"{product}\n")
-    print(f"Product '{product}' saved to {USED_PRODUCTS_FILE}.")
+# Save used product to prd_used.txt in the GitHub repository
+def save_used_product_to_github(product):
+    # Fetch the file from the repo to get its SHA
+    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FILE_PATH}"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        file_data = response.json()
+        file_sha = file_data['sha']  # Get the file's SHA for updating
+        # Read the current content of the file
+        current_content = base64.b64decode(file_data['content']).decode()
+
+        # Append the new product to the file content
+        new_content = current_content + f"\n{product}"
+
+        # Base64 encode the updated content
+        encoded_content = base64.b64encode(new_content.encode()).decode()
+
+        # Prepare the update data
+        data = {
+            "message": "Add new product to prd_used.txt",
+            "content": encoded_content,
+            "sha": file_sha
+        }
+
+        # Update the file in GitHub
+        update_response = requests.put(url, json=data, headers=headers)
+
+        if update_response.status_code == 200:
+            print(f"Product '{product}' saved to GitHub repository {REPO_NAME}.")
+        else:
+            print(f"Failed to save product to GitHub: {update_response.status_code} - {update_response.text}")
+    else:
+        print(f"Failed to fetch the file: {response.status_code} - {response.text}")
 
 # Remove numbers from the product name or category
 def remove_numbers_from_product(product):
@@ -101,40 +138,31 @@ def save_llm_response(product, response):
         file.write(response)
     print(f"LLM response saved to {response_file_path}")
 
-# Main function to run the process
-def process_products():
-    products = load_products()
-    if not products:
-        print("No products found.")
-        return
+# Main function to run the process for a single product
+def process_product():
+    product = input("Enter a product name: ")  # Ask for a single product
+    print(f"Processing product: {product}")
 
-    # Create the necessary directories
-    create_temp_dir()
-    create_content_dir()
+    # Query the LLM and keep prompting until we get a valid response
+    response = None
+    while response not in ['p', 'c']:
+        response = query_llm(product)
+        if response not in ['p', 'c']:
+            print(f"Invalid response '{response}', prompting again...")
 
-    for product in products:
-        print(f"Processing product: {product}")
-        
-        # Query the LLM and keep prompting until we get a valid response
-        response = None
-        while response not in ['p', 'c']:
-            response = query_llm(product)
-            if response not in ['p', 'c']:
-                print(f"Invalid response '{response}', prompting again...")
+    print(f"Response from LLM: {response}")
+    
+    # Save the used product to GitHub
+    save_used_product_to_github(product)
 
-        print(f"Response from LLM: {response}")
-        
-        # Save the used product to prd_used.txt
-        save_used_product(product)
+    # Save the product to the temporary directory
+    save_product_to_temp_dir(product)
 
-        # Save the product to the temporary directory
-        save_product_to_temp_dir(product)
+    # Save the LLM response to the content directory
+    save_llm_response(product, response)
 
-        # Save the LLM response to the content directory
-        save_llm_response(product, response)
-
-        # Optionally, sleep to avoid rate-limiting issues
-        time.sleep(2)
+    # Optionally, sleep to avoid rate-limiting issues
+    time.sleep(2)
 
 if __name__ == "__main__":
-    process_products()
+    process_product()
