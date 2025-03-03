@@ -1,4 +1,3 @@
-
 import os
 import re
 import requests
@@ -15,17 +14,14 @@ PRODUCTS_URL = "https://raw.githubusercontent.com/Starches71/71/main/products.tx
 # Define the path for the used products file
 USED_PRODUCTS_FILE = "prd_used.txt"
 
-# Define the directory for temporary product storage
-TEMP_DIR = "rd"
-
-# Define the directory for saving content (LLM responses)
-CONTENT_DIR = "content"
-
 # Your GitHub Personal Access Token (hardcoded)
 GITHUB_TOKEN = "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"
 REPO_OWNER = "Starches71"  # Replace with your GitHub username
 REPO_NAME = "71"  # Replace with your GitHub repository name
 FILE_PATH = "prd_used.txt"
+
+# Define the content directory path
+CONTENT_DIR = "content"
 
 # Load products from the GitHub file
 def load_products():
@@ -106,26 +102,16 @@ def query_llm(product):
         print(f"Error while querying LLM: {e}")
         return None
 
-# Create the temporary directory if it doesn't exist
-def create_temp_dir():
-    if not os.path.exists(TEMP_DIR):
-        os.makedirs(TEMP_DIR)
-        print(f"Created directory: {TEMP_DIR}")
-    else:
-        print(f"Directory {TEMP_DIR} already exists.")
-
-# Create the content directory if it doesn't exist
-def create_content_dir():
+# Save the product to a temporary file in the content directory
+def save_product_to_content_dir(product):
+    cleaned_product = remove_numbers_from_product(product)
+    
+    # Create content directory if it doesn't exist
     if not os.path.exists(CONTENT_DIR):
         os.makedirs(CONTENT_DIR)
-        print(f"Created directory: {CONTENT_DIR}")
-    else:
-        print(f"Directory {CONTENT_DIR} already exists.")
 
-# Save the product to a temporary file in the rd directory
-def save_product_to_temp_dir(product):
-    cleaned_product = remove_numbers_from_product(product)
-    product_file_path = os.path.join(TEMP_DIR, f"{cleaned_product}.txt")
+    # Save product in content directory
+    product_file_path = os.path.join(CONTENT_DIR, f"{cleaned_product}.txt")
     with open(product_file_path, 'w') as file:
         file.write(cleaned_product)
     print(f"Product saved to {product_file_path}")
@@ -133,6 +119,8 @@ def save_product_to_temp_dir(product):
 # Save LLM response to a file in the content directory
 def save_llm_response(product, response):
     cleaned_product = remove_numbers_from_product(product)
+    
+    # Save LLM response in content directory
     response_file_path = os.path.join(CONTENT_DIR, f"{cleaned_product}_response.txt")
     with open(response_file_path, 'w') as file:
         file.write(response)
@@ -160,8 +148,12 @@ def process_product():
         # Save the used product to GitHub
         save_used_product_to_github(product)
 
-        # Save the product to the temporary directory
-        save_product_to_temp_dir(product)
+        # Remove the product from the products list and save back to GitHub
+        products = products[1:]  # Remove the first product
+        update_products_file(products)
+
+        # Save the product to the content directory
+        save_product_to_content_dir(product)
 
         # Save the LLM response to the content directory
         save_llm_response(product, response)
@@ -170,6 +162,39 @@ def process_product():
         time.sleep(2)
     else:
         print("No products available to process.")
+
+# Update the products.txt file after removing the used product
+def update_products_file(products):
+    try:
+        url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{PRODUCTS_URL.split('/')[-1]}"
+        headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+
+        # Get the current file data and SHA
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            file_data = response.json()
+            file_sha = file_data['sha']
+            current_content = base64.b64decode(file_data['content']).decode()
+
+            # Rebuild the content by joining the remaining products
+            new_content = "\n".join(products)
+            encoded_content = base64.b64encode(new_content.encode()).decode()
+
+            data = {
+                "message": "Remove used product from products.txt",
+                "content": encoded_content,
+                "sha": file_sha
+            }
+
+            update_response = requests.put(url, json=data, headers=headers)
+            if update_response.status_code == 200:
+                print("products.txt updated successfully.")
+            else:
+                print(f"Failed to update products.txt: {update_response.status_code}")
+        else:
+            print(f"Failed to fetch products file from GitHub: {response.status_code}")
+    except Exception as e:
+        print(f"Error while updating products file: {e}")
 
 if __name__ == "__main__":
     process_product()
