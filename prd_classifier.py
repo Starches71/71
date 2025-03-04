@@ -1,3 +1,4 @@
+
 import os
 import base64
 import requests
@@ -113,9 +114,14 @@ def classify_product(product):
     data = {"text": product}
     try:
         response = requests.post(GROQ_URL, headers=headers, json=data)
+        print(f"Groq Response: {response.text}")  # Log the raw response from Groq for debugging
         if response.status_code == 200:
             category = response.json().get("category", "").lower()
-            return category if category in ["p", "c"] else None
+            if category in ["p", "c"]:
+                return category
+            else:
+                print(f"Unexpected category returned by Groq: {category}")
+                return None
         else:
             print(f"Failed to classify '{product}': {response.status_code}")
             return None
@@ -141,8 +147,10 @@ def process_products():
         print("No products to process.")
         return
 
-    for idx, product in enumerate(products[:MAX_PRODUCTS]):
-        print(f"Processing product {idx + 1}: {product}")
+    products_processed = 0
+
+    for product in products[:MAX_PRODUCTS]:
+        print(f"Processing product {products_processed + 1}: {product}")
         category = classify_product(product)
 
         if category:
@@ -152,6 +160,11 @@ def process_products():
             # Remove the processed product from the list
             products.remove(product)
             update_products_file(products)
+
+            products_processed += 1
+
+        if products_processed >= MAX_PRODUCTS:
+            break
 
         time.sleep(1)  # Sleep to avoid rate limiting issues
 
