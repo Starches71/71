@@ -12,7 +12,7 @@ FILE_PATH = "products.txt"
 RAW_URL = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/{BRANCH}/{FILE_PATH}"
 
 # API Keys & URLs
-GROQ_API_KEY = os.getenv("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")
+GROQ_API_KEY = "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"  # Replace with the correct key
 GROQ_URL = "https://api.groq.com/classify"
 
 # File Paths
@@ -42,14 +42,22 @@ def classify_product(product):
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     data = {"text": product}
 
-    response = requests.post(GROQ_URL, headers=headers, json=data)
+    try:
+        response = requests.post(GROQ_URL, headers=headers, json=data)
 
-    if response.status_code == 200:
-        category = response.json().get("category", "").upper()
-        return category if category in ["C", "P"] else None
-
-    print(f"⚠️ Failed to classify '{product}', skipping.")
-    return None
+        if response.status_code == 200:
+            category = response.json().get("category", "").upper()
+            if category in ["C", "P"]:
+                return category
+            else:
+                print(f"⚠️ Invalid category for '{product}': {category}")
+                return None
+        else:
+            print(f"⚠️ Failed to classify '{product}', status code: {response.status_code}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Error during API request: {e}")
+        return None
 
 def commit_and_push_changes():
     """Commit and push the changes to GitHub using GitHub Actions Token"""
