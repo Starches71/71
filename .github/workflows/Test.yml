@@ -1,0 +1,32 @@
+
+name: Create and Commit test.py
+
+on:
+  workflow_dispatch:  # Allows manual trigger from GitHub Actions
+
+jobs:
+  create-file:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Allows commit and push
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensures full commit history is available
+
+      - name: Create test.py file
+        run: |
+          echo 'print("Hello, GitHub Actions!")' > test.py
+          echo "File created successfully."
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add test.py
+          git commit -m "Added test.py via GitHub Actions" || echo "No changes to commit"
+
+      - name: Push changes
+        run: git push
