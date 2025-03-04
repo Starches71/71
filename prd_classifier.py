@@ -12,7 +12,7 @@ FILE_PATH = "products.txt"
 RAW_URL = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/{BRANCH}/{FILE_PATH}"
 
 # API Keys & URLs
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = os.getenv("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")
 GROQ_URL = "https://api.groq.com/classify"
 
 # File Paths
