@@ -1,41 +1,35 @@
 
 import os
-import base64
+import re
 import requests
-import sys
-import time
 from groq import Groq
+import time
+import base64
 
-# Hardcoded API keys
-GITHUB_TOKEN = "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"  # Your GitHub personal access token
-GROQ_API_KEY = "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"  # Your Groq API key
+# Initialize Groq client with your API key
+client = Groq(api_key="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")
 
-if not GITHUB_TOKEN or not GROQ_API_KEY:
-    print("❌ API keys are missing. Please provide valid GitHub and Groq API keys.")
-    sys.exit(1)
+# Define the URL of the raw products.txt from GitHub
+PRODUCTS_URL = "https://raw.githubusercontent.com/Starches71/71/main/products.txt"
 
-# GitHub repository details
-REPO_OWNER = "Starches71"
-REPO_NAME = "71"
-PRODUCTS_FILE_PATH = "products.txt"
-USED_PRODUCTS_FILE_PATH = "prd_used.txt"
-C_FILE = "c.txt"
-P_FILE = "p.txt"
-MAX_PRODUCTS = 50  # Process up to 50 products
+# Define the path for the used products file
+USED_PRODUCTS_FILE = "prd_used.txt"
 
-# URL for the raw products.txt
-PRODUCTS_URL = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/main/{PRODUCTS_FILE_PATH}"
-USED_PRODUCTS_URL = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/main/{USED_PRODUCTS_FILE_PATH}"
+# Your GitHub Personal Access Token (hardcoded)
+GITHUB_TOKEN = "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"
+REPO_OWNER = "Starches71"  # Replace with your GitHub username
+REPO_NAME = "71"  # Replace with your GitHub repository name
+FILE_PATH = "prd_used.txt"
 
-# Groq API setup using Groq Python client
-client = Groq(api_key=GROQ_API_KEY)
+# Define the content directory path
+CONTENT_DIR = "content"
 
-# Function to fetch products from GitHub
+# Load products from the GitHub file
 def load_products():
     try:
         response = requests.get(PRODUCTS_URL)
         if response.status_code == 200:
-            products = response.text.splitlines()
+            products = response.text.splitlines()  # Split by new line
             print(f"Loaded {len(products)} products.")
             return products
         else:
@@ -45,51 +39,174 @@ def load_products():
         print(f"Error while fetching products: {e}")
         return []
 
-# Function to save used product to GitHub repository
+# Save used product to prd_used.txt in the GitHub repository
 def save_used_product_to_github(product):
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{USED_PRODUCTS_FILE_PATH}"
+    # Fetch the file from the repo to get its SHA
+    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FILE_PATH}"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
-    try:
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            file_data = response.json()
-            file_sha = file_data['sha']
-            current_content = base64.b64decode(file_data['content']).decode()
+    response = requests.get(url, headers=headers)
 
-            new_content = current_content + f"\n{product}"
+    if response.status_code == 200:
+        file_data = response.json()
+        file_sha = file_data['sha']  # Get the file's SHA for updating
+        # Read the current content of the file
+        current_content = base64.b64decode(file_data['content']).decode()
 
-            encoded_content = base64.b64encode(new_content.encode()).decode()
+        # Append the new product to the file content
+        new_content = current_content + f"\n{product}"
 
-            data = {
-                "message": "Add new product to prd_used.txt",
-                "content": encoded_content,
-                "sha": file_sha
-            }
+        # Base64 encode the updated content
+        encoded_content = base64.b64encode(new_content.encode()).decode()
 
-            update_response = requests.put(url, json=data, headers=headers)
+        # Prepare the update data
+        data = {
+            "message": "Add new product to prd_used.txt",
+            "content": encoded_content,
+            "sha": file_sha
+        }
 
-            if update_response.status_code == 200:
-                print(f"Product '{product}' saved to GitHub repository {REPO_NAME}.")
-            else:
-                print(f"Failed to save product to GitHub: {update_response.status_code} - {update_response.text}")
+        # Update the file in GitHub
+        update_response = requests.put(url, json=data, headers=headers)
+
+        if update_response.status_code == 200:
+            print(f"Product '{product}' saved to GitHub repository {REPO_NAME}.")
         else:
-            print(f"Failed to fetch the file: {response.status_code} - {response.text}")
-    except Exception as e:
-        print(f"Error while updating GitHub file: {e}")
+            print(f"Failed to save product to GitHub: {update_response.status_code} - {update_response.text}")
+    else:
+        print(f"Failed to fetch the file: {response.status_code} - {response.text}")
 
-# Function to remove product from products.txt and update it on GitHub
+# Remove numbers from the product name or category
+def remove_numbers_from_product(product):
+    # Use a regex to remove numbers and the periods following them
+    cleaned_product = re.sub(r'^\d+\.\s*', '', product).strip()
+    print(f"Cleaned product name: {cleaned_product}")
+    return cleaned_product
+
+# Query the LLM to check if the product is real or a category
+def query_llm(product):
+    prompt = f"Is the {product} a real product on Amazon or just a product category? Answer 'p' if it's a product, and answer 'c' if it's a product category. Just answer 'p' or 'c' only."
+    conversation_history = [{"role": "user", "content": prompt}]
+    
+    # Define parameters as seen in your example
+    try:
+        completion = client.chat.completions.create(
+            model="Llama-3.3-70b-Versatile",
+            messages=conversation_history,
+            temperature=0,  # Same as in your example
+            max_tokens=1024,  # Same as in your example
+            top_p=0,  # Same as in your example
+            stream=False,
+        )
+        response_content = completion.choices[0].message.content if completion.choices else "No content found"
+        print(f"LLM Response: {response_content}")
+        return response_content.strip().lower()
+    except Exception as e:
+        print(f"Error while querying LLM: {e}")
+        return None
+
+# Save the product to a temporary file in the content directory
+def save_product_to_content_dir(product):
+    cleaned_product = remove_numbers_from_product(product)
+    
+    # Create content directory if it doesn't exist
+    if not os.path.exists(CONTENT_DIR):
+        os.makedirs(CONTENT_DIR)
+
+    # Save product in content directory
+    product_file_path = os.path.join(CONTENT_DIR, f"{cleaned_product}.txt")
+    with open(product_file_path, 'w') as file:
+        file.write(cleaned_product)
+    print(f"Product saved to {product_file_path}")
+
+# Save LLM response to the corresponding file in the repository
+def save_llm_response_to_repo(response, product_type):
+    # Determine the filename based on the product type ('c' or 'p')
+    file_name = 'c.txt' if product_type == 'c' else 'p.txt'
+    
+    # Fetch the current content of the corresponding file
+    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_name}"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        file_data = response.json()
+        file_sha = file_data['sha']  # Get the file's SHA for updating
+        current_content = base64.b64decode(file_data['content']).decode()
+
+        # Append the new LLM response to the file content
+        new_content = current_content + f"\n{response}"
+
+        # Base64 encode the updated content
+        encoded_content = base64.b64encode(new_content.encode()).decode()
+
+        # Prepare the update data
+        data = {
+            "message": f"Add response to {file_name}",
+            "content": encoded_content,
+            "sha": file_sha
+        }
+
+        # Update the file in GitHub
+        update_response = requests.put(url, json=data, headers=headers)
+
+        if update_response.status_code == 200:
+            print(f"LLM response saved to {file_name} in GitHub repository {REPO_NAME}.")
+        else:
+            print(f"Failed to save response to GitHub: {update_response.status_code} - {update_response.text}")
+    else:
+        print(f"Failed to fetch the file: {response.status_code} - {response.text}")
+
+# Main function to run the process for a single product
+def process_product():
+    # Load products from products.txt
+    products = load_products()
+
+    if products:
+        # Get the first product from the list
+        product = products[0]
+        print(f"Processing product: {product}")
+
+        # Query the LLM and keep prompting until we get a valid response
+        response = None
+        while response not in ['p', 'c']:
+            response = query_llm(product)
+            if response not in ['p', 'c']:
+                print(f"Invalid response '{response}', prompting again...")
+
+        print(f"Response from LLM: {response}")
+        
+        # Save the used product to GitHub
+        save_used_product_to_github(product)
+
+        # Remove the product from the products list and save back to GitHub
+        products = products[1:]  # Remove the first product
+        update_products_file(products)
+
+        # Save the product to the content directory
+        save_product_to_content_dir(product)
+
+        # Save the LLM response to the corresponding file in the repo
+        save_llm_response_to_repo(response, response)
+
+        # Optionally, sleep to avoid rate-limiting issues
+        time.sleep(2)
+    else:
+        print("No products available to process.")
+
+# Update the products.txt file after removing the used product
 def update_products_file(products):
     try:
-        url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{PRODUCTS_FILE_PATH}"
+        url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{PRODUCTS_URL.split('/')[-1]}"
         headers = {"Authorization": f"token {GITHUB_TOKEN}"}
 
+        # Get the current file data and SHA
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             file_data = response.json()
             file_sha = file_data['sha']
             current_content = base64.b64decode(file_data['content']).decode()
 
-            # Remove the processed product
+            # Rebuild the content by joining the remaining products
             new_content = "\n".join(products)
             encoded_content = base64.b64encode(new_content.encode()).decode()
 
@@ -109,83 +226,5 @@ def update_products_file(products):
     except Exception as e:
         print(f"Error while updating products file: {e}")
 
-# Function to classify product via Groq API using the Groq Python client
-def classify_product(product):
-    try:
-        # Making the Groq request using the new API format
-        completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": product}],
-            temperature=1,
-            max_completion_tokens=1024,
-            top_p=1,
-            stream=False,
-            stop=None,
-        )
-
-        category = None
-        # Loop through the Groq response chunks to check for content
-        for chunk in completion:
-            response_content = chunk.choices[0].delta.content
-            if response_content:
-                print(f"Groq Response: {response_content}")
-                # Check if the response contains 'p' or 'c' category
-                if "p" in response_content.lower():
-                    category = "p"
-                elif "c" in response_content.lower():
-                    category = "c"
-
-        if category:
-            print(f"Product classified as: {category}")
-            return category
-        else:
-            print(f"Failed to classify '{product}'.")
-            return None
-
-    except Exception as e:
-        print(f"Error while querying Groq: {e}")
-        return None
-
-# Function to save product to the appropriate file
-def save_to_file(product, category):
-    if category == "p":
-        with open(P_FILE, "a") as f:
-            f.write(product + "\n")
-        print(f"Product '{product}' classified as 'p' and saved to {P_FILE}.")
-    elif category == "c":
-        with open(C_FILE, "a") as f:
-            f.write(product + "\n")
-        print(f"Product '{product}' classified as 'c' and saved to {C_FILE}.")
-
-# Main function to process the products
-def process_products():
-    products = load_products()
-    if not products:
-        print("No products to process.")
-        return
-
-    products_processed = 0
-
-    for product in products[:MAX_PRODUCTS]:
-        print(f"Processing product {products_processed + 1}: {product}")
-        category = classify_product(product)
-
-        if category:
-            save_to_file(product, category)
-            save_used_product_to_github(product)
-            
-            # Remove the processed product from the list
-            products.remove(product)
-            update_products_file(products)
-
-            products_processed += 1
-
-        if products_processed >= MAX_PRODUCTS:
-            break
-
-        time.sleep(1)  # Sleep to avoid rate limiting issues
-
-    print("✅ Done processing products.")
-
 if __name__ == "__main__":
-    process_products()
+    process_product()
