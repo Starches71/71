@@ -1,41 +1,51 @@
-name: Run Product Classifier
+name: Classify Products Daily
 
 on:
   schedule:
-    - cron: "5 0 * * *"  # Runs daily at 12:05 AM UTC
-  workflow_dispatch:  # Allows manual execution
+    # Runs every day at 7:00 AM UTC
+    - cron: "0 7 * * *"
+  workflow_dispatch:
 
 jobs:
-  classify_products:
+  classify:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Python environment
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
         with:
-          fetch-depth: 0  # Ensures all files are pulled
+          python-version: '3.9'
 
-      - name: Verify products.txt exists
-        run: ls -l products.txt || echo "⚠️ products.txt not found, will attempt to fetch."
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install gitpython
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
-      - name: Install Dependencies
-        run: pip install requests
-
-      - name: Run Product Classifier (50 products)
+      # Step 4: Run the Python script (prd_classifier.py)
+      - name: Run prd_classifier.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: python prd_classifier.py
+        run: |
+          python prd_classifier.py
 
-      - name: Upload C & P Files as Artifacts
-        uses: actions/upload-artifact@v3
+      # Step 5: Upload any artifacts if needed (optional, adjust as needed)
+      - name: Upload classified products as artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: classified_products
+          name: classified-products
           path: |
             c.txt
             p.txt
+
+      # Step 6: (Optional) Download artifacts in case you want to use them later
+      # - name: Download classified products artifact (if needed)
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: classified-products
