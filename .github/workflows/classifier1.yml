@@ -33,7 +33,7 @@ jobs:
         run: python prd_classifier.py
 
       - name: Upload C & P Files as Artifacts
-        uses: actions/upload-artifact@v2  # Updated to v2
+        uses: actions/upload-artifact@v3
         with:
           name: classified_products
           path: |
