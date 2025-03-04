@@ -1,7 +1,7 @@
-
 import requests
 import os
 import sys
+from git import Repo
 
 # Constants
 REPO_OWNER = "Starches71"
@@ -51,6 +51,24 @@ def classify_product(product):
     print(f"⚠️ Failed to classify '{product}', skipping.")
     return None
 
+def commit_and_push_changes():
+    """Commit and push the changes to GitHub"""
+    try:
+        repo = Repo(".")
+        # Stage changes
+        repo.git.add([C_FILE, P_FILE])
+
+        # Commit the changes
+        repo.index.commit("Classified products and updated c.txt and p.txt")
+
+        # Push the changes to GitHub
+        origin = repo.remote(name='origin')
+        origin.push()
+        print("✅ Successfully pushed changes to GitHub.")
+    except Exception as e:
+        print(f"❌ Failed to push changes: {e}")
+        sys.exit(1)
+
 def process_products(limit=50):
     """Processes up to `limit` products and saves them in c.txt or p.txt"""
     if not os.path.exists(FILE_PATH):
@@ -89,6 +107,9 @@ def process_products(limit=50):
         print(f"✅ Saved {len(p_products)} 'P' products to {P_FILE}")
 
     print("✅ Done processing.")
+
+    # Commit and push the changes to the repo
+    commit_and_push_changes()
 
 if __name__ == "__main__":
     fetch_products()
