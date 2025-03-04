@@ -10,10 +10,17 @@ BRANCH = "main"
 FILE_PATH = "products.txt"
 RAW_URL = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/{BRANCH}/{FILE_PATH}"
 
-# GitHub Token for authentication
+# API Keys & URLs
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_URL = "https://api.groq.com/classify"
+
+# File Paths
+C_FILE = "c.txt"
+P_FILE = "p.txt"
 
 def fetch_products():
+    """Fetches products.txt from GitHub"""
     headers = {"Authorization": f"token {GITHUB_TOKEN}"} if GITHUB_TOKEN else {}
 
     response = requests.get(RAW_URL, headers=headers)
@@ -26,7 +33,26 @@ def fetch_products():
         print(f"❌ Failed to fetch products.txt: {response.status_code}")
         sys.exit(1)
 
+def classify_product(product):
+    """Uses Groq API to classify the product as 'C' or 'P'"""
+    if not GROQ_API_KEY:
+        print("❌ Missing GROQ_API_KEY. Cannot classify products.")
+        sys.exit(1)
+
+    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
+    data = {"text": product}
+
+    response = requests.post(GROQ_URL, headers=headers, json=data)
+
+    if response.status_code == 200:
+        category = response.json().get("category", "").upper()
+        return category if category in ["C", "P"] else None
+
+    print(f"⚠️ Failed to classify '{product}', skipping.")
+    return None
+
 def process_products(limit=50):
+    """Processes up to `limit` products and saves them in c.txt or p.txt"""
     if not os.path.exists(FILE_PATH):
         print("❌ products.txt not found after fetch.")
         sys.exit(1)
@@ -38,11 +64,29 @@ def process_products(limit=50):
         print("⚠️ No products to process.")
         sys.exit(0)
 
-    # Process only the specified number of products
     products_to_process = products[:limit]
-    
+    c_products, p_products = [], []
+
     for idx, product in enumerate(products_to_process, 1):
-        print(f"🔹 Processing {idx}/{limit}: {product}")
+        category = classify_product(product)
+
+        if category == "C":
+            c_products.append(product)
+        elif category == "P":
+            p_products.append(product)
+
+        print(f"🔹 {idx}/{limit}: {product} → {category or 'UNKNOWN'}")
+
+    # Save to files
+    if c_products:
+        with open(C_FILE, "w") as f:
+            f.write("\n".join(c_products))
+        print(f"✅ Saved {len(c_products)} 'C' products to {C_FILE}")
+
+    if p_products:
+        with open(P_FILE, "w") as f:
+            f.write("\n".join(p_products))
+        print(f"✅ Saved {len(p_products)} 'P' products to {P_FILE}")
 
     print("✅ Done processing.")
 
