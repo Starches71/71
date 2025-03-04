@@ -3,7 +3,7 @@ name: Run Product Classifier
 on:
   schedule:
     - cron: "5 0 * * *"  # Runs daily at 12:05 AM UTC
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:  # Allows manual execution
 
 jobs:
   classify_products:
@@ -29,4 +29,13 @@ jobs:
       - name: Run Product Classifier (50 products)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python prd_classifier.py
+
+      - name: Upload C & P Files as Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: classified_products
+          path: |
+            c.txt
+            p.txt
