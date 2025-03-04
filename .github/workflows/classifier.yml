@@ -1,0 +1,29 @@
+
+name: Product Classifier
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # Runs daily at midnight UTC (Adjust if needed)
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  classify_products:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: pip install requests groq
+
+      - name: Run Product Classifier (50 products)
+        env:
+          GROQ_API_KEY: "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"
+          GITHUB_TOKEN: "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"
+        run: python prd_classifier.py --limit 50
