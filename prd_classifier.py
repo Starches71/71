@@ -4,6 +4,7 @@ import base64
 import requests
 import sys
 import time
+from groq import Groq
 
 # Hardcoded API keys
 GITHUB_TOKEN = "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"  # Your GitHub personal access token
@@ -26,8 +27,8 @@ MAX_PRODUCTS = 50  # Process up to 50 products
 PRODUCTS_URL = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/main/{PRODUCTS_FILE_PATH}"
 USED_PRODUCTS_URL = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/main/{USED_PRODUCTS_FILE_PATH}"
 
-# Groq API setup
-GROQ_URL = "https://api.groq.com/classify"
+# Groq API setup using Groq Python client
+client = Groq(api_key=GROQ_API_KEY)
 
 # Function to fetch products from GitHub
 def load_products():
@@ -108,23 +109,39 @@ def update_products_file(products):
     except Exception as e:
         print(f"Error while updating products file: {e}")
 
-# Function to classify product via Groq API
+# Function to classify product via Groq API using the Groq Python client
 def classify_product(product):
-    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    data = {"text": product}
     try:
-        response = requests.post(GROQ_URL, headers=headers, json=data)
-        print(f"Groq Response: {response.text}")  # Log the raw response from Groq for debugging
-        if response.status_code == 200:
-            category = response.json().get("category", "").lower()
-            if category in ["p", "c"]:
-                return category
-            else:
-                print(f"Unexpected category returned by Groq: {category}")
-                return None
+        # Making the Groq request using the new API format
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": product}],
+            temperature=1,
+            max_completion_tokens=1024,
+            top_p=1,
+            stream=False,
+            stop=None,
+        )
+
+        category = None
+        # Loop through the Groq response chunks to check for content
+        for chunk in completion:
+            response_content = chunk.choices[0].delta.content
+            if response_content:
+                print(f"Groq Response: {response_content}")
+                # Check if the response contains 'p' or 'c' category
+                if "p" in response_content.lower():
+                    category = "p"
+                elif "c" in response_content.lower():
+                    category = "c"
+
+        if category:
+            print(f"Product classified as: {category}")
+            return category
         else:
-            print(f"Failed to classify '{product}': {response.status_code}")
+            print(f"Failed to classify '{product}'.")
             return None
+
     except Exception as e:
         print(f"Error while querying Groq: {e}")
         return None
