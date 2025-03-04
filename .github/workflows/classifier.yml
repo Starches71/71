@@ -1,29 +1,46 @@
-
 name: Product Classifier
 
 on:
+  # Trigger the workflow on push to main
+  push:
+    branches:
+      - main
+  # Optionally, schedule the workflow to run at specific intervals (e.g., every day at midnight)
   schedule:
-    - cron: "0 0 * * *"  # Runs daily at midnight UTC (Adjust if needed)
-  workflow_dispatch:  # Allows manual trigger
+    - cron: "0 0 * * *"  # Run every day at midnight UTC
 
 jobs:
-  classify_products:
+  classifier:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      # Set up Python environment
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
         with:
-          python-version: "3.10"
+          python-version: '3.x'
 
-      - name: Install Dependencies
-        run: pip install requests groq
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests gitpython
 
-      - name: Run Product Classifier (50 products)
+      # Run the Python classifier script
+      - name: Run Product Classifier
+        run: python prd_classifier.py
+
+      # Commit and push changes back to the repository (using GITHUB_TOKEN)
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update classified products"
+          git push
         env:
-          GROQ_API_KEY: "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"
-          GITHUB_TOKEN: "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"
-        run: python prd_classifier.py --limit 50
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # This token is automatically available in GitHub Actions
