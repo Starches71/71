@@ -52,7 +52,7 @@ def classify_product(product):
     return None
 
 def commit_and_push_changes():
-    """Commit and push the changes to GitHub using SSH"""
+    """Commit and push the changes to GitHub using GitHub Actions Token"""
     try:
         repo = Repo(".")
         # Stage changes
