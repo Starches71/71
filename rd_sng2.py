@@ -1,4 +1,3 @@
-
 import os
 import requests
 
@@ -8,7 +7,7 @@ CX_ID = "a73cae6bad04a492d"
 
 # Read the product name from the file in the prd_name directory
 prd_name_dir = "prd_name"
-product_file = os.path.join(prd_name_dir, "product_name.txt")  # Assuming the file name is product_name.txt
+product_file = os.path.join(prd_name_dir, "product.txt")  # Adjusted file name to "product.txt"
 
 # Check if the file exists and read the product name
 if os.path.exists(product_file):
