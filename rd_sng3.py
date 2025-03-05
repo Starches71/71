@@ -1,4 +1,3 @@
-
 import os
 import requests
 from urllib.parse import urlparse, parse_qs
@@ -44,35 +43,27 @@ if response.status_code == 200:
         product_url = first_result["link"]
         print(f"Product URL from search result: {product_url}")
         
-        # Check if it's a redirect URL (Google URL)
-        if "google.com/url" in product_url:
-            # Extract the actual Amazon URL from the 'url' parameter
-            parsed_url = urlparse(product_url)
-            params = parse_qs(parsed_url.query)
-            amazon_url = params.get('url', [None])[0]
-            
-            if amazon_url:
-                print(f"Extracted Amazon URL: {amazon_url}")
-                
-                # Add affiliate ID to the URL
-                affiliate_id = "starchestech-20"
-                affiliate_link = f"{amazon_url}?tag={affiliate_id}"
+        # Check if the URL points to an Amazon product directly
+        if "amazon.com" in product_url:
+            print(f"Amazon product URL found: {product_url}")
 
-                # Ensure prd_aff directory exists
-                if not os.path.exists(prd_aff_dir):
-                    os.makedirs(prd_aff_dir)
+            # Add affiliate ID to the URL
+            affiliate_id = "starchestech-20"
+            affiliate_link = f"{product_url}?tag={affiliate_id}"
 
-                # Save the affiliate link to a file
-                affiliate_link_file = os.path.join(prd_aff_dir, "affiliate_link.txt")
-                with open(affiliate_link_file, "w") as f:
-                    f.write(affiliate_link)
+            # Ensure prd_aff directory exists
+            if not os.path.exists(prd_aff_dir):
+                os.makedirs(prd_aff_dir)
 
-                print(f"Affiliate link saved at {affiliate_link_file}")
-                print(f"Affiliate link: {affiliate_link}")
-            else:
-                print("Failed to extract Amazon URL from redirect.")
+            # Save the affiliate link to a file
+            affiliate_link_file = os.path.join(prd_aff_dir, "affiliate_link.txt")
+            with open(affiliate_link_file, "w") as f:
+                f.write(affiliate_link)
+
+            print(f"Affiliate link saved at {affiliate_link_file}")
+            print(f"Affiliate link: {affiliate_link}")
         else:
-            print("No redirect URL found in the search result.")
+            print("No direct Amazon URL found in the search result.")
     else:
         print("No items found in the API response.")
 else:
