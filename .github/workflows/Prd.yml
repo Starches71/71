@@ -31,25 +31,26 @@ jobs:
       run: |
         curl -o products.txt https://raw.githubusercontent.com/Starches71/71/main/products.txt || echo "" > products.txt
 
-    - name: Process the first product
+    - name: Process the first 50 products
       run: |
-        # Get the first product from the file
-        PRODUCT=$(head -n 1 products.txt)
-        echo "Processing product: $PRODUCT"
+        # Process first 50 products
+        for PRODUCT in $(head -n 50 products.txt); do
+          echo "Processing product: $PRODUCT"
 
-        # Run the Python script to get classification
-        RESPONSE=$(python3 prd.py "$PRODUCT")
+          # Run the Python script to get classification
+          RESPONSE=$(python3 prd.py "$PRODUCT")
 
-        echo "LLM Response: $RESPONSE"
+          echo "LLM Response: $RESPONSE"
 
-        # Determine the file to save the response
-        if [[ "$RESPONSE" == "p" ]]; then
-          echo "$PRODUCT" >> p.txt
-        elif [[ "$RESPONSE" == "c" ]]; then
-          echo "$PRODUCT" >> c.txt
-        else
-          echo "Invalid response from LLM: $RESPONSE"
-        fi
+          # Determine the file to save the response
+          if [[ "$RESPONSE" == "p" ]]; then
+            echo "$PRODUCT" >> p.txt
+          elif [[ "$RESPONSE" == "c" ]]; then
+            echo "$PRODUCT" >> c.txt
+          else
+            echo "Invalid response from LLM: $RESPONSE"
+          fi
+        done
 
     - name: Commit changes (p.txt or c.txt)
       run: |
@@ -59,9 +60,10 @@ jobs:
         git commit -m "Update product classification based on Groq API" || echo "No changes to commit"
         git push origin main || echo "No changes to push"
 
-    - name: Update products.txt (remove processed product)
+    - name: Update products.txt (remove processed products)
       run: |
-        sed -i '1d' products.txt
+        # Remove the first 50 processed products
+        sed -i '1,50d' products.txt
         git add products.txt || echo "No changes to commit"
-        git commit -m "Remove processed product from products.txt" || echo "No changes to commit"
+        git commit -m "Remove processed products from products.txt" || echo "No changes to commit"
         git push origin main || echo "No changes to push"
