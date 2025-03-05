@@ -1,13 +1,12 @@
-
 name: Process Product with Groq API
 
 on:
   push:
     branches:
-      - main  # Trigger on push to the main branch, adjust as needed
-  workflow_dispatch:  # Allows you to manually trigger the workflow
+      - main  # Trigger on push to the main branch
+  workflow_dispatch:  # Allows manual trigger
   schedule:
-    - cron: '0 */3 * * *'  # Runs every 3 hours (adjust as needed)
+    - cron: '0 */3 * * *'  # Runs every 3 hours
 
 jobs:
   process-product:
