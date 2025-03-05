@@ -1,3 +1,4 @@
 groq
 praw
 requests
+playwright
