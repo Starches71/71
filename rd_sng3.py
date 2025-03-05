@@ -1,4 +1,3 @@
-
 import os
 from playwright.sync_api import sync_playwright
 
@@ -6,11 +5,11 @@ from playwright.sync_api import sync_playwright
 affiliate_id = "starchestech-20"
 
 # Directory and file names
-prd_name_dir = "prd_name"
-prd_aff_dir = "prd_aff"
+prd_name_dir = "prd_name"  # Keep this as is
+prd_aff_dir = "prd_aff"  # Ensure this is the correct output directory
 
 # Read product name from prd_name directory
-product_file = os.path.join(prd_name_dir, "product_name.txt")
+product_file = os.path.join(prd_name_dir, "product.txt")  # Assuming the file is named 'product.txt'
 
 # Check if the product name file exists and read the product name
 if os.path.exists(product_file):
