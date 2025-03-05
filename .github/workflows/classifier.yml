@@ -1,113 +1,88 @@
-name: Classify Products
+name: Process Product with Groq API
 
 on:
-  schedule:
-    - cron: '0 */3 * * *'  # Runs every 3 hours
-  workflow_dispatch:  # Allows manual trigger
+  push:
+    branches:
+      - main  # Trigger on push to the main branch, adjust as needed
 
 jobs:
-  classify:
+  process-product:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Set Up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8  # Specify your desired Python version
 
-      - name: Install Dependencies
-        run: pip install requests gitpython
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install requests groq
 
-      - name: Fetch Products and Classify
-        env:
-          GROQ_API_KEY: "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"
-        run: |
-          python <<EOF
-          import requests
-          import os
-          from git import Repo
+    - name: Fetch products list from GitHub
+      run: |
+        curl -o products.txt https://raw.githubusercontent.com/Starches71/71/main/products.txt
 
-          REPO_OWNER = "Starches71"
-          REPO_NAME = "71"
-          BRANCH = "main"
-          FILE_PATH = "products.txt"
-          RAW_URL = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/{BRANCH}/{FILE_PATH}"
+    - name: Process the first product
+      run: |
+        # Get the first product from the file
+        PRODUCT=$(head -n 1 products.txt)
+        echo "Processing product: $PRODUCT"
 
-          C_FILE = "c.txt"
-          P_FILE = "p.txt"
-          GROQ_URL = "https://api.groq.com/classify"
-          GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+        # Define Groq API call and other necessary variables
+        API_KEY="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"
+        RESPONSE=$(python3 -c "
+import requests
+from groq import Groq
 
-          def fetch_products():
-              response = requests.get(RAW_URL)
-              if response.status_code == 200:
-                  with open(FILE_PATH, "w") as f:
-                      f.write(response.text)
-                  print("✅ Successfully fetched products.txt")
-              else:
-                  print(f"❌ Failed to fetch products.txt: {response.status_code}")
-                  exit(1)
+client = Groq(api_key='$API_KEY')
 
-          def classify_product(product):
-              headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-              data = {"text": product}
-              response = requests.post(GROQ_URL, headers=headers, json=data)
-              if response.status_code == 200:
-                  category = response.json().get("category", "").upper()
-                  return category if category in ["C", "P"] else None
-              else:
-                  print(f"⚠️ Failed to classify '{product}', status code: {response.status_code}")
-                  return None
+# Define the prompt to query the LLM
+prompt = 'Is the $PRODUCT a real product on Amazon or just a product category? Answer p if it\'s a product, and answer c if it\'s a product category. Just answer p or c only.'
+conversation_history = [{'role': 'user', 'content': prompt}]
 
-          def process_products(limit=50):
-              if not os.path.exists(FILE_PATH):
-                  print("❌ products.txt not found.")
-                  exit(1)
+# Call Groq API
+completion = client.chat.completions.create(
+    model='Llama-3.3-70b-Versatile',
+    messages=conversation_history,
+    temperature=0,
+    max_tokens=1024,
+    top_p=0,
+    stream=False,
+)
 
-              with open(FILE_PATH, "r") as f:
-                  products = [line.strip() for line in f.readlines() if line.strip()]
+response_content = completion.choices[0].message.content if completion.choices else 'No content found'
+response_content.strip().lower()
+")
 
-              if not products:
-                  print("⚠️ No products to process.")
-                  exit(0)
+        echo "LLM Response: $RESPONSE"
 
-              c_products, p_products = [], []
-              for idx, product in enumerate(products[:limit], 1):
-                  category = classify_product(product)
-                  if category == "C":
-                      c_products.append(product)
-                  elif category == "P":
-                      p_products.append(product)
-                  print(f"🔹 {idx}/{limit}: {product} → {category or 'UNKNOWN'}")
+        # Determine the file to save the response
+        if [[ "$RESPONSE" == "p" ]]; then
+          echo "$PRODUCT" >> p.txt
+        elif [[ "$RESPONSE" == "c" ]]; then
+          echo "$PRODUCT" >> c.txt
+        else
+          echo "Invalid response from LLM: $RESPONSE"
+        fi
 
-              if c_products:
-                  with open(C_FILE, "w") as f:
-                      f.write("\n".join(c_products))
-                  print(f"✅ Saved {len(c_products)} 'C' products to {C_FILE}")
+    - name: Commit changes (p.txt or c.txt)
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add p.txt c.txt
+        git commit -m "Update product classification based on Groq API"
+        git push origin main
 
-              if p_products:
-                  with open(P_FILE, "w") as f:
-                      f.write("\n".join(p_products))
-                  print(f"✅ Saved {len(p_products)} 'P' products to {P_FILE}")
-
-          def commit_and_push_changes():
-              repo = Repo(".")
-              repo.git.add([C_FILE, P_FILE])
-              repo.index.commit("Updated classified products")
-              origin = repo.remote(name="origin")
-              origin.push()
-              print("✅ Successfully pushed changes to GitHub.")
-
-          fetch_products()
-          process_products()
-          commit_and_push_changes()
-          EOF
-
-      - name: Push Changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Updated classified products"
-          file_pattern: "c.txt p.txt"
+    - name: Update products.txt (remove processed product)
+      run: |
+        # Remove the processed product from the list
+        sed -i '1d' products.txt
+        # Commit the updated products.txt back to GitHub
+        git add products.txt
+        git commit -m "Remove processed product from products.txt"
+        git push origin main
