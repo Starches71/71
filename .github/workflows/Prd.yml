@@ -37,30 +37,8 @@ jobs:
         PRODUCT=$(head -n 1 products.txt)
         echo "Processing product: $PRODUCT"
 
-        # Define Groq API call and other necessary variables
-        API_KEY="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"
-        
-        RESPONSE=$(python3 -c "
-import requests
-from groq import Groq
-
-client = Groq(api_key='$API_KEY')
-
-prompt = f'Is the {PRODUCT} a real product on Amazon or just a product category? Answer p if it is a product, and answer c if it is a category. Just answer p or c only.'
-conversation_history = [{'role': 'user', 'content': prompt}]
-
-completion = client.chat.completions.create(
-    model='Llama-3.3-70b-Versatile',
-    messages=conversation_history,
-    temperature=0,
-    max_tokens=10,
-    top_p=0,
-    stream=False
-)
-
-response_content = completion.choices[0].message.content.strip().lower() if completion.choices else 'invalid'
-print(response_content)
-")
+        # Run the Python script to get classification
+        RESPONSE=$(python3 prd.py "$PRODUCT")
 
         echo "LLM Response: $RESPONSE"
 
