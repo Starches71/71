@@ -1,0 +1,55 @@
+
+name: Run Product Scripts
+
+on:
+  workflow_dispatch:  # Allows manual trigger
+  schedule:
+    - cron: "30 6 * * *"   # 6:30 AM
+    - cron: "30 9 * * *"   # 9:30 AM
+    - cron: "30 12 * * *"  # 12:30 PM
+    - cron: "30 15 * * *"  # 3:30 PM
+    - cron: "30 17 * * *"  # 5:30 PM
+
+jobs:
+  run-scripts:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Python scripts
+        run: |
+          python rd_sng.py
+          python rd_sng1.py
+          python rd_sng2.py
+          python rd_sng3.py
+          python rd_sng4.py
+
+      - name: Update amazon.txt and prd_used.txt
+        run: |
+          # Get the first product name from prd_name directory
+          PRODUCT_NAME=$(ls prd_name | head -n 1)
+
+          # Remove the first line from amazon.txt
+          sed -i '1d' amazon.txt
+
+          # Save the product name in prd_used.txt
+          echo "$PRODUCT_NAME" >> prd_used.txt
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add amazon.txt prd_used.txt
+          git commit -m "Updated amazon.txt and prd_used.txt"
+          git push
