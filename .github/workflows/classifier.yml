@@ -1,46 +1,113 @@
-name: Product Classifier
+name: Classify Products
 
 on:
-  # Trigger the workflow on push to main
-  push:
-    branches:
-      - main
-  # Optionally, schedule the workflow to run at specific intervals (e.g., every day at midnight)
   schedule:
-    - cron: "0 0 * * *"  # Run every day at midnight UTC
+    - cron: '0 */3 * * *'  # Runs every 3 hours
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
-  classifier:
+  classify:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      # Set up Python environment
-      - name: Set up Python 3.x
-        uses: actions/setup-python@v2
+      - name: Set Up Python
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.9'
 
-      # Install dependencies
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests gitpython
+      - name: Install Dependencies
+        run: pip install requests gitpython
 
-      # Run the Python classifier script
-      - name: Run Product Classifier
-        run: python prd_classifier.py
-
-      # Commit and push changes back to the repository (using GITHUB_TOKEN)
-      - name: Commit and push changes
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add .
-          git commit -m "Update classified products"
-          git push
+      - name: Fetch Products and Classify
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # This token is automatically available in GitHub Actions
+          GROQ_API_KEY: "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"
+        run: |
+          python <<EOF
+          import requests
+          import os
+          from git import Repo
+
+          REPO_OWNER = "Starches71"
+          REPO_NAME = "71"
+          BRANCH = "main"
+          FILE_PATH = "products.txt"
+          RAW_URL = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/{BRANCH}/{FILE_PATH}"
+
+          C_FILE = "c.txt"
+          P_FILE = "p.txt"
+          GROQ_URL = "https://api.groq.com/classify"
+          GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+          def fetch_products():
+              response = requests.get(RAW_URL)
+              if response.status_code == 200:
+                  with open(FILE_PATH, "w") as f:
+                      f.write(response.text)
+                  print("✅ Successfully fetched products.txt")
+              else:
+                  print(f"❌ Failed to fetch products.txt: {response.status_code}")
+                  exit(1)
+
+          def classify_product(product):
+              headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
+              data = {"text": product}
+              response = requests.post(GROQ_URL, headers=headers, json=data)
+              if response.status_code == 200:
+                  category = response.json().get("category", "").upper()
+                  return category if category in ["C", "P"] else None
+              else:
+                  print(f"⚠️ Failed to classify '{product}', status code: {response.status_code}")
+                  return None
+
+          def process_products(limit=50):
+              if not os.path.exists(FILE_PATH):
+                  print("❌ products.txt not found.")
+                  exit(1)
+
+              with open(FILE_PATH, "r") as f:
+                  products = [line.strip() for line in f.readlines() if line.strip()]
+
+              if not products:
+                  print("⚠️ No products to process.")
+                  exit(0)
+
+              c_products, p_products = [], []
+              for idx, product in enumerate(products[:limit], 1):
+                  category = classify_product(product)
+                  if category == "C":
+                      c_products.append(product)
+                  elif category == "P":
+                      p_products.append(product)
+                  print(f"🔹 {idx}/{limit}: {product} → {category or 'UNKNOWN'}")
+
+              if c_products:
+                  with open(C_FILE, "w") as f:
+                      f.write("\n".join(c_products))
+                  print(f"✅ Saved {len(c_products)} 'C' products to {C_FILE}")
+
+              if p_products:
+                  with open(P_FILE, "w") as f:
+                      f.write("\n".join(p_products))
+                  print(f"✅ Saved {len(p_products)} 'P' products to {P_FILE}")
+
+          def commit_and_push_changes():
+              repo = Repo(".")
+              repo.git.add([C_FILE, P_FILE])
+              repo.index.commit("Updated classified products")
+              origin = repo.remote(name="origin")
+              origin.push()
+              print("✅ Successfully pushed changes to GitHub.")
+
+          fetch_products()
+          process_products()
+          commit_and_push_changes()
+          EOF
+
+      - name: Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Updated classified products"
+          file_pattern: "c.txt p.txt"
