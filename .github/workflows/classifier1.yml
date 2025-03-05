@@ -1,51 +1,91 @@
-name: Classify Products Daily
+name: Process Product with Groq API
 
 on:
+  push:
+    branches:
+      - main  # Trigger on push to the main branch, adjust as needed
+  workflow_dispatch:  # Allows you to manually trigger the workflow
   schedule:
-    # Runs every day at 7:00 AM UTC
-    - cron: "0 7 * * *"
-  workflow_dispatch:
+    - cron: '0 */3 * * *'  # Runs every 3 hours (adjust as needed)
 
 jobs:
-  classify:
+  process-product:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      # Step 2: Set up Python environment
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8  # Specify your desired Python version
 
-      # Step 3: Install dependencies
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install gitpython
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install requests groq
 
-      # Step 4: Run the Python script (prd_classifier.py)
-      - name: Run prd_classifier.py
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: |
-          python prd_classifier.py
+    - name: Fetch products list from GitHub
+      run: |
+        curl -o products.txt https://raw.githubusercontent.com/Starches71/71/main/products.txt
 
-      # Step 5: Upload any artifacts if needed (optional, adjust as needed)
-      - name: Upload classified products as artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: classified-products
-          path: |
-            c.txt
-            p.txt
+    - name: Process the first product
+      run: |
+        # Get the first product from the file
+        PRODUCT=$(head -n 1 products.txt)
+        echo "Processing product: $PRODUCT"
 
-      # Step 6: (Optional) Download artifacts in case you want to use them later
-      # - name: Download classified products artifact (if needed)
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: classified-products
+        # Define Groq API call and other necessary variables
+        API_KEY="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"
+        RESPONSE=$(python3 -c "
+import requests
+from groq import Groq
+
+client = Groq(api_key='$API_KEY')
+
+# Define the prompt to query the LLM
+prompt = 'Is the $PRODUCT a real product on Amazon or just a product category? Answer p if it\'s a product, and answer c if it\'s a product category. Just answer p or c only.'
+conversation_history = [{'role': 'user', 'content': prompt}]
+
+# Call Groq API
+completion = client.chat.completions.create(
+    model='Llama-3.3-70b-Versatile',
+    messages=conversation_history,
+    temperature=0,
+    max_tokens=1024,
+    top_p=0,
+    stream=False,
+)
+
+response_content = completion.choices[0].message.content if completion.choices else 'No content found'
+response_content.strip().lower()
+")
+
+        echo "LLM Response: $RESPONSE"
+
+        # Determine the file to save the response
+        if [[ "$RESPONSE" == "p" ]]; then
+          echo "$PRODUCT" >> p.txt
+        elif [[ "$RESPONSE" == "c" ]]; then
+          echo "$PRODUCT" >> c.txt
+        else
+          echo "Invalid response from LLM: $RESPONSE"
+        fi
+
+    - name: Commit changes (p.txt or c.txt)
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add p.txt c.txt
+        git commit -m "Update product classification based on Groq API"
+        git push origin main
+
+    - name: Update products.txt (remove processed product)
+      run: |
+        # Remove the processed product from the list
+        sed -i '1d' products.txt
+        # Commit the updated products.txt back to GitHub
+        git add products.txt
+        git commit -m "Remove processed product from products.txt"
+        git push origin main
