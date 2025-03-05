@@ -39,6 +39,7 @@ jobs:
 
         # Define Groq API call and other necessary variables
         API_KEY="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"
+        
         RESPONSE=$(python3 -c "
 import requests
 from groq import Groq
