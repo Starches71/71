@@ -17,7 +17,8 @@ if not os.path.exists(output_dir):
 def query_groq(product_name):
     prompt = f"""
     Give me a value or benefit driven headline of {product_name}, also give me the body that explains the features of {product_name} in value or benefit driven body, 
-    each feature of {product_name} with bullet points style written,separate the tittle and the body with one line ,dont inckude the world (tittle) (body) in the texts output,don’t include anything other than the text I ordered you.
+    each feature of {product_name} with bullet points style written,separate the tittle and the body with one line ,dont include the word (tittle) 
+    or (body) in the texts output,don’t include anything other than the text I ordered you.
     """
     
     conversation_history = [{"role": "user", "content": prompt}]
