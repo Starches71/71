@@ -48,36 +48,52 @@ content = get_first_file_content(content_dir)
 affiliate_link = get_first_file_content(aff_link_dir)
 image_paths = get_image_files(image_dir)
 
-# Extract title (first line of content) and body (rest of the content)
-title = content.split("\n")[0] if content else "Awesome Gadget You Must See!"
-body = "\n".join(content.split("\n")[1:]) if content else "Check out this amazing gadget!"
+# Ensure content is present
+if content:
+    title = content.split("\n")[0]
+    body = "\n".join(content.split("\n")[1:])
+else:
+    title = "Awesome Gadget You Must See!"
+    body = "Check out this amazing gadget!"
 
-# Format the post body
-post_body = f"{body}\n\nAffiliate Link: {affiliate_link}\n\n"
+# Ensure affiliate link is added to the body
+post_body = f"{body}\n\nAffiliate Link: {affiliate_link}" if affiliate_link else body
+
+# Debug: Print the content to check for issues
+print(f"Title: {title}")
+print(f"Body: {post_body}")
+print(f"Affiliate Link: {affiliate_link}")
 
 # Loop through each subreddit and post
 for subreddit_name in subreddits:
     try:
         subreddit = reddit.subreddit(subreddit_name)
         
-        # Check if there's at least one image
+        # Post with image if image paths are available
         if image_paths:
             print(f"Posting to r/{subreddit_name} with an image...")
+            image_path = image_paths[0]
             
-            # Create post with image (ensure both selftext and url are provided)
-            post = subreddit.submit(
+            # Create a post with the image and selftext
+            post = subreddit.submit_image(
                 title=title,
-                selftext=post_body,  # Include the text content
-                url=image_paths[0]  # Include the image URL
+                image_path=image_path,
+                selftext=post_body
             )
+            
+            print(f"✅ Posted successfully to r/{subreddit_name}: {post.url}")
         
+        # If no image is available, post text content
         else:
             print(f"Posting text to r/{subreddit_name}...")
             
-            # Create text post (if no images)
-            post = subreddit.submit(title=title, selftext=post_body)
-        
-        print(f"✅ Posted successfully to r/{subreddit_name}: {post.url}")
+            # Create a text post
+            post = subreddit.submit(
+                title=title,
+                selftext=post_body
+            )
+            
+            print(f"✅ Posted successfully to r/{subreddit_name}: {post.url}")
     
     except Exception as e:
         print(f"❌ Error posting to r/{subreddit_name}: {e}")
