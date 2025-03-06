@@ -59,20 +59,17 @@ for subreddit_name in subreddits:
     try:
         subreddit = reddit.subreddit(subreddit_name)
         
-        # Only post gallery with 1 image if images are available
+        # Check if there's at least one image
         if image_paths:
             print(f"Posting to r/{subreddit_name} with an image...")
             
-            # Create post with 1 image
-            post = subreddit.submit_gallery(
+            # Create text post with image (instead of gallery)
+            post = subreddit.submit(
                 title=title,
-                images=[{"image_path": image_paths[0]}]  # Only 1 image here
+                selftext=post_body,
+                url=image_paths[0]  # Direct image link
             )
-            
-            # Update the post body (title, body, and affiliate link)
-            post.selftext = post_body
-            post.save()  # Save the post with the body text and image
-            
+        
         else:
             print(f"Posting text to r/{subreddit_name}...")
             
