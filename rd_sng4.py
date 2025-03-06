@@ -1,3 +1,4 @@
+
 import praw
 import os
 
@@ -63,11 +64,11 @@ for subreddit_name in subreddits:
         if image_paths:
             print(f"Posting to r/{subreddit_name} with an image...")
             
-            # Create text post with image (instead of gallery)
+            # Create post with image (ensure both selftext and url are provided)
             post = subreddit.submit(
                 title=title,
-                selftext=post_body,
-                url=image_paths[0]  # Direct image link
+                selftext=post_body,  # Include the text content
+                url=image_paths[0]  # Include the image URL
             )
         
         else:
