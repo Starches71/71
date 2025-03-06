@@ -1,4 +1,3 @@
-
 import praw
 import os
 
@@ -23,7 +22,7 @@ aff_link_dir = "prd_aff"
 
 # List of subreddits to post in
 subreddits = [
-    "techtact",  # Your subreddit
+    "techtact",
     "Coolgadgetstube",
     "Bestfindsgadgets",
     "Technology"
@@ -31,7 +30,7 @@ subreddits = [
 
 def get_first_file_content(directory):
     """ Get content from the first file found in a directory """
-    files = sorted(os.listdir(directory))  # Sort to ensure consistency
+    files = sorted(os.listdir(directory))
     if not files:
         return None
     file_path = os.path.join(directory, files[0])
@@ -74,15 +73,20 @@ for subreddit_name in subreddits:
             print(f"Posting to r/{subreddit_name} with an image...")
             image_path = image_paths[0]
             
-            # Create a post with the image and selftext
+            # Create an image post (without selftext)
             post = subreddit.submit_image(
                 title=title,
-                image_path=image_path,
-                selftext=post_body
+                image_path=image_path
             )
             
             print(f"✅ Posted successfully to r/{subreddit_name}: {post.url}")
-        
+            
+            # Add body text as a comment under the post
+            comment_text = post_body.strip()
+            if comment_text:
+                post.reply(comment_text)
+                print(f"📝 Added comment with details to r/{subreddit_name}")
+
         # If no image is available, post text content
         else:
             print(f"Posting text to r/{subreddit_name}...")
