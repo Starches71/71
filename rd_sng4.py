@@ -20,8 +20,8 @@ content_dir = "prd_content"
 image_dir = "prd_images"
 aff_link_dir = "prd_aff"
 
-# Your subreddit
-subreddit_name = "techtact"  # Your own subreddit
+# Your Reddit username
+username = "Majestic_Computer_64"
 
 # Fetch content, images, and affiliate link
 def get_first_file_content(directory):
@@ -62,12 +62,12 @@ print(f"Body: {post_body}")
 print(f"Affiliate Link: {affiliate_link}")
 
 try:
-    # Post to your own subreddit
-    subreddit = reddit.subreddit(subreddit_name)
+    # Post to your user profile
+    subreddit = reddit.subreddit(f'u_{username}')
 
     # Post with image URL if image paths are available
     if image_paths:
-        print(f"Posting to r/{subreddit_name} with an image URL...")
+        print(f"Posting to r/u_{username} with an image URL...")
         image_path = image_paths[0]
 
         # Get the image URL (replace this with the actual URL you want to post)
@@ -79,11 +79,11 @@ try:
             selftext=f"{post_body}\n\n{image_url}"
         )
 
-        print(f"✅ Posted successfully to r/{subreddit_name}: {post.url}")
+        print(f"✅ Posted successfully to r/u_{username}: {post.url}")
 
     # If no image is available, post text content
     else:
-        print(f"Posting text to r/{subreddit_name}...")
+        print(f"Posting text to r/u_{username}...")
 
         # Create a text post
         post = subreddit.submit(
@@ -91,7 +91,7 @@ try:
             selftext=post_body
         )
 
-        print(f"✅ Posted successfully to r/{subreddit_name}: {post.url}")
+        print(f"✅ Posted successfully to r/u_{username}: {post.url}")
 
 except Exception as e:
-    print(f"❌ Error posting to r/{subreddit_name}: {e}")
+    print(f"❌ Error posting to r/u_{username}: {e}")
