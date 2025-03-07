@@ -1,3 +1,4 @@
+
 import os
 import requests
 
@@ -29,19 +30,15 @@ output_dir = "prd_images"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
-# Extract image links and save images
-if "items" in data:
-    for i, item in enumerate(data["items"][:5]):  # Get first 5 images
-        image_url = item['link']
-        image_name = f"{output_dir}/image_{i+1}.jpg"
+# File to save the image links
+image_links_file = os.path.join(output_dir, "image_links.txt")
 
-        # Download and save image
-        try:
-            img_data = requests.get(image_url).content
-            with open(image_name, 'wb') as f:
-                f.write(img_data)
-            print(f"Image {i+1} saved as {image_name}")
-        except Exception as e:
-            print(f"Failed to download image {i+1}: {e}")
+# Extract image links and save them to a file
+if "items" in data:
+    with open(image_links_file, 'w') as f:
+        for i, item in enumerate(data["items"][:5]):  # Get first 5 image links
+            image_url = item['link']
+            f.write(image_url + "\n")  # Write the image URL to the file
+            print(f"Image link {i+1} saved: {image_url}")
 else:
     print("No images found.")
