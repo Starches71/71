@@ -1,5 +1,5 @@
 
-name: Apply Gradient Effect to Image
+name: Apply Gradient Effect to Image using OpenCV
 
 on:
   push:
@@ -24,11 +24,12 @@ jobs:
         with:
           python-version: '3.x'
 
-      # Install dependencies (PyCairo for image manipulation)
+      # Install dependencies (OpenCV and NumPy)
       - name: Install dependencies
         run: |
-          sudo apt-get install -y libcairo2-dev
-          pip install pycairo
+          sudo apt-get update
+          sudo apt-get install -y python3-opencv
+          pip install numpy
 
       # Run the Python script to apply gradient effect
       - name: Apply gradient effect to image
@@ -40,4 +41,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: output-image
-          path: output_gradient_image.png
+          path: output_gradient_image_opencv.png
