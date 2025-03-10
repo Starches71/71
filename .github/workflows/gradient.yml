@@ -24,19 +24,20 @@ jobs:
         with:
           python-version: '3.x'
 
-      # Install dependencies (Pillow for image manipulation)
+      # Install dependencies (PyCairo and Pillow for image manipulation)
       - name: Install dependencies
         run: |
-          pip install Pillow
+          sudo apt-get install -y libcairo2-dev
+          pip install pycairo Pillow
 
       # Run the Python script to apply gradient effect
       - name: Apply gradient effect to image
         run: |
-          python apply_gradient.py
+          python cairo.py
 
-      # Upload the modified image as artifact using the latest version v4
+      # Upload the modified image as artifact
       - name: Upload modified image as artifact
         uses: actions/upload-artifact@v4
         with:
           name: output-image
-          path: output_gradient_image.jpeg
+          path: output_gradient_image.png
