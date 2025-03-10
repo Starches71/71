@@ -33,7 +33,7 @@ jobs:
       # Run the Python script to apply gradient effect
       - name: Apply gradient effect to image
         run: |
-          python cairo.py
+          python apply_gradient.py  # updated name of the Python script
 
       # Upload the modified image as artifact
       - name: Upload modified image as artifact
