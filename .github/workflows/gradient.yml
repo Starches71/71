@@ -1,3 +1,4 @@
+
 name: Apply Gradient Effect to Image
 
 on:
@@ -35,7 +36,7 @@ jobs:
 
       # Upload the modified image as artifact using the correct action version
       - name: Upload modified image as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: output-image
           path: output_gradient_image.jpeg
