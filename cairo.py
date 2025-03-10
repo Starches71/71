@@ -13,10 +13,14 @@ width, height = image.size
 surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
 context = cairo.Context(surface)
 
-# Draw the original image onto the Cairo surface
+# Create a pattern with the image to draw it on the surface
 pil_image = image.convert("RGBA")
 buffer = pil_image.tobytes("raw", "RGBA", 0, -1)
-surface.blit(0, 0, pil_image.width, pil_image.height, cairo.ImageSurface(cairo.FORMAT_ARGB32, pil_image.width, pil_image.height))
+image_surface = cairo.ImageSurface.create_for_data(buffer, cairo.FORMAT_ARGB32, width, height)
+
+# Draw the original image onto the Cairo surface
+context.set_source_surface(image_surface, 0, 0)
+context.paint()
 
 # Create a gradient for the bottom part of the image (linear gradient)
 gradient = cairo.LinearGradient(0, height - 100, 0, height)  # Gradient starts from 100px above the bottom
