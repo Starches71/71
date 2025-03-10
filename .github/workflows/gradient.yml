@@ -1,5 +1,5 @@
 
-name: Apply Gradient Effect to Image using OpenCV
+name: Apply Gradient Effect to Image
 
 on:
   push:
@@ -24,21 +24,19 @@ jobs:
         with:
           python-version: '3.x'
 
-      # Install dependencies (OpenCV and NumPy)
+      # Install dependencies (OpenCV for image manipulation)
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-opencv
-          pip install numpy
+          pip install opencv-python
 
       # Run the Python script to apply gradient effect
       - name: Apply gradient effect to image
         run: |
-          python apply_gradient.py  # updated name of the Python script
+          python apply_gradient.py
 
       # Upload the modified image as artifact
       - name: Upload modified image as artifact
         uses: actions/upload-artifact@v4
         with:
           name: output-image
-          path: output_gradient_image_opencv.png
+          path: output_gradient_image.jpeg
