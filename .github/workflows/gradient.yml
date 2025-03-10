@@ -24,11 +24,11 @@ jobs:
         with:
           python-version: '3.x'
 
-      # Install dependencies (PyCairo and Pillow for image manipulation)
+      # Install dependencies (PyCairo for image manipulation)
       - name: Install dependencies
         run: |
           sudo apt-get install -y libcairo2-dev
-          pip install pycairo Pillow
+          pip install pycairo
 
       # Run the Python script to apply gradient effect
       - name: Apply gradient effect to image
