@@ -8,34 +8,37 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch: # This allows manual triggering of the workflow
+  workflow_dispatch:
 
 jobs:
   apply_gradient:
     runs-on: ubuntu-latest
-    
+
     steps:
-      # Check out the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      # Install dependencies (OpenCV for image manipulation)
       - name: Install dependencies
         run: |
           pip install opencv-python
 
-      # Run the Python script to apply gradient effect
       - name: Apply gradient effect to image
         run: |
+          # Ensure the image is available in the repo
+          ls -alh
+          
+          # Run the Python script to apply the gradient
           python apply_gradient.py
 
-      # Upload the modified image as artifact
+      - name: List files to verify image creation
+        run: |
+          ls -alh
+
       - name: Upload modified image as artifact
         uses: actions/upload-artifact@v4
         with:
