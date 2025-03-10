@@ -1,24 +1,19 @@
+
 import cairo
-from PIL import Image
 
 # Path to the image in the repo
 input_image_path = "images (31).jpeg"
 output_image_path = "output_gradient_image.png"
 
-# Open the original image using PIL to get its dimensions
-image = Image.open(input_image_path)
-width, height = image.size
+# Open the image using Cairo's ImageSurface
+image_surface = cairo.ImageSurface.create_from_png(input_image_path)
+width = image_surface.get_width()
+height = image_surface.get_height()
 
-# Create an image surface from the original image
-surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
-context = cairo.Context(surface)
+# Create a context for drawing on the surface
+context = cairo.Context(image_surface)
 
-# Create a pattern with the image to draw it on the surface
-pil_image = image.convert("RGBA")
-buffer = pil_image.tobytes("raw", "RGBA", 0, -1)
-image_surface = cairo.ImageSurface.create_for_data(buffer, cairo.FORMAT_ARGB32, width, height)
-
-# Draw the original image onto the Cairo surface
+# Draw the original image on the surface
 context.set_source_surface(image_surface, 0, 0)
 context.paint()
 
@@ -35,6 +30,6 @@ context.rectangle(0, height - 100, width, 100)  # Apply gradient to bottom 100px
 context.fill()
 
 # Write the modified image to the output path
-surface.write_to_png(output_image_path)
+image_surface.write_to_png(output_image_path)
 
 print(f"Gradient applied and image saved to {output_image_path}.")
