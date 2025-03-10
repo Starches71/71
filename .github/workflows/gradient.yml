@@ -34,9 +34,9 @@ jobs:
         run: |
           python apply_gradient.py
 
-      # Upload the modified image as artifact using the correct action version
+      # Upload the modified image as artifact using the latest version v4
       - name: Upload modified image as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: output-image
           path: output_gradient_image.jpeg
