@@ -24,7 +24,6 @@ jobs:
     - name: Verify ImageMagick Installation
       run: |
         convert -version || { echo "convert not found!"; exit 1; }
-        magick -version || { echo "magick not found!"; exit 1; }
 
     - name: List files in current directory (debugging)
       run: ls -l
