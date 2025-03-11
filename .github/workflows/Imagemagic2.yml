@@ -26,14 +26,21 @@ jobs:
       run: convert -version
 
     - name: Download Image from Repository
-      run: cp "images (31).jpeg" base_image.jpeg  # Ensure you are handling this file correctly with quotes
+      run: cp "images (31).jpeg" base_image.jpeg  # Handle files with spaces
 
-    - name: Create Linear Gradient
-      run: convert -size 1280x720 gradient:white-black gradient.png  # Creating gradient image
-
-    - name: Verify Gradient Creation
+    - name: Get Dimensions of Base Image
       run: |
-        ls -l gradient.png  # This ensures the gradient file exists
+        # Get the dimensions (width and height) of the base image
+        dimensions=$(identify -format "%wx%h" base_image.jpeg)
+        width=$(echo $dimensions | cut -d'x' -f1)
+        height=$(echo $dimensions | cut -d'x' -f2)
+        echo "Base Image Dimensions: $width x $height"
+
+    - name: Create Gradient with Same Dimensions
+      run: |
+        # Create a gradient image with the same dimensions as the base image
+        convert -size ${width}x${height} gradient:white-black gradient.png
+        ls -l gradient.png  # Debugging step to check if the gradient file is created
 
     - name: Apply Gradient Overlay with Layering
       run: |
@@ -45,7 +52,7 @@ jobs:
 
         # Apply gradient overlay on the base image
         convert "base_image.jpeg" \
-          gradient.png -resize 1280x720 \
+          gradient.png -resize ${width}x${height} \
           -compose overlay -gravity center -composite \
           output.png
 
