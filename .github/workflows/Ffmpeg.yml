@@ -1,5 +1,5 @@
 
-name: Apply Gradient Effect and Text Overlay to Image
+name: Apply Vignette Effect on Image
 
 on:
   push:
@@ -8,36 +8,35 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  apply_gradient:
+  apply_vignette:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
       - name: Install FFmpeg
         run: |
           sudo apt update
           sudo apt install -y ffmpeg
 
-      - name: Apply gradient effect and overlay text
+      - name: Apply Vignette Effect
         run: |
           # Define input and output file paths
-          input_image="images (31).jpeg"
-          output_image="output_gradient_image.jpg"
+          INPUT_FILE="images (31).jpeg"  # This assumes the file is in the root directory of your repo
+          OUTPUT_FILE="output_vignette_image.png"
           
-          # Apply gradient effect (darkening the bottom of the image)
-          ffmpeg -i "$input_image" -filter_complex "[0]split[base][overlay]; \
-          [overlay]drawbox=y=H-100:w=iw:h=100:color=black@0.7:t=fill[overlay]; \
-          [base][overlay]overlay=0:H-100, \
-          drawtext=text='Your Text Here':fontcolor=white:fontsize=30:x=(w-text_w)/2:y=H-50" \
-          "$output_image"
+          # Apply the vignette effect and save the result
+          ffmpeg -i "$INPUT_FILE" -filter_complex "
+              [0]split[base][overlay];
+              [overlay]vignette=amount=1.5:radius=0.5:cx=0.5:cy=0.5,format=rgba[overlay];
+              [base][overlay]overlay=0:H*0.7,drawtext=text='Your Text Here':fontcolor=white:fontsize=24:x=10:y=H-80
+          " -c:v png "$OUTPUT_FILE"
 
-      - name: Upload modified image as artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload output image
+        uses: actions/upload-artifact@v2
         with:
-          name: output-image
-          path: output_gradient_image.jpg
+          name: vignette-image
+          path: output_vignette_image.png
