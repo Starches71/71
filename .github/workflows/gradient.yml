@@ -29,18 +29,16 @@ jobs:
 
       - name: Apply gradient effect to image
         run: |
-          # Ensure the image is available in the repo
-          ls -alh
-          
-          # Run the Python script to apply the gradient
-          python apply_gradient.py
+          ls -alh  # Verify the image exists
+          python apply_gradient.py  # Run the script
 
-      - name: List files to verify image creation
+      - name: List files after processing
+        run: ls -alh
+
+      - name: Commit and push modified image
         run: |
-          ls -alh
-
-      - name: Upload modified image as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: output-image
-          path: output_gradient_image.jpeg
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add output_gradient_image.jpeg
+          git commit -m "Added gradient image"
+          git push
