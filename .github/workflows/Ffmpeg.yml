@@ -1,4 +1,5 @@
-name: Apply Linear Gradient to Image
+
+name: Apply Black Linear Gradient to Image
 
 on:
   push:
@@ -16,13 +17,13 @@ jobs:
     - name: Install FFmpeg
       run: sudo apt-get install ffmpeg
 
-    - name: Apply Linear Gradient to Image
+    - name: Apply Black Linear Gradient to Image
       run: |
         # Define input and output file paths
         INPUT_FILE="./images (31).jpeg"
         OUTPUT_FILE="./output_image.jpg"
         
-        # Apply linear gradient effect to the bottom 30% of the image
+        # Apply linear gradient (black to transparent) to the bottom 30% of the image
         ffmpeg -i "$INPUT_FILE" -filter_complex "[0:v]split[base][gradient]; 
         [gradient]format=rgba,geq=r='if(gte(Y,H*0.7),0,0)':g='if(gte(Y,H*0.7),0,0)':b='if(gte(Y,H*0.7),0,0)':a='if(gte(Y,H*0.7),255,0)'[gradient]; 
         [base][gradient]overlay=0:H*0.7" -y "$OUTPUT_FILE"
