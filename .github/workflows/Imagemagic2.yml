@@ -1,5 +1,5 @@
 
-name: ImageMagick Overlay
+name: ImageMagick Overlay with Debugging
 
 on:
   push:
@@ -25,36 +25,51 @@ jobs:
     - name: Verify ImageMagick Installation
       run: convert -version
 
+    - name: List files in current directory (debugging)
+      run: ls -l
+
     - name: Download Image from Repository
-      run: cp "images (31).jpeg" base_image.jpeg  # Handle files with spaces
+      run: cp "images (31).jpeg" base_image.jpeg
 
-    - name: Get Dimensions of Base Image
+    - name: Verify that input image exists (debugging)
       run: |
-        # Get the dimensions (width and height) of the base image
-        dimensions=$(identify -format "%wx%h" base_image.jpeg)
-        width=$(echo $dimensions | cut -d'x' -f1)
-        height=$(echo $dimensions | cut -d'x' -f2)
-        echo "Base Image Dimensions: $width x $height"
-
-    - name: Create Gradient with Same Dimensions
-      run: |
-        # Create a gradient image with the same dimensions as the base image
-        convert -size ${width}x${height} gradient:white-black gradient.png
-        ls -l gradient.png  # Debugging step to check if the gradient file is created
-
-    - name: Apply Gradient Overlay with Layering
-      run: |
-        # Check if gradient image exists
-        if [ ! -f gradient.png ]; then
-          echo "Error: gradient.png not found!"
+        if [ ! -f "base_image.jpeg" ]; then
+          echo "base_image.jpeg not found!"
           exit 1
+        else
+          echo "base_image.jpeg found!"
         fi
 
-        # Apply gradient overlay on the base image
-        convert "base_image.jpeg" \
-          gradient.png -resize ${width}x${height} \
-          -compose overlay -gravity center -composite \
-          output.png
+    - name: Create Linear Gradient (debugging)
+      run: convert -size 1280x720 gradient:white-black gradient.png
+
+    - name: Verify that gradient.png was created (debugging)
+      run: |
+        if [ ! -f "gradient.png" ]; then
+          echo "gradient.png not found!"
+          exit 1
+        else
+          echo "gradient.png created successfully!"
+        fi
+
+    - name: List files in current directory after creating gradient (debugging)
+      run: ls -l
+
+    - name: Overlay Gradient on Image (Multiply)
+      run: |
+        convert base_image.jpeg gradient.png -compose Multiply -gravity center -composite output.png
+
+    - name: Verify Overlay Result (debugging)
+      run: |
+        if [ ! -f "output.png" ]; then
+          echo "output.png not created!"
+          exit 1
+        else
+          echo "output.png created successfully!"
+        fi
+
+    - name: List files in current directory after overlay (debugging)
+      run: ls -l
 
     - name: Upload Processed Image
       uses: actions/upload-artifact@v4
