@@ -23,7 +23,7 @@ jobs:
         sudo apt install -y imagemagick
 
     - name: Verify ImageMagick Installation
-      run: convert -version
+      run: magick -version
 
     - name: List files in current directory (debugging)
       run: ls -l
@@ -40,9 +40,18 @@ jobs:
           echo "base_image.jpeg found!"
         fi
 
+    - name: Get Image Dimensions
+      id: dimensions
+      run: |
+        width=$(magick identify -format "%w" base_image.jpeg)
+        height=$(magick identify -format "%h" base_image.jpeg)
+        echo "Width: $width, Height: $height"
+        echo "::set-output name=width::$width"
+        echo "::set-output name=height::$height"
+
     - name: Apply Linear Gradient Filter Directly to Image
       run: |
-        convert base_image.jpeg -size 1280x720 gradient:white-black -compose Multiply -gravity center -composite output.png
+        magick base_image.jpeg -size ${{ steps.dimensions.outputs.width }}x${{ steps.dimensions.outputs.height }} gradient:white-black -compose Multiply -gravity center -composite output.png
 
     - name: Verify that output.png was created (debugging)
       run: |
