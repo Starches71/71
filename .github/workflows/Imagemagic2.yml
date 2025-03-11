@@ -26,13 +26,14 @@ jobs:
       run: convert -version
 
     - name: Download Image from Repository
-      run: cp "images (31).jpeg" base_image.jpeg
+      run: cp "images (31).jpeg" base_image.jpeg  # Ensure you are handling this file correctly with quotes
 
     - name: Create Linear Gradient
-      run: convert -size 1280x720 gradient:white-black gradient.png
+      run: convert -size 1280x720 gradient:white-black gradient.png  # Creating gradient image
 
     - name: Verify Gradient Creation
-      run: ls -l gradient.png
+      run: |
+        ls -l gradient.png  # This ensures the gradient file exists
 
     - name: Apply Gradient Overlay with Layering
       run: |
@@ -42,8 +43,8 @@ jobs:
           exit 1
         fi
 
-        # Apply gradient overlay
-        convert base_image.jpeg \
+        # Apply gradient overlay on the base image
+        convert "base_image.jpeg" \
           gradient.png -resize 1280x720 \
           -compose overlay -gravity center -composite \
           output.png
