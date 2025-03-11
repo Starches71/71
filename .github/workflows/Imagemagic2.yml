@@ -31,15 +31,21 @@ jobs:
     - name: Create Linear Gradient
       run: convert -size 1280x720 gradient:white-black gradient.png
 
+    - name: Verify Gradient Creation
+      run: ls -l gradient.png
+
     - name: Apply Gradient Overlay with Layering
       run: |
-        # Create the base image with the gradient applied in layers
+        # Check if gradient image exists
+        if [ ! -f gradient.png ]; then
+          echo "Error: gradient.png not found!"
+          exit 1
+        fi
+
+        # Apply gradient overlay
         convert base_image.jpeg \
-          -background none \
-          -resize 1280x720 \
-          -gravity center \
           gradient.png -resize 1280x720 \
-          -compose overlay -composite \
+          -compose overlay -gravity center -composite \
           output.png
 
     - name: Upload Processed Image
