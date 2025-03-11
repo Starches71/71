@@ -1,48 +1,40 @@
 import cv2
 import numpy as np
 
-# Read the image
-image = cv2.imread('images (31).jpeg')
+# Load the image
+image = cv2.imread("images (31).jpeg")
 
 # Get image dimensions
 height, width, _ = image.shape
 
-# Define extra space for black area + gradient (extra height = 1/3 of image height)
-extra_black_height = height // 6  # Pure black part at the bottom
-extra_gradient_height = height // 3  # Fading gradient part
+# Define extra height for text and gradient
+extra_height = height // 4  # Extra space at bottom (25% of original height)
+new_height = height + extra_height
 
-# Create a completely black region
-black_bar = np.zeros((extra_black_height, width, 3), dtype=np.uint8)
+# Create a new black image (to extend bottom)
+extended_image = np.zeros((new_height, width, 3), dtype=np.uint8)
+extended_image[:height, :, :] = image  # Place original image on top
 
-# Create a gradient that starts black and fades upwards
-gradient = np.zeros((extra_gradient_height, width, 3), dtype=np.uint8)
-for i in range(extra_gradient_height):
-    intensity = int(255 * (i / extra_gradient_height))  # Fades from black to transparent
-    gradient[i, :, :] = (intensity, intensity, intensity)  # Grayscale fade
+# Create gradient effect (fully black at bottom, fading upward)
+for i in range(extra_height):
+    alpha = 1 - (i / extra_height)  # Alpha decreases as we move up
+    extended_image[height + i, :, :] = (0, 0, 0) * alpha + extended_image[height + i, :, :] * (1 - alpha)
 
-# Stack everything: image + gradient + black bar
-image_with_gradient = np.vstack((image, gradient, black_bar))
-
-# Define text properties
-text = "Samsung S25 becomes first phone to have 6G technology. What an amazing technology!"
+# Define text parameters
+text = "Samsung S25 becomes first phone with 6G technology!"
 font = cv2.FONT_HERSHEY_SIMPLEX
-font_scale = 1
+font_scale = min(width / 1000, 1)  # Adjust text size based on width
 font_thickness = 2
-text_color = (255, 255, 255)  # White text
+text_size = cv2.getTextSize(text, font, font_scale, font_thickness)[0]
 
-# Get text size
-(text_width, text_height), _ = cv2.getTextSize(text, font, font_scale, font_thickness)
+# Calculate text position (centered horizontally, inside the black area)
+text_x = (width - text_size[0]) // 2
+text_y = height + extra_height // 2 + text_size[1] // 2
 
-# Center text horizontally
-text_x = (width - text_width) // 2  
+# Put white text over the black gradient
+cv2.putText(extended_image, text, (text_x, text_y), font, font_scale, (255, 255, 255), font_thickness, cv2.LINE_AA)
 
-# Place text inside the black area (ensuring visibility)
-text_y = height + extra_gradient_height + extra_black_height // 2 + text_height // 2  
+# Save the modified image
+cv2.imwrite("output_gradient_image.jpeg", extended_image)
 
-# Draw text
-cv2.putText(image_with_gradient, text, (text_x, text_y), font, font_scale, text_color, font_thickness, cv2.LINE_AA)
-
-# Save final image
-cv2.imwrite('output_gradient_image.jpeg', image_with_gradient)
-
-print("Final image saved as output_gradient_image.jpeg with proper gradient and text.")
+print("Gradient applied and image saved as output_gradient_image.jpeg.")
