@@ -1,0 +1,38 @@
+
+name: Apply Gradient Effect to Image
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  apply_gradient:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt update
+          sudo apt install ffmpeg
+
+      - name: Apply gradient effect to image
+        run: |
+          # Use the specific image file from the repository
+          input_image="images (31).jpeg"
+          output_image="output_gradient_image.jpg"
+          
+          ffmpeg -i "$input_image" -filter_complex "[0]split[base][overlay];[overlay]geq='if(gte(Y, H/2), 255, 0)':128:128[overlay];[base][overlay]overlay=0:H/2" "$output_image"
+
+      - name: Upload modified image as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-image
+          path: output_gradient_image.jpg
