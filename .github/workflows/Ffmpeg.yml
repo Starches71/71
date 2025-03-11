@@ -1,3 +1,4 @@
+
 name: Apply Gradient Effect and Text Overlay to Image
 
 on:
@@ -28,11 +29,11 @@ jobs:
           input_image="images (31).jpeg"
           output_image="output_gradient_image.jpg"
           
-          # Apply the gradient and text overlay using FFmpeg
+          # Apply the gradient effect using FFmpeg
           ffmpeg -i "$input_image" -filter_complex "[0]split[base][overlay]; \
           [overlay]geq='if(gte(Y, H/2), 255, 0)':128:128[overlay]; \
           [base][overlay]overlay=0:H/2, \
-          drawtext=text='Your Text Here':fontcolor=white:fontsize=40:x=10:y=10" \
+          drawtext=text='Your Text Here':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=H-60" \
           "$output_image"
 
       - name: Upload modified image as artifact
