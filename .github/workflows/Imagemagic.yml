@@ -1,0 +1,32 @@
+name: ImageMagick Processing
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  image-processing:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up ImageMagick
+      run: |
+        sudo apt update
+        sudo apt install -y imagemagick
+
+    - name: Run ImageMagick command
+      run: |
+        magick -size 1280x720 gradient:white-black output.png
+
+    - name: Upload processed image
+      uses: actions/upload-artifact@v2
+      with:
+        name: processed-image
+        path: output.png
