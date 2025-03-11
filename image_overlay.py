@@ -1,4 +1,3 @@
-
 from PIL import Image, ImageDraw
 
 # Open the image from the repository
@@ -17,9 +16,16 @@ draw = ImageDraw.Draw(gradient)
 f_co = (13, 255, 154)  # Starting color (light)
 t_co = (4, 128, 30)    # Ending color (dark)
 
-# Apply the gradient to the bottom 30% of the image
+# Apply the gradient to the top 70% of the image
 for i, color in enumerate(interpolate(f_co, t_co, im.width * 2)):
-    draw.line([(i, int(im.height * 0.7)), (0, int(im.height * 0.7) + i)], tuple(color), width=1)
+    draw.line([(i, 0), (i, int(im.height * 0.7))], tuple(color), width=1)
+
+# Now, apply a black gradient to the bottom 30% of the image
+black_start = (0, 0, 0)  # Black color
+black_end = (0, 0, 0)    # Black color (no change)
+
+for i, color in enumerate(interpolate(black_start, black_end, im.width * 2)):
+    draw.line([(i, int(im.height * 0.7)), (i, im.height)], tuple(color), width=1)
 
 # Composite the gradient over the original image
 im_composite = Image.alpha_composite(im.convert('RGBA'), gradient)
