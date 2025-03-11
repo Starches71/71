@@ -9,24 +9,24 @@ image = cv2.imread("images (31).jpeg")
 height, width, _ = image.shape
 
 # Define extra height for text and gradient
-extra_height = height // 2  # 50% extra space at bottom
+extra_height = height // 2  # 50% extra space at the top
 new_height = height + extra_height
 
-# Create a new black image (to extend the image upwards)
+# Create a new black image (to extend upwards)
 extended_image = np.zeros((new_height, width, 3), dtype=np.uint8)
 extended_image[extra_height:, :, :] = image  # Place original image on the bottom
 
-# Create a proper gradient effect (smooth fade from transparent to black upwards)
+# Create a gradient effect (smooth fade from transparent to black upwards)
 for i in range(extra_height):
-    alpha = (i / extra_height) ** 2  # Strong black at the top, fades smoothly
+    alpha = (i / extra_height) ** 2  # Strong black at top, fades smoothly
     extended_image[i, :, :] = (np.array([0, 0, 0]) * (1 - alpha) + 
                                extended_image[i, :, :] * alpha).astype(np.uint8)
 
 # Define text parameters
 text = "Samsung is the first phone to\nHave built-in 6G in the world"
 font = cv2.FONT_HERSHEY_SIMPLEX
-font_scale = min(width / 600, 1.2)  # Slightly larger text
-font_thickness = 1  # Thin text for better readability
+font_scale = min(width / 800, 1.0)  # Slightly larger text, but reasonable size
+font_thickness = 2  # Thin text for better readability
 line_spacing = int(60 * font_scale)  # Spacing between lines
 
 # Calculate text size and center it
@@ -44,6 +44,6 @@ for i, (line, size) in enumerate(zip(lines, text_sizes)):
     cv2.putText(extended_image, line, (text_x, text_y), font, font_scale, (255, 255, 255), font_thickness, cv2.LINE_AA)
 
 # Save the modified image
-cv2.imwrite("output_gradient_image_upwards.jpeg", extended_image)
+cv2.imwrite("output_gradient_image_upwards_white_text.jpeg", extended_image)
 
-print("Upward gradient applied and image saved as output_gradient_image_upwards.jpeg.")
+print("Upward gradient applied and image saved as output_gradient_image_upwards_white_text.jpeg.")
