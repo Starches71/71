@@ -1,4 +1,4 @@
-name: Apply Vignette Effect to Image
+name: Apply Smooth Box Gradient Effect to Image
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  apply-vignette:
+  apply-smooth-box-gradient:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,22 +16,25 @@ jobs:
     - name: Install FFmpeg
       run: sudo apt-get install ffmpeg
 
-    - name: Apply Vignette Effect to Image
+    - name: Apply Smooth Box Gradient Effect to Image
       run: |
         # Define input and output file paths
         INPUT_FILE="./images (31).jpeg"
-        OUTPUT_FILE="./output_image_vignette.jpg"
+        OUTPUT_FILE="./output_image_smooth_gradient.jpg"
 
-        # Create a gradient overlay using drawbox
-        ffmpeg -i "$INPUT_FILE" -vf "
-          format=rgba,
-          drawbox=y=ih*0.9:height=ih*0.1:color=black@1:t=fill,
-          drawbox=y=ih*0.8:height=ih*0.1:color=black@0.8:t=fill,
-          drawbox=y=ih*0.7:height=ih*0.1:color=black@0:t=fill
-        " -y "$OUTPUT_FILE"
+        # Generate a vertical gradient mask (black at bottom, fading upwards)
+        ffmpeg -f lavfi -i "color=black:s=iwxih" -vf "
+          geq=r='p(X,Y)':g='p(X,Y)':b='p(X,Y)':a='
+            if(lte(Y,H*0.7),0,
+            if(lte(Y,H*0.8),(Y-H*0.7)/(H*0.1)*255,
+            if(lte(Y,H*0.9),255 - (Y-H*0.8)/(H*0.1)*51,255)))'
+        " -y gradient.png
+
+        # Overlay the gradient mask onto the input image
+        ffmpeg -i "$INPUT_FILE" -i gradient.png -filter_complex "[0:v][1:v]overlay=0:0,format=rgba" -y "$OUTPUT_FILE"
 
     - name: Upload result image
       uses: actions/upload-artifact@v4
       with:
-        name: output-image-vignette
-        path: ./output_image_vignette.jpg
+        name: output-image-smooth-gradient
+        path: ./output_image_smooth_gradient.jpg
