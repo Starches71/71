@@ -1,3 +1,4 @@
+
 name: Apply Smooth Box Gradient Effect to Image
 
 on:
@@ -23,7 +24,7 @@ jobs:
         OUTPUT_FILE="./output_image_smooth_gradient.jpg"
 
         # Generate a vertical gradient mask (black at bottom, fading upwards)
-        ffmpeg -f lavfi -i "color=black:s=iwxih" -vf "
+        ffmpeg -f lavfi -i "color=black:s=iw:ih" -vf "
           geq=r='p(X,Y)':g='p(X,Y)':b='p(X,Y)':a='
             if(lte(Y,H*0.7),0,
             if(lte(Y,H*0.8),(Y-H*0.7)/(H*0.1)*255,
