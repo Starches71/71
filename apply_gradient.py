@@ -1,3 +1,4 @@
+
 from PIL import Image, ImageDraw, ImageFont
 
 # Load the image
@@ -32,16 +33,18 @@ text_color = (255, 255, 255)  # White text color
 # Calculate text size and center it
 draw = ImageDraw.Draw(extended_image)
 lines = text.split("\n")
-text_widths = [draw.textsize(line, font=font)[0] for line in lines]
+
+# Calculate text bounding box for each line
+text_widths = [draw.textbbox((0, 0), line, font=font)[2] for line in lines]
 max_text_width = max(text_widths)
-total_text_height = sum([draw.textsize(line, font=font)[1] for line in lines]) + (len(lines) - 1) * 20
+total_text_height = sum([draw.textbbox((0, 0), line, font=font)[3] for line in lines]) + (len(lines) - 1) * 20
 
 text_x = (width - max_text_width) // 2  # Center text horizontally
 text_y_start = extra_height + (height - total_text_height) // 2  # Center text in gradient area
 
 # Draw text line by line
 for i, line in enumerate(lines):
-    text_y = text_y_start + (i * (draw.textsize(line, font=font)[1] + 20))
+    text_y = text_y_start + (i * (draw.textbbox((0, 0), line, font=font)[3] + 20))
     draw.text((text_x, text_y), line, font=font, fill=text_color)
 
 # Save the modified image
