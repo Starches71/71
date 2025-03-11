@@ -1,6 +1,5 @@
 
 from PIL import Image, ImageDraw, ImageFont
-import numpy as np
 
 # Load the image
 image = Image.open("images (31).jpeg")
