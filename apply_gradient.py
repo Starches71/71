@@ -1,3 +1,4 @@
+
 import cv2
 import numpy as np
 
@@ -8,7 +9,7 @@ image = cv2.imread("images (31).jpeg")
 height, width, _ = image.shape
 
 # Define extra height for text and gradient
-extra_height = height // 3  # 33% of the original height
+extra_height = height // 2  # 50% of original height
 new_height = height + extra_height
 
 # Create a new black image (to extend bottom)
@@ -22,18 +23,22 @@ for i in range(extra_height):
                                         extended_image[height + i, :, :] * (1 - alpha)).astype(np.uint8)
 
 # Define text parameters
-text = "Samsung S25 becomes first phone with 6G technology!"
+text = "Samsung is the first phone to\nHave built-in 6G in the world"
 font = cv2.FONT_HERSHEY_SIMPLEX
-font_scale = min(width / 800, 1)  # Adjust text size based on width
-font_thickness = 2
-text_size = cv2.getTextSize(text, font, font_scale, font_thickness)[0]
+font_scale = min(width / 1000, 1)  # Adjust text size based on width
+font_thickness = 2  # Keep text thin for readability
+line_spacing = int(50 * font_scale)  # Spacing between lines
 
-# Calculate text position (centered horizontally, inside the black area)
-text_x = (width - text_size[0]) // 2
-text_y = height + extra_height // 2 + text_size[1] // 2
+# Split text into lines and calculate position
+lines = text.split("\n")
+total_text_height = len(lines) * line_spacing
+text_x = width // 10  # Align text slightly from left
+text_y_start = height + (extra_height // 4)  # Start drawing text within gradient
 
-# Put white text over the black gradient
-cv2.putText(extended_image, text, (text_x, text_y), font, font_scale, (255, 255, 255), font_thickness, cv2.LINE_AA)
+# Put white text over the black gradient (line by line)
+for i, line in enumerate(lines):
+    text_y = text_y_start + (i * line_spacing)
+    cv2.putText(extended_image, line, (text_x, text_y), font, font_scale, (255, 255, 255), font_thickness, cv2.LINE_AA)
 
 # Save the modified image
 cv2.imwrite("output_gradient_image.jpeg", extended_image)
