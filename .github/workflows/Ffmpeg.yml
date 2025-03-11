@@ -1,3 +1,4 @@
+
 name: Apply Vignette Effect to Image
 
 on:
@@ -21,12 +22,15 @@ jobs:
         # Define input and output file paths
         INPUT_FILE="./images (31).jpeg"
         OUTPUT_FILE="./output_image_vignette.jpg"
-        
-        # Apply vignette effect where the bottom 30% gradually darkens from transparent to black
-        ffmpeg -i "$INPUT_FILE" -filter_complex "[0:v]split[bg][fg];
-        [bg]crop=iw:ih*0.7:0:0[bg];
-        [fg]crop=iw:ih*0.3:0:ih*0.7,format=rgba,geq=r='if(gte(Y,H*0.3),0.2*(1-(Y/H*0.7)),1)':g='if(gte(Y,H*0.3),0.2*(1-(Y/H*0.7)),1)':b='if(gte(Y,H*0.3),0.2*(1-(Y/H*0.7)),1)':a='if(gte(Y,H*0.3),255,0)'[fg];
-        [bg][fg]vstack" -y "$OUTPUT_FILE"
+
+        # Apply gradient overlay with specific opacity stops
+        ffmpeg -i "$INPUT_FILE" -vf "
+          format=rgba,
+          geq=r='p(X,Y)':g='p(X,Y)':b='p(X,Y)':a='
+            if(gte(Y,H*0.9),255,
+            if(gte(Y,H*0.8),204,
+            if(gte(Y,H*0.7),0,0)))'
+        " -y "$OUTPUT_FILE"
 
     - name: Upload result image
       uses: actions/upload-artifact@v4
