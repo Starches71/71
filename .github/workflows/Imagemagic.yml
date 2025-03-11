@@ -1,3 +1,4 @@
+
 name: ImageMagick Processing
 
 on:
@@ -14,7 +15,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up ImageMagick
       run: |
@@ -26,7 +27,7 @@ jobs:
         magick -size 1280x720 gradient:white-black output.png
 
     - name: Upload processed image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: processed-image
         path: output.png
