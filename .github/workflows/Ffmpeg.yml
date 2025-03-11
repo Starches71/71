@@ -20,11 +20,11 @@ jobs:
     - name: Apply Linear Gradient to Image
       run: |
         # Define input and output file paths
-        INPUT_FILE="./input_image.jpg"
+        INPUT_FILE="./images (31).jpeg"
         OUTPUT_FILE="./output_image.jpg"
         
         # Apply linear gradient effect to the bottom 30% of the image
-        ffmpeg -i $INPUT_FILE -filter_complex "[0:v]split[base][gradient]; [gradient]format=rgba,geq=r='if(gte(Y,H*0.7),0,255)':g='if(gte(Y,H*0.7),0,255)':b='if(gte(Y,H*0.7),0,0)':a='if(gte(Y,H*0.7),0,255)'[gradient]; [base][gradient]overlay=0:H*0.7" -y $OUTPUT_FILE
+        ffmpeg -i "$INPUT_FILE" -filter_complex "[0:v]split[base][gradient]; [gradient]format=rgba,geq=r='if(gte(Y,H*0.7),0,255)':g='if(gte(Y,H*0.7),0,255)':b='if(gte(Y,H*0.7),0,0)':a='if(gte(Y,H*0.7),0,255)'[gradient]; [base][gradient]overlay=0:H*0.7" -y "$OUTPUT_FILE"
 
     - name: Upload result image
       uses: actions/upload-artifact@v4
