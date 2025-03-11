@@ -1,41 +1,33 @@
-name: Apply Vignette Effect on Image
+
+name: Apply Linear Gradient to Image
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  apply_vignette:
+  apply-gradient:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Install FFmpeg
-        run: |
-          sudo apt update
-          sudo apt install -y ffmpeg
+    - name: Install FFmpeg
+      run: sudo apt-get install ffmpeg
 
-      - name: Apply Vignette Effect
-        run: |
-          # Define input and output file paths
-          INPUT_FILE="images (31).jpeg"  # This assumes the file is in the root directory of your repo
-          OUTPUT_FILE="output_vignette_image.png"
-          
-          # Apply vignette effect to darken bottom 30% of the image
-          ffmpeg -i "$INPUT_FILE" -filter_complex "
-              [0:v]split[base][vignette];
-              [vignette]geq='lum(0,0)':lum_expr='if(gt(Y,H*0.7),1,0.5)',format=rgba[vignette];
-              [base][vignette]overlay=0:H*0.7
-          " -y "$OUTPUT_FILE"
+    - name: Apply Linear Gradient to Image
+      run: |
+        # Define input and output file paths
+        INPUT_FILE="./input_image.jpg"
+        OUTPUT_FILE="./output_image.jpg"
+        
+        # Apply linear gradient effect to the bottom 30% of the image
+        ffmpeg -i $INPUT_FILE -filter_complex "[0:v]split[base][gradient]; [gradient]format=rgba,geq=r='if(gte(Y,H*0.7),0,255)':g='if(gte(Y,H*0.7),0,255)':b='if(gte(Y,H*0.7),0,0)':a='if(gte(Y,H*0.7),0,255)'[gradient]; [base][gradient]overlay=0:H*0.7" -y $OUTPUT_FILE
 
-      - name: Upload output image
-        uses: actions/upload-artifact@v4
-        with:
-          name: vignette-image
-          path: output_vignette_image.png
+    - name: Upload result image
+      uses: actions/upload-artifact@v3
+      with:
+        name: output-image
+        path: ./output_image.jpg
