@@ -1,5 +1,4 @@
-
-name: Apply Black Linear Gradient to Image
+name: Apply Vignette Effect to Image
 
 on:
   push:
@@ -7,7 +6,7 @@ on:
       - main
 
 jobs:
-  apply-gradient:
+  apply-vignette:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,20 +16,20 @@ jobs:
     - name: Install FFmpeg
       run: sudo apt-get install ffmpeg
 
-    - name: Apply Black Linear Gradient to Image
+    - name: Apply Vignette Effect to Image
       run: |
         # Define input and output file paths
         INPUT_FILE="./images (31).jpeg"
-        OUTPUT_FILE="./output_image.jpg"
+        OUTPUT_FILE="./output_image_vignette.jpg"
         
-        # Create a gradient from black to transparent for the bottom 30% of the image
+        # Apply vignette effect where the bottom 30% gradually darkens from transparent to black
         ffmpeg -i "$INPUT_FILE" -filter_complex "[0:v]split[bg][fg];
-        [bg]crop=iw:ih*0.7:0:0[bg]; 
-        [fg]crop=iw:ih*0.3:0:ih*0.7,format=rgba,geq=r='if(gte(Y,H*0.3),0,0)':g='if(gte(Y,H*0.3),0,0)':b='if(gte(Y,H*0.3),0,0)':a='if(gte(Y,H*0.3),255,0)'[fg]; 
+        [bg]crop=iw:ih*0.7:0:0[bg];
+        [fg]crop=iw:ih*0.3:0:ih*0.7,format=rgba,geq=r='if(gte(Y,H*0.3),0.2*(1-(Y/H*0.7)),1)':g='if(gte(Y,H*0.3),0.2*(1-(Y/H*0.7)),1)':b='if(gte(Y,H*0.3),0.2*(1-(Y/H*0.7)),1)':a='if(gte(Y,H*0.3),255,0)'[fg];
         [bg][fg]vstack" -y "$OUTPUT_FILE"
 
     - name: Upload result image
       uses: actions/upload-artifact@v4
       with:
-        name: output-image
-        path: ./output_image.jpg
+        name: output-image-vignette
+        path: ./output_image_vignette.jpg
