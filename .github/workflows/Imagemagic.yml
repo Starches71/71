@@ -22,9 +22,12 @@ jobs:
         sudo apt update
         sudo apt install -y imagemagick
 
+    - name: Verify ImageMagick Installation
+      run: convert -version
+
     - name: Run ImageMagick command
       run: |
-        magick -size 1280x720 gradient:white-black output.png
+        convert -size 1280x720 gradient:white-black output.png
 
     - name: Upload processed image
       uses: actions/upload-artifact@v4
