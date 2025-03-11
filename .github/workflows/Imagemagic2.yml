@@ -1,3 +1,4 @@
+
 name: ImageMagick Overlay
 
 on:
@@ -30,9 +31,16 @@ jobs:
     - name: Create Linear Gradient
       run: convert -size 1280x720 gradient:white-black gradient.png
 
-    - name: Overlay Gradient on Image (Multiply)
+    - name: Apply Gradient Overlay with Layering
       run: |
-        convert base_image.jpeg gradient.png -compose Multiply -gravity center -composite output.png
+        # Create the base image with the gradient applied in layers
+        convert base_image.jpeg \
+          -background none \
+          -resize 1280x720 \
+          -gravity center \
+          gradient.png -resize 1280x720 \
+          -compose overlay -composite \
+          output.png
 
     - name: Upload Processed Image
       uses: actions/upload-artifact@v4
