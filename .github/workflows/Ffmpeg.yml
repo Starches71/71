@@ -1,4 +1,3 @@
-
 name: Apply Vignette Effect on Image
 
 on:
@@ -28,12 +27,12 @@ jobs:
           INPUT_FILE="images (31).jpeg"  # This assumes the file is in the root directory of your repo
           OUTPUT_FILE="output_vignette_image.png"
           
-          # Apply the vignette effect and save the result
+          # Apply vignette effect to darken bottom 30% of the image
           ffmpeg -i "$INPUT_FILE" -filter_complex "
-              [0]split[base][overlay];
-              [overlay]vignette=amount=1.5:radius=0.5:cx=0.5:cy=0.5,format=rgba[overlay];
-              [base][overlay]overlay=0:H*0.7,drawtext=text='Your Text Here':fontcolor=white:fontsize=24:x=10:y=H-80
-          " -c:v png "$OUTPUT_FILE"
+              [0:v]split[base][vignette];
+              [vignette]geq='lum(0,0)':lum_expr='if(gt(Y,H*0.7),1,0.5)',format=rgba[vignette];
+              [base][vignette]overlay=0:H*0.7
+          " -y "$OUTPUT_FILE"
 
       - name: Upload output image
         uses: actions/upload-artifact@v4
