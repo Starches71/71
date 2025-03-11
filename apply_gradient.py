@@ -1,4 +1,3 @@
-
 from PIL import Image, ImageDraw, ImageFont
 
 # Load the image
@@ -26,9 +25,8 @@ extended_image.paste(gradient.convert("RGB"), (0, 0))
 
 # Define text parameters
 text = "Samsung is the first phone to\nHave built-in 6G in the world"
-font = ImageFont.load_default()  # Using default font (you can use .ttf files as well)
+font = ImageFont.load_default()  # Using default font (no need to specify a TTF file)
 font_size = int(min(width / 800, 1.0) * 30)  # Adjust font size based on width
-font = ImageFont.truetype("arial.ttf", font_size)  # You can use other TTF fonts here
 text_color = (255, 255, 255)  # White text color
 
 # Calculate text size and center it
