@@ -1,41 +1,32 @@
-
-name: Apply Smooth Box Gradient Effect to Image
+name: FFmpeg Video Processing
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  apply-smooth-box-gradient:
+  video-processing:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
 
-    - name: Install FFmpeg
-      run: sudo apt-get install ffmpeg
-
-    - name: Apply Smooth Box Gradient Effect to Image
+    - name: Set up FFmpeg
       run: |
-        # Define input and output file paths
-        INPUT_FILE="./images (31).jpeg"
-        OUTPUT_FILE="./output_image_smooth_gradient.jpg"
+        sudo apt update
+        sudo apt install -y ffmpeg
 
-        # Generate a vertical gradient mask (black at bottom, fading upwards)
-        ffmpeg -f lavfi -i "color=black:s=iw:ih" -vf "
-          geq=r='p(X,Y)':g='p(X,Y)':b='p(X,Y)':a='
-            if(lte(Y,H*0.7),0,
-            if(lte(Y,H*0.8),(Y-H*0.7)/(H*0.1)*255,
-            if(lte(Y,H*0.9),255 - (Y-H*0.8)/(H*0.1)*51,255)))'
-        " -y gradient.png
+    - name: Run FFmpeg command
+      run: |
+        ffmpeg -f lavfi -t 10 -i color=c=black:s=1280x720:r=30 -f lavfi -t 10 -i anullsrc=r=44100:cl=stereo -filter_complex "[0][1]concat=n=1:v=1:a=1" output.mp4
 
-        # Overlay the gradient mask onto the input image
-        ffmpeg -i "$INPUT_FILE" -i gradient.png -filter_complex "[0:v][1:v]overlay=0:0,format=rgba" -y "$OUTPUT_FILE"
-
-    - name: Upload result image
-      uses: actions/upload-artifact@v4
+    - name: Upload processed video
+      uses: actions/upload-artifact@v2
       with:
-        name: output-image-smooth-gradient
-        path: ./output_image_smooth_gradient.jpg
+        name: processed-video
+        path: output.mp4
