@@ -25,20 +25,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install opencv-python
+          pip install opencv-python numpy
 
       - name: Apply gradient effect to image
         run: |
-          ls -alh  # Verify the image exists
-          python apply_gradient.py  # Run the script
+          python apply_gradient.py
 
-      - name: List files after processing
-        run: ls -alh
-
-      - name: Commit and push modified image
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add output_gradient_image.jpeg
-          git commit -m "Added gradient image"
-          git push
+      - name: Upload modified image as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-image
+          path: output_gradient_image.jpeg
