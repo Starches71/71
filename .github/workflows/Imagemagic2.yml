@@ -1,0 +1,42 @@
+
+name: ImageMagick Overlay
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  image-overlay:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up ImageMagick
+      run: |
+        sudo apt update
+        sudo apt install -y imagemagick
+
+    - name: Verify ImageMagick Installation
+      run: convert -version
+
+    - name: Download Image from Repository
+      run: cp "images (31).jpeg" base_image.jpeg
+
+    - name: Create Linear Gradient
+      run: convert -size 1280x720 gradient:white-black gradient.png
+
+    - name: Overlay Gradient on Image
+      run: |
+        convert base_image.jpeg gradient.png -compose overlay -composite output.png
+
+    - name: Upload Processed Image
+      uses: actions/upload-artifact@v4
+      with:
+        name: overlayed-image
+        path: output.png
