@@ -1,4 +1,3 @@
-
 name: Apply Gradient Effect and Text Overlay to Image
 
 on:
@@ -21,7 +20,7 @@ jobs:
       - name: Install FFmpeg
         run: |
           sudo apt update
-          sudo apt install ffmpeg
+          sudo apt install -y ffmpeg
 
       - name: Apply gradient effect and overlay text
         run: |
@@ -30,10 +29,10 @@ jobs:
           output_image="output_gradient_image.jpg"
           
           # Apply the gradient and text overlay using FFmpeg
-          ffmpeg -i "$input_image" -filter_complex "[0]split[base][overlay]; 
-          [overlay]geq='if(gte(Y, H/2), 255, 0)':128:128[overlay];
-          [base][overlay]overlay=0:H/2, 
-          drawtext=text='Your Text Here':fontcolor=white:fontsize=40:x=10:y=10" 
+          ffmpeg -i "$input_image" -filter_complex "[0]split[base][overlay]; \
+          [overlay]geq='if(gte(Y, H/2), 255, 0)':128:128[overlay]; \
+          [base][overlay]overlay=0:H/2, \
+          drawtext=text='Your Text Here':fontcolor=white:fontsize=40:x=10:y=10" \
           "$output_image"
 
       - name: Upload modified image as artifact
