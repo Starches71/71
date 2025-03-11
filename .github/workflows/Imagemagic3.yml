@@ -1,0 +1,63 @@
+
+name: ImageMagick Gradient Filter Directly to Image
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  image-overlay:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up ImageMagick
+      run: |
+        sudo apt update
+        sudo apt install -y imagemagick
+
+    - name: Verify ImageMagick Installation
+      run: convert -version
+
+    - name: List files in current directory (debugging)
+      run: ls -l
+
+    - name: Download Image from Repository
+      run: cp "images (31).jpeg" base_image.jpeg
+
+    - name: Verify that input image exists (debugging)
+      run: |
+        if [ ! -f "base_image.jpeg" ]; then
+          echo "base_image.jpeg not found!"
+          exit 1
+        else
+          echo "base_image.jpeg found!"
+        fi
+
+    - name: Apply Linear Gradient Filter Directly to Image
+      run: |
+        convert base_image.jpeg -size 1280x720 gradient:white-black -compose Multiply -gravity center -composite output.png
+
+    - name: Verify that output.png was created (debugging)
+      run: |
+        if [ ! -f "output.png" ]; then
+          echo "output.png not created!"
+          exit 1
+        else
+          echo "output.png created successfully!"
+        fi
+
+    - name: List files in current directory after applying gradient (debugging)
+      run: ls -l
+
+    - name: Upload Processed Image as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-artifact
+        path: output.png
