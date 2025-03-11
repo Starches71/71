@@ -1,4 +1,3 @@
-
 name: Apply Linear Gradient to Image
 
 on:
@@ -23,11 +22,10 @@ jobs:
         INPUT_FILE="./images (31).jpeg"
         OUTPUT_FILE="./output_image.jpg"
         
-        # Create a gradient image for the bottom 30% of the original image
-        ffmpeg -f lavfi -t 1 -i color=black:s=1920x1080 -vf "gradient=s=1920x324:r=0:g=0:b=0:a=1[grad]" -y gradient.png
-        
-        # Combine the gradient with the original image, overlaying it on the bottom 30%
-        ffmpeg -i "$INPUT_FILE" -i gradient.png -filter_complex "[0:v][1:v]overlay=0:H*0.7" -y "$OUTPUT_FILE"
+        # Apply linear gradient effect to the bottom 30% of the image
+        ffmpeg -i "$INPUT_FILE" -filter_complex "[0:v]split[base][gradient]; 
+        [gradient]format=rgba,geq=r='if(gte(Y,H*0.7),0,0)':g='if(gte(Y,H*0.7),0,0)':b='if(gte(Y,H*0.7),0,0)':a='if(gte(Y,H*0.7),255,0)'[gradient]; 
+        [base][gradient]overlay=0:H*0.7" -y "$OUTPUT_FILE"
 
     - name: Upload result image
       uses: actions/upload-artifact@v4
