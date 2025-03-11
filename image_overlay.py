@@ -1,7 +1,8 @@
+
 from PIL import Image, ImageDraw
 
 # Open the image from the repository
-im = Image.open('31.jpeg')
+im = Image.open('images (31).jpeg')  # Corrected filename
 
 def interpolate(f_co, t_co, interval):
     det_co =[(t - f) / interval for f , t in zip(f_co, t_co)]
