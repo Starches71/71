@@ -1,5 +1,5 @@
 
-name: Apply Gradient Effect to Image
+name: Apply Gradient Effect and Text Overlay to Image
 
 on:
   push:
@@ -23,13 +23,18 @@ jobs:
           sudo apt update
           sudo apt install ffmpeg
 
-      - name: Apply gradient effect to image
+      - name: Apply gradient effect and overlay text
         run: |
-          # Use the specific image file from the repository
+          # Define input and output file paths
           input_image="images (31).jpeg"
           output_image="output_gradient_image.jpg"
           
-          ffmpeg -i "$input_image" -filter_complex "[0]split[base][overlay];[overlay]geq='if(gte(Y, H/2), 255, 0)':128:128[overlay];[base][overlay]overlay=0:H/2" "$output_image"
+          # Apply the gradient and text overlay using FFmpeg
+          ffmpeg -i "$input_image" -filter_complex "[0]split[base][overlay]; 
+          [overlay]geq='if(gte(Y, H/2), 255, 0)':128:128[overlay];
+          [base][overlay]overlay=0:H/2, 
+          drawtext=text='Your Text Here':fontcolor=white:fontsize=40:x=10:y=10" 
+          "$output_image"
 
       - name: Upload modified image as artifact
         uses: actions/upload-artifact@v4
