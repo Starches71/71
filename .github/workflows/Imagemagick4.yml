@@ -1,4 +1,4 @@
-name: ImageMagick Gradient Filter with Bottom Extension
+name: ImageMagick Gradient Filter Directly to Image
 
 on:
   push:
@@ -45,19 +45,21 @@ jobs:
       run: |
         width=$(convert base_image.jpeg -format "%w" info:)
         height=$(convert base_image.jpeg -format "%h" info:)
-        new_height=$((height + (height / 3)))  # Increase height by 30%
-        echo "Width: $width, New Height: $new_height"
-        echo "::set-output name=width::$width"
-        echo "::set-output name=height::$height"
-        echo "::set-output name=new_height::$new_height"
+        new_height=$((height + height / 5))  # Extend height by 20%
+        echo "WIDTH=$width" >> $GITHUB_ENV
+        echo "HEIGHT=$height" >> $GITHUB_ENV
+        echo "NEW_HEIGHT=$new_height" >> $GITHUB_ENV
+        echo "Width: $width, Original Height: $height, New Height: $new_height"
 
     - name: Extend Image with Black Bottom
       run: |
-        convert base_image.jpeg -background black -gravity north -extent ${{ steps.dimensions.outputs.width }}x${{ steps.dimensions.outputs.new_height }} extended_image.jpeg
+        convert base_image.jpeg -background black -gravity north -extent ${WIDTH}x${NEW_HEIGHT} extended_image.jpeg
 
     - name: Apply Linear Gradient to Bottom Only
       run: |
-        convert extended_image.jpeg -size ${{ steps.dimensions.outputs.width }}x${{ steps.dimensions.outputs.new_height }} gradient:none-black -gravity south -extent ${{ steps.dimensions.outputs.width }}x${{ steps.dimensions.outputs.new_height }} -compose Multiply -composite output.png
+        convert extended_image.jpeg \
+          -size ${WIDTH}x${NEW_HEIGHT} gradient:none-black \
+          -gravity south -compose Multiply -composite output.png
 
     - name: Verify that output.png was created (debugging)
       run: |
