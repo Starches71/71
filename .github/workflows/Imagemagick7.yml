@@ -1,4 +1,3 @@
-
 name: ImageMagick Gradient Filter Directly to Image
 
 on:
@@ -50,9 +49,10 @@ jobs:
         echo "IMAGE_WIDTH=$width" >> $GITHUB_ENV
         echo "IMAGE_HEIGHT=$height" >> $GITHUB_ENV
 
-    - name: Apply Brighter Linear Gradient Filter
+    - name: Apply Fully Visible Linear Gradient
       run: |
-        convert base_image.jpeg -size ${IMAGE_WIDTH}x${IMAGE_HEIGHT} gradient:#FFFFFF-#A0A0A0 -compose Multiply -gravity center -composite output.png
+        convert -size ${IMAGE_WIDTH}x${IMAGE_HEIGHT} gradient:#FFFFFF-#A0A0A0 gradient.png
+        convert base_image.jpeg gradient.png -compose Over -composite output.png
 
     - name: Add Centered Text to Image using ffmpeg
       run: |
@@ -60,19 +60,11 @@ jobs:
         font_size=13
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-        # Define image width with margins
-        margin=50
-        text_width=$(( IMAGE_WIDTH - 2 * margin ))
+        # Define text position closer to the bottom (-10)
+        y_pos=$(( IMAGE_HEIGHT - 10 ))
 
-        # Wrap text using fmt with controlled spacing
-        wrapped_text=$(echo "$text" | fmt -w $(( text_width / (font_size / 2) )))
-
-        # Print wrapped text for debugging
-        echo "Wrapped text:"
-        echo "$wrapped_text"
-
-        # Use ffmpeg to add properly centered text
-        ffmpeg -i output.png -vf "drawtext=text='$wrapped_text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2" -y output_with_text.png
+        # Use ffmpeg to add text at proper height
+        ffmpeg -i output.png -vf "drawtext=text='$text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=${y_pos}" -y output_with_text.png
 
     - name: Verify that output_with_text.png was created
       run: |
