@@ -1,3 +1,4 @@
+
 name: Image Processing
 
 on:
@@ -15,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Rename image file
-        run: mv "31).jpeg" base_image.jpeg
+        run: mv "images (31).jpeg" base_image.jpeg
 
       - name: Install ImageMagick
         run: sudo apt-get install imagemagick -y
