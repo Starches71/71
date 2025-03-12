@@ -1,4 +1,3 @@
-
 name: Process Image with Linear Gradient and Text
 
 on:
@@ -23,7 +22,7 @@ jobs:
       run: |
         mkdir -p ~/.fonts
         # Fetch font from your main branch in the repository
-        curl -L https://github.com/Starches71/71/raw/main/FontsFree-Net-Proxima-Nova-Bold-It.otf%20(1).ttf -o ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ (1).ttf
+        curl -L https://github.com/Starches71/71/raw/main/FontsFree-Net-Proxima-Nova-Bold-It.otf%20(1).ttf -o ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ 1.ttf
         fc-cache -fv  # Rebuild font cache
 
     - name: Get Image Dimensions
@@ -42,7 +41,7 @@ jobs:
         
         # Add text overlay at the bottom of the image
         convert gradient_image.jpeg \
-          -font ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ (1).ttf \
+          -font ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ 1.ttf \
           -pointsize $((height / 15)) \  # Dynamically adjust font size based on image height
           -fill white \
           -gravity south \  # Place the text at the bottom
