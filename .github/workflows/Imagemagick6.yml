@@ -17,7 +17,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up ImageMagick
+    - name: Set up ImageMagick and ffmpeg
       run: |
         sudo apt update
         sudo apt install -y imagemagick ffmpeg
@@ -32,7 +32,7 @@ jobs:
     - name: Download Image from Repository
       run: cp "images (31).jpeg" base_image.jpeg
 
-    - name: Verify that input image exists (debugging)
+    - name: Verify that input image exists
       run: |
         if [ ! -f "base_image.jpeg" ]; then
           echo "base_image.jpeg not found!"
@@ -47,33 +47,30 @@ jobs:
         width=$(convert base_image.jpeg -format "%w" info:)
         height=$(convert base_image.jpeg -format "%h" info:)
         echo "Width: $width, Height: $height"
-        echo "width=$width" >> $GITHUB_ENV
-        echo "height=$height" >> $GITHUB_ENV
+        echo "IMAGE_WIDTH=$width" >> $GITHUB_ENV
+        echo "IMAGE_HEIGHT=$height" >> $GITHUB_ENV
 
     - name: Apply Linear Gradient Filter Directly to Image
       run: |
-        convert base_image.jpeg \
-          -size ${width}x${height} gradient:white-black \
-          -compose Multiply -gravity center -composite \
-          output.png
+        convert base_image.jpeg -size ${IMAGE_WIDTH}x${IMAGE_HEIGHT} gradient:white-black -compose Multiply -gravity center -composite output.png
 
     - name: Add Text to Image using ffmpeg
       run: |
         text="Samsung phones can now flip into two because they are the best"
         font_size=13
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-
-        # Wrap text using fold (auto-wraps words without breaking them)
-        wrapped_text=$(echo "$text" | fold -s -w $width)
-
-        # Debugging: Print wrapped text
+        
+        # Use fmt to wrap text at a reasonable width
+        wrapped_text=$(echo "$text" | fmt -w 40)  # Adjust width if needed
+        
+        # Print wrapped text for debugging
         echo "Wrapped text:"
         echo "$wrapped_text"
 
-        # Use ffmpeg to add the text to the image
+        # Use ffmpeg to add text to the image
         ffmpeg -i output.png -vf "drawtext=text='$wrapped_text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
 
-    - name: Verify that output_with_text.png was created (debugging)
+    - name: Verify that output_with_text.png was created
       run: |
         if [ ! -f "output_with_text.png" ]; then
           echo "output_with_text.png not created!"
@@ -82,7 +79,7 @@ jobs:
           echo "output_with_text.png created successfully!"
         fi
 
-    - name: List files in current directory after applying text (debugging)
+    - name: List files in current directory after processing
       run: ls -l
 
     - name: Upload Processed Image as Artifact
