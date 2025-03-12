@@ -56,15 +56,19 @@ jobs:
 
     - name: Add Text to Image using ffmpeg
       run: |
-        # Variables for dynamic text wrapping
-        MAX_WIDTH=${{ steps.dimensions.outputs.width }}
-        TEXT="Samsung phones can now flip into two. This is based on CNN news."
-        FONT_SIZE=30
-        TEXT_X="(w-text_w)/2"
-        TEXT_Y="h-text_h-10"
+        # Variables for dynamic text wrapping and font size adjustment
+        text="Samsung phones can now flip into two: The latest feature lets you switch modes easily"
+        max_width=240  # Maximum width for text (in pixels)
+        font_size=24  # Starting font size
         
-        # Calculate the dynamic font size and wrap text if needed
-        ffmpeg -i output.png -vf "drawtext=text='${TEXT}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=${FONT_SIZE}:fontcolor=white:x=${TEXT_X}:y=${TEXT_Y}:wrap=word" -y output_with_text.png
+        # Estimate font size to fit within the width of the image
+        while [ $(echo -n "$text" | awk '{ print length }') -gt $max_width ]; do
+          font_size=$((font_size - 2))
+          text=$(echo "$text" | fold -w $max_width)  # Wrap text to fit the max width
+        done
+        
+        # Apply text with dynamic font size
+        ffmpeg -i output.png -vf "drawtext=text='$text':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
 
     - name: Verify that output_with_text.png was created (debugging)
       run: |
