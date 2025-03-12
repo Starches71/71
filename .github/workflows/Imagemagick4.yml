@@ -1,0 +1,78 @@
+name: ImageMagick Gradient Filter with Bottom Extension
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  image-overlay:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up ImageMagick
+      run: |
+        sudo apt update
+        sudo apt install -y imagemagick
+
+    - name: Verify ImageMagick Installation
+      run: |
+        convert -version || { echo "convert not found!"; exit 1; }
+
+    - name: List files in current directory (debugging)
+      run: ls -l
+
+    - name: Download Image from Repository
+      run: cp "images (31).jpeg" base_image.jpeg
+
+    - name: Verify that input image exists (debugging)
+      run: |
+        if [ ! -f "base_image.jpeg" ]; then
+          echo "base_image.jpeg not found!"
+          exit 1
+        else
+          echo "base_image.jpeg found!"
+        fi
+
+    - name: Get Image Dimensions
+      id: dimensions
+      run: |
+        width=$(convert base_image.jpeg -format "%w" info:)
+        height=$(convert base_image.jpeg -format "%h" info:)
+        new_height=$((height + (height / 3)))  # Increase height by 30%
+        echo "Width: $width, New Height: $new_height"
+        echo "::set-output name=width::$width"
+        echo "::set-output name=height::$height"
+        echo "::set-output name=new_height::$new_height"
+
+    - name: Extend Image with Black Bottom
+      run: |
+        convert base_image.jpeg -background black -gravity north -extent ${{ steps.dimensions.outputs.width }}x${{ steps.dimensions.outputs.new_height }} extended_image.jpeg
+
+    - name: Apply Linear Gradient to Bottom Only
+      run: |
+        convert extended_image.jpeg -size ${{ steps.dimensions.outputs.width }}x${{ steps.dimensions.outputs.new_height }} gradient:none-black -gravity south -extent ${{ steps.dimensions.outputs.width }}x${{ steps.dimensions.outputs.new_height }} -compose Multiply -composite output.png
+
+    - name: Verify that output.png was created (debugging)
+      run: |
+        if [ ! -f "output.png" ]; then
+          echo "output.png not created!"
+          exit 1
+        else
+          echo "output.png created successfully!"
+        fi
+
+    - name: List files in current directory after applying gradient (debugging)
+      run: ls -l
+
+    - name: Upload Processed Image as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-artifact
+        path: output.png
