@@ -57,7 +57,7 @@ jobs:
     - name: Add Centered Text to Image using ffmpeg
       run: |
         text="The phones are great unless you want to make them fancy"
-        font_size=24
+        font_size=13
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
         # Define image width with margins
