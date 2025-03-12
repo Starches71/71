@@ -1,50 +1,91 @@
-name: Process Image with Text
+name: ImageMagick Gradient Filter Directly to Image
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  process_image:
+  image-overlay:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up environment
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+    - name: Set up ImageMagick
+      run: |
+        sudo apt update
+        sudo apt install -y imagemagick ffmpeg
 
-      - name: Define text and parameters
-        run: |
-          text="My father is from my daughter's Franchise, he is good one there For one who hates it"
-          max_width=240
-          font_size=13
-          font_file="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+    - name: Verify ImageMagick Installation
+      run: |
+        convert -version || { echo "convert not found!"; exit 1; }
 
-          # Wrap text to fit the max width
-          wrapped_text=$(echo "$text" | fold -w $max_width)
+    - name: List files in current directory (debugging)
+      run: ls -l
 
-          # Calculate bottom offset (30% from the bottom)
-          height=720  # You can set the height dynamically if needed
-          bottom_offset=$(echo "$height * 0.30" | bc)
+    - name: Download Image from Repository
+      run: cp "images (31).jpeg" base_image.jpeg
 
-          # Escape the wrapped text to handle special characters properly
-          wrapped_text_escaped=$(echo "$wrapped_text" | sed 's/ /\\ /g')
+    - name: Verify that input image exists (debugging)
+      run: |
+        if [ ! -f "base_image.jpeg" ]; then
+          echo "base_image.jpeg not found!"
+          exit 1
+        else
+          echo "base_image.jpeg found!"
+        fi
 
-          # Use the wrapped text in the ffmpeg command
-          echo "$wrapped_text_escaped"
+    - name: Get Image Dimensions
+      id: dimensions
+      run: |
+        width=$(convert base_image.jpeg -format "%w" info:)
+        height=$(convert base_image.jpeg -format "%h" info:)
+        echo "Width: $width, Height: $height"
+        echo "::set-output name=width::$width"
+        echo "::set-output name=height::$height"
 
-      - name: Process image with ffmpeg
-        run: |
-          # Create an image with text using ffmpeg
-          ffmpeg -f lavfi -t 5 -i color=c=black:s=640x480 -vf "drawtext=text='$wrapped_text_escaped':fontfile=$font_file:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-($bottom_offset)-((h-text_h)/3)" output_with_text.png
+    - name: Apply Linear Gradient Filter Directly to Image
+      run: |
+        convert base_image.jpeg -size ${{ steps.dimensions.outputs.width }}x${{ steps.dimensions.outputs.height }} gradient:white-black -compose Multiply -gravity center -composite output.png
 
-      - name: Upload result image
-        uses: actions/upload-artifact@v4
-        with:
-          name: processed-image
-          path: output_with_text.png
+    - name: Add Text to Image using ffmpeg
+      run: |
+        text="Samsung phones can now flip into two"
+        font_size=13
+        font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+        text_width=$(convert -size ${width}x1000 xc:white -font $font -pointsize $font_size label:"$text" -format "%w" info:)
+        
+        # Check if text exceeds the width of the image
+        if [ "$text_width" -gt "$width" ]; then
+          # Calculate the maximum number of characters that fit in the width
+          max_chars=$(convert -size ${width}x1000 xc:white -font $font -pointsize $font_size label:"$text" -format "%w" info: | awk '{print int($1 / 10)}')
+          text1="${text:0:$max_chars}"
+          text2="${text:$max_chars}"
+          text="$text1\n$text2"
+        fi
+
+        # Add the text with new lines to the image
+        ffmpeg -i output.png -vf "drawtext=text='$text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
+
+    - name: Verify that output_with_text.png was created (debugging)
+      run: |
+        if [ ! -f "output_with_text.png" ]; then
+          echo "output_with_text.png not created!"
+          exit 1
+        else
+          echo "output_with_text.png created successfully!"
+        fi
+
+    - name: List files in current directory after applying text (debugging)
+      run: ls -l
+
+    - name: Upload Processed Image as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-artifact
+        path: output_with_text.png
