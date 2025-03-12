@@ -1,3 +1,4 @@
+
 name: ImageMagick Gradient Filter Directly to Image
 
 on:
@@ -69,33 +70,40 @@ jobs:
           echo $width
         }
 
-        # Split the text into words
-        words=($text)
-        
-        # Initialize variables
-        current_line=""
-        current_line_width=0
-        wrapped_text=""
+        # Function to wrap text
+        wrap_text() {
+          local text="$1"
+          local max_width=$2
+          local wrapped_text=""
+          local current_line=""
+          local current_line_width=0
 
-        # Iterate over each word in the text
-        for word in "${words[@]}"; do
-          word_width=$(measure_word_width "$word")
+          # Split the text into words
+          for word in $text; do
+            word_width=$(measure_word_width "$word")
+            
+            # Check if adding the word exceeds the width of the image
+            if [ $(($current_line_width + $word_width)) -le $max_width ]; then
+              current_line="$current_line $word"
+              current_line_width=$(($current_line_width + $word_width))
+            else
+              # If the word doesn't fit, move it to the next line
+              wrapped_text="$wrapped_text$current_line\n"
+              current_line="$word"
+              current_line_width=$word_width
+            fi
+          done
+
+          # Add the last line
+          wrapped_text="$wrapped_text$current_line"
           
-          # If the word fits in the current line, add it
-          if [ $(($current_line_width + $word_width)) -le $image_width ]; then
-            current_line="$current_line $word"
-            current_line_width=$(($current_line_width + $word_width))
-          else
-            # If the word doesn't fit, move it to the next line
-            wrapped_text="$wrapped_text$current_line\n"
-            current_line="$word"
-            current_line_width=$word_width
-          fi
-        done
+          # Output wrapped text
+          echo "$wrapped_text"
+        }
 
-        # Add the last line
-        wrapped_text="$wrapped_text$current_line"
-        
+        # Get wrapped text
+        wrapped_text=$(wrap_text "$text" $image_width)
+
         # Print the wrapped text (for debugging)
         echo "Wrapped text:\n$wrapped_text"
 
