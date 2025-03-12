@@ -16,7 +16,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up ImageMagick and ffmpeg
+    - name: Set up ImageMagick
       run: |
         sudo apt update
         sudo apt install -y imagemagick ffmpeg
@@ -55,36 +55,15 @@ jobs:
 
     - name: Add Text to Image using ffmpeg
       run: |
-        # Variables for dynamic text wrapping and font size adjustment
         text="My father is from my daughter's Franchise, he is good one there For one who hates it"
-        max_width=240  # Maximum width for text (in pixels)
-        font_size=13  # Fixed font size of 13
-        
+        max_width=240
+        font_size=13
+
         # Wrap text to fit the max width
         wrapped_text=$(echo "$text" | fold -w $max_width)
-        
-        # Calculate the Y position to place the text 30% from the bottom of the image
+
+        # Calculate bottom offset (30% from the bottom)
         bottom_offset=$(echo "$height * 0.30" | bc)
-        
-        # Apply text vertically and center horizontally. 
-        # We'll calculate the total height of the wrapped text and adjust the Y position.
-        ffmpeg -i output.png -vf "
-          drawtext=text='$wrapped_text':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-($bottom_offset)-((h-text_h)/3)" -y output_with_text.png
 
-    - name: Verify that output_with_text.png was created (debugging)
-      run: |
-        if [ ! -f "output_with_text.png" ]; then
-          echo "output_with_text.png not created!"
-          exit 1
-        else
-          echo "output_with_text.png created successfully!"
-        fi
-
-    - name: List files in current directory after applying text (debugging)
-      run: ls -l
-
-    - name: Upload Processed Image as Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: image-artifact
-        path: output_with_text.png
+        # Escape the wrapped text to handle special characters properly
+        wrapped_text_escaped=$(echo "$wrapped_text" | sed 's/
