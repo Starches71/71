@@ -1,4 +1,5 @@
-name: Process Image with Linear Gradient and Text
+
+name: Image Processing Pipeline
 
 on:
   push:
@@ -6,52 +7,47 @@ on:
       - main
 
 jobs:
-  process-image:
+  process_image:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-    - name: Install ImageMagick and font utilities
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y imagemagick fontconfig
+      - name: Set Up Fonts
+        run: |
+          mkdir -p ~/.fonts
+          curl -L https://github.com/Starches71/71/raw/main/FontsFree-Net-Proxima-Nova-Bold-It.otf%20(1).ttf -o ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf1.ttf
+          fc-cache -fv
 
-    - name: Setup Font
-      run: |
-        mkdir -p ~/.fonts
-        # Fetch font from your main branch in the repository
-        curl -L https://github.com/Starches71/71/raw/main/FontsFree-Net-Proxima-Nova-Bold-It.otf%20%281%29.ttf -o ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ 1.ttf
-        fc-cache -fv  # Rebuild font cache
+      - name: Fetch Image Dimensions
+        run: |
+          # Fetch image dimensions to dynamically adjust font size
+          width=$(identify -format "%w" gradient_image.jpeg)
+          height=$(identify -format "%h" gradient_image.jpeg)
+          echo "Width: $width, Height: $height"
 
-    - name: Get Image Dimensions
-      id: dimensions
-      run: |
-        # Get the dimensions of the base image to apply gradient accordingly
-        width=$(identify -format "%w" "images (31).jpeg")
-        height=$(identify -format "%h" "images (31).jpeg")
-        echo "width=$width" >> $GITHUB_ENV
-        echo "height=$height" >> $GITHUB_ENV
+      - name: Apply Gradient to Image
+        run: |
+          # Apply a gradient to the image
+          convert gradient_image.jpeg \
+            -size ${width}x${height} gradient:blue-yellow \
+            -gravity center \
+            -composite gradient_image_with_gradient.jpeg
 
-    - name: Apply Gradient
-      run: |
-        # Apply the gradient first
-        convert "images (31).jpeg" -size ${width}x${height} gradient:white-black -compose Multiply -gravity center -composite gradient_image.jpeg
+      - name: Add White Text at Bottom
+        run: |
+          # Add simple white text to the gradient image at the bottom
+          convert gradient_image_with_gradient.jpeg \
+            -font ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ 1.ttf \
+            -pointsize $((height / 15)) \  # Dynamically adjust font size based on image height
+            -fill white \
+            -gravity south \  # Place the text at the bottom
+            -annotate +0+20 "Sample Text" \  # Simple placeholder text
+            extended_image.jpeg
 
-    - name: Add White Text at Bottom
-      run: |
-        # Add white text to the gradient image at the bottom
-        convert gradient_image.jpeg \
-          -font ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ 1.ttf \
-          -pointsize $((height / 15)) \  # Dynamically adjust font size based on image height
-          -fill white \
-          -gravity south \  # Place the text at the bottom
-          -annotate +0+20 "Game over for ChatGPT and Gemini? This auto AI was launched and doesn't require human." \
-          extended_image.jpeg
-
-    - name: Upload Processed Image
-      uses: actions/upload-artifact@v4
-      with:
-        name: extended-image
-        path: extended_image.jpeg
+      - name: Upload Processed Image
+        uses: actions/upload-artifact@v2
+        with:
+          name: processed-image
+          path: extended_image.jpeg
