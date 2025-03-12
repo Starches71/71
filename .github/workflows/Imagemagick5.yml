@@ -1,0 +1,52 @@
+
+name: Process Image with Linear Gradient and Text
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  process-image:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install ImageMagick and font utilities
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y imagemagick fontconfig
+
+    - name: Setup Font
+      run: |
+        mkdir -p ~/.fonts
+        # Fetch font from your main branch in the repository
+        curl -L https://github.com/Starches71/71/raw/main/FontsFree-Net-Proxima-Nova-Bold-It.otf -o ~/.fonts/ProximaNovaBoldIt.otf
+        fc-cache -fv  # Rebuild font cache
+
+    - name: Apply Linear Gradient and Add Text
+      run: |
+        # First, apply the linear gradient to the image
+        convert "images (31).jpeg" \
+          -size 275x203 gradient:white-black \
+          -gravity center \
+          -composite \
+          linear_gradient_image.jpeg
+
+        # Then, add the text overlay at the bottom of the image
+        height=$(identify -format "%h" linear_gradient_image.jpeg)
+        convert linear_gradient_image.jpeg \
+          -font ~/.fonts/ProximaNovaBoldIt.otf \
+          -pointsize $((height / 15)) \  # Dynamically adjust font size based on image height
+          -fill white \
+          -gravity south \  # Place the text at the bottom
+          -annotate +0+20 "Game over for ChatGPT and Gemini? This auto AI was launched and doesn't require human." \
+          extended_image.jpeg
+
+    - name: Upload Processed Image
+      uses: actions/upload-artifact@v3
+      with:
+        name: extended-image
+        path: extended_image.jpeg
