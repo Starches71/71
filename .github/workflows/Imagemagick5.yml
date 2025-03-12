@@ -22,7 +22,7 @@ jobs:
       run: |
         mkdir -p ~/.fonts
         # Fetch font from your main branch in the repository
-        curl -L https://github.com/Starches71/71/raw/main/FontsFree-Net-Proxima-Nova-Bold-It.otf%20(1).ttf -o ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ 1.ttf
+        curl -L https://github.com/Starches71/71/raw/main/FontsFree-Net-Proxima-Nova-Bold-It.otf%20%281%29.ttf -o ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ 1.ttf
         fc-cache -fv  # Rebuild font cache
 
     - name: Get Image Dimensions
