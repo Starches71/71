@@ -1,129 +1,17 @@
-
-name: ImageMagick Gradient Filter Directly to Image
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  image-overlay:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up ImageMagick
-      run: |
-        sudo apt update
-        sudo apt install -y imagemagick ffmpeg
-
-    - name: Verify ImageMagick Installation
-      run: |
-        convert -version || { echo "convert not found!"; exit 1; }
-
-    - name: List files in current directory (debugging)
-      run: ls -l
-
-    - name: Download Image from Repository
-      run: cp "images (31).jpeg" base_image.jpeg
-
-    - name: Verify that input image exists (debugging)
-      run: |
-        if [ ! -f "base_image.jpeg" ]; then
-          echo "base_image.jpeg not found!"
-          exit 1
-        else
-          echo "base_image.jpeg found!"
-        fi
-
-    - name: Get Image Dimensions
-      id: dimensions
-      run: |
-        width=$(convert base_image.jpeg -format "%w" info:)
-        height=$(convert base_image.jpeg -format "%h" info:)
-        echo "Width: $width, Height: $height"
-        echo "::set-output name=width::$width"
-        echo "::set-output name=height::$height"
-
-    - name: Apply Linear Gradient Filter Directly to Image
-      run: |
-        convert base_image.jpeg -size ${{ steps.dimensions.outputs.width }}x${{ steps.dimensions.outputs.height }} gradient:white-black -compose Multiply -gravity center -composite output.png
-
-    - name: Add Text to Image using ffmpeg
+- name: Add Text to Image using ffmpeg
       run: |
         text="Samsung phones can now flip into two because they are the best"
         font_size=13
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-        
-        # Measure the width of the image
+
+        # Get image width
         image_width=${{ steps.dimensions.outputs.width }}
-        
-        # Function to measure the width of a word in the image
-        measure_word_width() {
-          word=$1
-          width=$(convert -size ${image_width}x1000 xc:white -font $font -pointsize $font_size label:"$word" -format "%w" info:)
-          echo $width
-        }
 
-        # Function to wrap text
-        wrap_text() {
-          local text="$1"
-          local max_width=$2
-          local wrapped_text=""
-          local current_line=""
-          local current_line_width=0
-
-          # Split the text into words
-          for word in $text; do
-            word_width=$(measure_word_width "$word")
-            
-            # Check if adding the word exceeds the width of the image
-            if [ $(($current_line_width + $word_width)) -le $max_width ]; then
-              current_line="$current_line $word"
-              current_line_width=$(($current_line_width + $word_width))
-            else
-              # If the word doesn't fit, move it to the next line
-              wrapped_text="$wrapped_text$current_line\n"
-              current_line="$word"
-              current_line_width=$word_width
-            fi
-          done
-
-          # Add the last line
-          wrapped_text="$wrapped_text$current_line"
-          
-          # Output wrapped text
-          echo "$wrapped_text"
-        }
-
-        # Get wrapped text
-        wrapped_text=$(wrap_text "$text" $image_width)
+        # Use fold to wrap text at image width
+        wrapped_text=$(echo "$text" | fold -s -w $image_width)
 
         # Print the wrapped text (for debugging)
         echo "Wrapped text:\n$wrapped_text"
 
         # Use ffmpeg to add the text to the image
         ffmpeg -i output.png -vf "drawtext=text='$wrapped_text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
-
-    - name: Verify that output_with_text.png was created (debugging)
-      run: |
-        if [ ! -f "output_with_text.png" ]; then
-          echo "output_with_text.png not created!"
-          exit 1
-        else
-          echo "output_with_text.png created successfully!"
-        fi
-
-    - name: List files in current directory after applying text (debugging)
-      run: ls -l
-
-    - name: Upload Processed Image as Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: image-artifact
-        path: output_with_text.png
