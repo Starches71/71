@@ -1,17 +1,92 @@
-- name: Add Text to Image using ffmpeg
+
+name: ImageMagick Gradient Filter Directly to Image
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  image-overlay:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up ImageMagick
+      run: |
+        sudo apt update
+        sudo apt install -y imagemagick ffmpeg
+
+    - name: Verify ImageMagick Installation
+      run: |
+        convert -version || { echo "convert not found!"; exit 1; }
+
+    - name: List files in current directory (debugging)
+      run: ls -l
+
+    - name: Download Image from Repository
+      run: cp "images (31).jpeg" base_image.jpeg
+
+    - name: Verify that input image exists (debugging)
+      run: |
+        if [ ! -f "base_image.jpeg" ]; then
+          echo "base_image.jpeg not found!"
+          exit 1
+        else
+          echo "base_image.jpeg found!"
+        fi
+
+    - name: Get Image Dimensions
+      id: dimensions
+      run: |
+        width=$(convert base_image.jpeg -format "%w" info:)
+        height=$(convert base_image.jpeg -format "%h" info:)
+        echo "Width: $width, Height: $height"
+        echo "width=$width" >> $GITHUB_ENV
+        echo "height=$height" >> $GITHUB_ENV
+
+    - name: Apply Linear Gradient Filter Directly to Image
+      run: |
+        convert base_image.jpeg \
+          -size ${width}x${height} gradient:white-black \
+          -compose Multiply -gravity center -composite \
+          output.png
+
+    - name: Add Text to Image using ffmpeg
       run: |
         text="Samsung phones can now flip into two because they are the best"
         font_size=13
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-        # Get image width
-        image_width=${{ steps.dimensions.outputs.width }}
+        # Wrap text using fold (auto-wraps words without breaking them)
+        wrapped_text=$(echo "$text" | fold -s -w $width)
 
-        # Use fold to wrap text at image width
-        wrapped_text=$(echo "$text" | fold -s -w $image_width)
-
-        # Print the wrapped text (for debugging)
-        echo "Wrapped text:\n$wrapped_text"
+        # Debugging: Print wrapped text
+        echo "Wrapped text:"
+        echo "$wrapped_text"
 
         # Use ffmpeg to add the text to the image
         ffmpeg -i output.png -vf "drawtext=text='$wrapped_text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
+
+    - name: Verify that output_with_text.png was created (debugging)
+      run: |
+        if [ ! -f "output_with_text.png" ]; then
+          echo "output_with_text.png not created!"
+          exit 1
+        else
+          echo "output_with_text.png created successfully!"
+        fi
+
+    - name: List files in current directory after applying text (debugging)
+      run: ls -l
+
+    - name: Upload Processed Image as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-artifact
+        path: output_with_text.png
