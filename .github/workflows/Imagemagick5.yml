@@ -56,7 +56,7 @@ jobs:
 
     - name: Add Text to Image using ffmpeg
       run: |
-        ffmpeg -i output.png -vf "drawtext=text='Samsung phones can now flip into two':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=30:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
+        ffmpeg -i output.png -vf "drawtext=text='Samsung phones can now flip into two':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=10:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
 
     - name: Verify that output_with_text.png was created (debugging)
       run: |
