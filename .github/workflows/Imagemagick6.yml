@@ -1,4 +1,3 @@
-
 name: ImageMagick Gradient Filter Directly to Image
 
 on:
@@ -69,7 +68,7 @@ jobs:
           text=$(echo "$text" | fold -w $width -s)
         fi
         
-        # Add the text to the image
+        # Add the text to the image using ffmpeg (draw the wrapped text)
         ffmpeg -i output.png -vf "drawtext=text='$text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
 
     - name: Verify that output_with_text.png was created (debugging)
