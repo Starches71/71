@@ -1,3 +1,4 @@
+
 name: ImageMagick Gradient Filter Directly to Image
 
 on:
@@ -58,18 +59,17 @@ jobs:
         text="Samsung phones can now flip into two because they are the best"
         font_size=13
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-        text_width=$(convert -size ${width}x1000 xc:white -font $font -pointsize $font_size label:"$text" -format "%w" info:)
         
+        # Use 'convert' to measure text width
+        text_width=$(convert -size ${width}x1000 xc:white -font $font -pointsize $font_size label:"$text" -format "%w" info:)
+
         # Check if text exceeds the width of the image
         if [ "$text_width" -gt "$width" ]; then
-          # Calculate the maximum number of characters that fit in the width
-          max_chars=$(convert -size ${width}x1000 xc:white -font $font -pointsize $font_size label:"$text" -format "%w" info: | awk '{print int($1 / 10)}')
-          text1="${text:0:$max_chars}"
-          text2="${text:$max_chars}"
-          text="$text1\n$text2"
+          # Break the text into lines that fit the width using 'fold'
+          text=$(echo "$text" | fold -w $width -s)
         fi
-
-        # Add the text with new lines to the image
+        
+        # Add the text to the image
         ffmpeg -i output.png -vf "drawtext=text='$text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
 
     - name: Verify that output_with_text.png was created (debugging)
