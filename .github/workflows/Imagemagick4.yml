@@ -37,7 +37,7 @@ jobs:
       - name: Apply Linear Gradient Effect
         run: |
           convert extended_image.jpeg \
-            -size ${WIDTH}x${NEW_HEIGHT} gradient:black-white \
+            -size ${WIDTH}x${NEW_HEIGHT} gradient:white-black \
             -compose Multiply -composite output.png
 
       - name: Upload Processed Image
