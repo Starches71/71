@@ -55,7 +55,7 @@ jobs:
 
     - name: Add Text to Image using ffmpeg
       run: |
-        text="Samsung phones can now flip into two"
+        text="Samsung phones can now flip into two because they are the best"
         font_size=13
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
         text_width=$(convert -size ${width}x1000 xc:white -font $font -pointsize $font_size label:"$text" -format "%w" info:)
