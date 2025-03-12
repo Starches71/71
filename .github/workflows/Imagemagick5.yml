@@ -1,53 +1,77 @@
 
-name: Image Processing Pipeline
+name: ImageMagick Gradient Filter Directly to Image
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  process_image:
+  image-overlay:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set Up Fonts
-        run: |
-          mkdir -p ~/.fonts
-          curl -L https://github.com/Starches71/71/raw/main/FontsFree-Net-Proxima-Nova-Bold-It.otf%20(1).ttf -o ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ 1.ttf
-          fc-cache -fv
+    - name: Set up ImageMagick
+      run: |
+        sudo apt update
+        sudo apt install -y imagemagick ffmpeg
 
-      - name: Fetch Image Dimensions
-        run: |
-          # Fetch image dimensions to dynamically adjust font size
-          width=$(identify -format "%w" gradient_image.jpeg)
-          height=$(identify -format "%h" gradient_image.jpeg)
-          echo "Width: $width, Height: $height"
+    - name: Verify ImageMagick Installation
+      run: |
+        convert -version || { echo "convert not found!"; exit 1; }
 
-      - name: Apply Gradient to Image
-        run: |
-          # Apply a gradient to the image
-          convert gradient_image.jpeg \
-            -size ${width}x${height} gradient:blue-yellow \
-            -gravity center \
-            -composite gradient_image_with_gradient.jpeg
+    - name: List files in current directory (debugging)
+      run: ls -l
 
-      - name: Add White Text at Bottom
-        run: |
-          # Add simple white text to the gradient image at the bottom
-          convert gradient_image_with_gradient.jpeg \
-            -font ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ 1.ttf \
-            -pointsize $((height / 15)) \  # Dynamically adjust font size based on image height
-            -fill white \
-            -gravity south \  # Place the text at the bottom
-            -annotate +0+20 "Sample Text" \  # Simple placeholder text
-            extended_image.jpeg
+    - name: Download Image from Repository
+      run: cp "images (31).jpeg" base_image.jpeg
 
-      - name: Upload Processed Image
-        uses: actions/upload-artifact@v4
-        with:
-          name: processed-image
-          path: extended_image.jpeg
+    - name: Verify that input image exists (debugging)
+      run: |
+        if [ ! -f "base_image.jpeg" ]; then
+          echo "base_image.jpeg not found!"
+          exit 1
+        else
+          echo "base_image.jpeg found!"
+        fi
+
+    - name: Get Image Dimensions
+      id: dimensions
+      run: |
+        width=$(convert base_image.jpeg -format "%w" info:)
+        height=$(convert base_image.jpeg -format "%h" info:)
+        echo "Width: $width, Height: $height"
+        echo "::set-output name=width::$width"
+        echo "::set-output name=height::$height"
+
+    - name: Apply Linear Gradient Filter Directly to Image
+      run: |
+        convert base_image.jpeg -size ${{ steps.dimensions.outputs.width }}x${{ steps.dimensions.outputs.height }} gradient:white-black -compose Multiply -gravity center -composite output.png
+
+    - name: Add Text to Image using ffmpeg
+      run: |
+        ffmpeg -i output.png -vf "drawtext=text='Samsung phones can now flip into two':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=30:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
+
+    - name: Verify that output_with_text.png was created (debugging)
+      run: |
+        if [ ! -f "output_with_text.png" ]; then
+          echo "output_with_text.png not created!"
+          exit 1
+        else
+          echo "output_with_text.png created successfully!"
+        fi
+
+    - name: List files in current directory after applying text (debugging)
+      run: ls -l
+
+    - name: Upload Processed Image as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-artifact
+        path: output_with_text.png
