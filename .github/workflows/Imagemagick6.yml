@@ -16,7 +16,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up ImageMagick
+    - name: Set up ImageMagick and ffmpeg
       run: |
         sudo apt update
         sudo apt install -y imagemagick ffmpeg
@@ -65,7 +65,7 @@ jobs:
         
         # Calculate the Y position to place the text 30% from the bottom of the image
         bottom_offset=$(echo "$height * 0.30" | bc)
-
+        
         # Apply text vertically and center horizontally. 
         # We'll calculate the total height of the wrapped text and adjust the Y position.
         ffmpeg -i output.png -vf "
@@ -76,7 +76,7 @@ jobs:
         if [ ! -f "output_with_text.png" ]; then
           echo "output_with_text.png not created!"
           exit 1
-        else:
+        else
           echo "output_with_text.png created successfully!"
         fi
 
