@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install ImageMagick and font utilities
       run: |
@@ -46,7 +46,7 @@ jobs:
           extended_image.jpeg
 
     - name: Upload Processed Image
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: extended-image
         path: extended_image.jpeg
