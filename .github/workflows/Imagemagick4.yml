@@ -1,18 +1,44 @@
-- name: Get image dimensions
-      run: |
-        width=$(identify -format "%w" base_image.jpeg)
-        height=$(identify -format "%h" base_image.jpeg)
-        new_height=$((height + 20))  # Adjust height slightly
-        echo "WIDTH=$width" >> $GITHUB_ENV
-        echo "HEIGHT=$height" >> $GITHUB_ENV
-        echo "NEW_HEIGHT=$new_height" >> $GITHUB_ENV
 
-    - name: Extend Image with White Bottom
-      run: |
-        convert base_image.jpeg -background white -gravity north -extent ${WIDTH}x${NEW_HEIGHT} extended_image.jpeg
+name: Image Processing
 
-    - name: Apply Linear Gradient Effect
-      run: |
-        convert extended_image.jpeg \
-          -size ${WIDTH}x${NEW_HEIGHT} gradient:black-white \
-          -compose Multiply -composite output.png
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  process_image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install ImageMagick
+        run: sudo apt-get install imagemagick -y
+
+      - name: Get image dimensions
+        run: |
+          width=$(identify -format "%w" base_image.jpeg)
+          height=$(identify -format "%h" base_image.jpeg)
+          new_height=$((height + 20))  # Slightly increase height
+          echo "WIDTH=$width" >> $GITHUB_ENV
+          echo "HEIGHT=$height" >> $GITHUB_ENV
+          echo "NEW_HEIGHT=$new_height" >> $GITHUB_ENV
+
+      - name: Extend Image with White Bottom
+        run: |
+          convert base_image.jpeg -background white -gravity north -extent ${WIDTH}x${NEW_HEIGHT} extended_image.jpeg
+
+      - name: Apply Linear Gradient Effect
+        run: |
+          convert extended_image.jpeg \
+            -size ${WIDTH}x${NEW_HEIGHT} gradient:black-white \
+            -compose Multiply -composite output.png
+
+      - name: Upload Processed Image
+        uses: actions/upload-artifact@v3
+        with:
+          name: processed-image
+          path: output.png
