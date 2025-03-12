@@ -26,18 +26,22 @@ jobs:
         curl -L https://github.com/Starches71/71/raw/main/FontsFree-Net-Proxima-Nova-Bold-It.otf -o ~/.fonts/ProximaNovaBoldIt.otf
         fc-cache -fv  # Rebuild font cache
 
+    - name: Get Image Dimensions
+      id: dimensions
+      run: |
+        # Get the dimensions of the base image to apply gradient accordingly
+        width=$(identify -format "%w" "images (31).jpeg")
+        height=$(identify -format "%h" "images (31).jpeg")
+        echo "width=$width" >> $GITHUB_ENV
+        echo "height=$height" >> $GITHUB_ENV
+
     - name: Apply Linear Gradient and Add Text
       run: |
-        # First, apply the linear gradient to the image
-        convert "images (31).jpeg" \
-          -size 275x203 gradient:white-black \
-          -gravity center \
-          -composite \
-          linear_gradient_image.jpeg
-
-        # Then, add the text overlay at the bottom of the image
-        height=$(identify -format "%h" linear_gradient_image.jpeg)
-        convert linear_gradient_image.jpeg \
+        # Apply the gradient
+        convert "images (31).jpeg" -size ${width}x${height} gradient:white-black -compose Multiply -gravity center -composite gradient_image.jpeg
+        
+        # Add text overlay at the bottom of the image
+        convert gradient_image.jpeg \
           -font ~/.fonts/ProximaNovaBoldIt.otf \
           -pointsize $((height / 15)) \  # Dynamically adjust font size based on image height
           -fill white \
