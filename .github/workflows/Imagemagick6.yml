@@ -59,16 +59,14 @@ jobs:
         # Variables for dynamic text wrapping and font size adjustment
         text="Samsung phones can now flip into two: The latest feature lets you switch modes easily"
         max_width=240  # Maximum width for text (in pixels)
-        font_size=24  # Starting font size
+        font_size=13  # Fixed font size of 13
         
-        # Estimate font size to fit within the width of the image
-        while [ $(echo -n "$text" | awk '{ print length }') -gt $max_width ]; do
-          font_size=$((font_size - 2))
-          text=$(echo "$text" | fold -w $max_width)  # Wrap text to fit the max width
-        done
+        # Wrap text to fit the max width
+        wrapped_text=$(echo "$text" | fold -w $max_width)
         
-        # Apply text with dynamic font size
-        ffmpeg -i output.png -vf "drawtext=text='$text':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
+        # Apply text with fixed font size and arrange text vertically, centered
+        ffmpeg -i output.png -vf "
+          drawtext=text='$wrapped_text':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2" -y output_with_text.png
 
     - name: Verify that output_with_text.png was created (debugging)
       run: |
