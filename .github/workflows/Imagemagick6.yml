@@ -1,3 +1,4 @@
+
 name: ImageMagick Gradient Filter Directly to Image
 
 on:
@@ -59,16 +60,16 @@ jobs:
         font_size=13
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
         
-        # Use 'convert' to measure text width
+        # Measure the width of the text in the image
         text_width=$(convert -size ${width}x1000 xc:white -font $font -pointsize $font_size label:"$text" -format "%w" info:)
 
-        # Check if text exceeds the width of the image
+        # If the text exceeds the width, we need to wrap it
         if [ "$text_width" -gt "$width" ]; then
-          # Break the text into lines that fit the width using 'fold'
+          # Wrap the text to fit the width of the image using 'fold'
           text=$(echo "$text" | fold -w $width -s)
         fi
         
-        # Add the text to the image using ffmpeg (draw the wrapped text)
+        # Use ffmpeg to add the text to the image
         ffmpeg -i output.png -vf "drawtext=text='$text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
 
     - name: Verify that output_with_text.png was created (debugging)
