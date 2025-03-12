@@ -34,12 +34,14 @@ jobs:
         echo "width=$width" >> $GITHUB_ENV
         echo "height=$height" >> $GITHUB_ENV
 
-    - name: Apply Linear Gradient and Add Text
+    - name: Apply Gradient
       run: |
-        # Apply the gradient
+        # Apply the gradient first
         convert "images (31).jpeg" -size ${width}x${height} gradient:white-black -compose Multiply -gravity center -composite gradient_image.jpeg
-        
-        # Add text overlay at the bottom of the image
+
+    - name: Add White Text at Bottom
+      run: |
+        # Add white text to the gradient image at the bottom
         convert gradient_image.jpeg \
           -font ~/.fonts/FontsFree-Net-Proxima-Nova-Bold-It.otf\ 1.ttf \
           -pointsize $((height / 15)) \  # Dynamically adjust font size based on image height
