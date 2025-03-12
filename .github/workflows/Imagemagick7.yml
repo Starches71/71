@@ -1,0 +1,92 @@
+name: ImageMagick Gradient Filter Directly to Image
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  image-overlay:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up ImageMagick and ffmpeg
+      run: |
+        sudo apt update
+        sudo apt install -y imagemagick ffmpeg
+
+    - name: Verify ImageMagick Installation
+      run: |
+        convert -version || { echo "convert not found!"; exit 1; }
+
+    - name: List files in current directory (debugging)
+      run: ls -l
+
+    - name: Download Image from Repository
+      run: cp "images (31).jpeg" base_image.jpeg
+
+    - name: Verify that input image exists
+      run: |
+        if [ ! -f "base_image.jpeg" ]; then
+          echo "base_image.jpeg not found!"
+          exit 1
+        else
+          echo "base_image.jpeg found!"
+        fi
+
+    - name: Get Image Dimensions
+      id: dimensions
+      run: |
+        width=$(convert base_image.jpeg -format "%w" info:)
+        height=$(convert base_image.jpeg -format "%h" info:)
+        echo "Width: $width, Height: $height"
+        echo "IMAGE_WIDTH=$width" >> $GITHUB_ENV
+        echo "IMAGE_HEIGHT=$height" >> $GITHUB_ENV
+
+    - name: Apply Brighter Gradient Filter
+      run: |
+        convert base_image.jpeg -size ${IMAGE_WIDTH}x${IMAGE_HEIGHT} gradient:#FFFFFF-#606060 -compose Multiply -gravity center -composite output.png
+
+    - name: Add Centered Text to Image using ffmpeg
+      run: |
+        text="The phones are great unless you want to make them fancy"
+        font_size=22
+        font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+        
+        # Define image width with margins
+        margin=40
+        text_width=$(( IMAGE_WIDTH - 2 * margin ))
+
+        # Use fmt for text wrapping with center alignment
+        wrapped_text=$(echo "$text" | fmt -w $(( text_width / (font_size / 2) )) | sed 's/^/        /')
+
+        # Print wrapped text for debugging
+        echo "Wrapped text:"
+        echo "$wrapped_text"
+
+        # Use ffmpeg to add centered text to the image
+        ffmpeg -i output.png -vf "drawtext=text='$wrapped_text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-30" -y output_with_text.png
+
+    - name: Verify that output_with_text.png was created
+      run: |
+        if [ ! -f "output_with_text.png" ]; then
+          echo "output_with_text.png not created!"
+          exit 1
+        else
+          echo "output_with_text.png created successfully!"
+        fi
+
+    - name: List files in current directory after processing
+      run: ls -l
+
+    - name: Upload Processed Image as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-artifact
+        path: output_with_text.png
