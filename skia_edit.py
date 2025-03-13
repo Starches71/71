@@ -1,3 +1,4 @@
+
 import skia
 import os
 
@@ -5,9 +6,9 @@ def apply_gradient_and_text(input_path, output_path):
     # Load the image from the repository
     with open(input_path, 'rb') as f:
         image_data = f.read()
-    
-    # Use the corrected method to load the image from encoded data
-    image = skia.Image.MakeFromEncoded(image_data)
+
+    # Correct method to load image from encoded data
+    image = skia.Image.MakeFromEncoded(skia.Data.MakeFromBytes(image_data))
     if image is None:
         raise ValueError("Failed to load image.")
 
@@ -15,14 +16,14 @@ def apply_gradient_and_text(input_path, output_path):
     surface = skia.Surface(image.width(), image.height())
     canvas = surface.getCanvas()
 
-    # Apply a linear gradient
+    # Apply a linear gradient manually (using LinearGradientShader.Make)
     paint = skia.Paint()
-    paint.setShader(skia.Shader.MakeLinearGradient(
-        (0, 0), (image.width(), image.height()),
-        [skia.Color(255, 255, 255), skia.Color(0, 0, 0)],
-        [0, 1],
-        skia.TileMode.kClamp_TileMode
-    ))
+    colors = [skia.Color(255, 255, 255), skia.Color(0, 0, 0)]
+    positions = [0, 1]
+    shader = skia.LinearGradientShader.Make(
+        (0, 0), (image.width(), image.height()), colors, positions, skia.TileMode.kClamp_TileMode
+    )
+    paint.setShader(shader)
     canvas.drawPaint(paint)
 
     # Draw the original image onto the canvas
@@ -38,8 +39,8 @@ def apply_gradient_and_text(input_path, output_path):
     # Define the text to overlay
     text = "Samsung phones can now flip into two"
 
-    # Create a font object
-    font = skia.Font(skia.Typeface(''), 14)  # Adjusted font size
+    # Create a font object with default font (use a system font or a custom font)
+    font = skia.Font(skia.Typeface('Arial'), 14)  # Adjusted font size
 
     # Calculate text bounds
     bounds = skia.Rect()
