@@ -1,0 +1,65 @@
+name: Generate Image from HTML and CSS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  generate-image:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js for Puppeteer
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install Puppeteer
+      run: |
+        npm install puppeteer
+
+    - name: Install ImageMagick (Optional if you want further image manipulation)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y imagemagick
+
+    - name: Run Puppeteer to generate the image
+      run: |
+        echo "
+        const puppeteer = require('puppeteer');
+        
+        (async () => {
+          const browser = await puppeteer.launch({ headless: true });
+          const page = await browser.newPage();
+          await page.goto('file://${GITHUB_WORKSPACE}/index.html', { waitUntil: 'load' });
+          
+          const element = await page.$('body');
+          await element.screenshot({ path: 'output_image.png' });
+          
+          await browser.close();
+        })();
+        " > generate_image.js
+
+        node generate_image.js
+
+    - name: Verify the generated image
+      run: |
+        if [ ! -f "output_image.png" ]; then
+          echo "output_image.png not created!"
+          exit 1
+        else
+          echo "output_image.png created successfully!"
+        fi
+
+    - name: Upload the generated image as an artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: generated-image
+        path: output_image.png
