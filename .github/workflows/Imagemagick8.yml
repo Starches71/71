@@ -1,4 +1,5 @@
-name: ImageMagick Gradient Filter and Text Overlay with Wand
+
+name: Generate Image from HTML and CSS
 
 on:
   push:
@@ -9,79 +10,51 @@ on:
       - main
 
 jobs:
-  image-overlay:
+  generate-image:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Set up Python and Install Dependencies
+    # Step 1: Install Node.js and Puppeteer
+    - name: Set up Node.js for Puppeteer
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install Puppeteer
       run: |
-        sudo apt update
-        sudo apt install -y imagemagick ffmpeg
-        python3 -m pip install --upgrade pip
-        python3 -m pip install Wand
+        npm init -y
+        npm install puppeteer
 
-    - name: Verify Wand Installation
+    # Step 2: Copy your image to the right place (assuming it's in a directory)
+    - name: Ensure Image Exists
       run: |
-        python3 -c "from wand.image import Image; print('Wand is installed successfully and ready to use')"
-
-    - name: Download Image from Repository
-      run: cp "images (31).jpeg" base_image.jpeg
-
-    - name: Get Image Dimensions
-      id: dimensions
-      run: |
-        width=$(convert base_image.jpeg -format "%w" info:)
-        height=$(convert base_image.jpeg -format "%h" info:)
-        echo "IMAGE_WIDTH=$width" >> $GITHUB_ENV
-        echo "IMAGE_HEIGHT=$height" >> $GITHUB_ENV
-
-    - name: Apply Linear Gradient Filter Directly to Image Using Wand
-      run: |
-        python3 -c "
-from wand.image import Image
-from wand.drawing import Drawing
-from wand.color import Color
-
-# Open the base image
-with Image(filename='base_image.jpeg') as img:
-    # Apply a gradient overlay
-    with Drawing() as draw:
-        draw.fill_color = Color('white')
-        draw.gradient = 'linear-gradient: 0, black, white'
-        draw.rectangle(left=0, top=0, right=img.width, bottom=img.height)
-        draw(img)
-    img.save(filename='output.png')
-"
-
-    - name: Add Text with Padding (Avoids Left & Right Edges)
-      run: |
-        text="Samsung phones can now flip into two because they are the best"
-        font_size=13
-        font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-
-        # Set padding from left and right edges (10% of image width)
-        padding=$(echo "$IMAGE_WIDTH * 0.1" | bc)
-        x_position=$(echo "$padding" | awk '{print int($1)}')
-
-        # Apply text overlay with padding
-        ffmpeg -i output.png -vf "drawtext=text='$text': \
-          fontfile='$font':fontsize=$font_size:fontcolor=white: \
-          box=1:boxcolor=black@0.5:boxborderw=10: \
-          x=$x_position: y=(h-text_h)-20" \
-          -y output_with_text.png
-
-    - name: Verify that output_with_text.png was created
-      run: |
-        if [ ! -f "output_with_text.png" ]; then
-          echo "output_with_text.png not created!"
+        if [ ! -f "images/your_image.jpeg" ]; then
+          echo "Image not found!"
           exit 1
         fi
+        echo "Image found."
 
-    - name: Upload Processed Image as Artifact
+    # Step 3: Run Puppeteer to generate the image with gradient and text overlay
+    - name: Run Puppeteer to generate the image
+      run: |
+        node generate_image.js
+
+    # Step 4: Verify that the image was created
+    - name: Verify the generated image
+      run: |
+        if [ ! -f "output_image.png" ]; then
+          echo "output_image.png not created!"
+          exit 1
+        else
+          echo "output_image.png created successfully!"
+        fi
+
+    # Step 5: Upload the generated image as an artifact
+    - name: Upload the generated image as an artifact
       uses: actions/upload-artifact@v4
       with:
-        name: image-artifact
-        path: output_with_text.png
+        name: generated-image
+        path: output_image.png
