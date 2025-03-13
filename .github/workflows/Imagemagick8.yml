@@ -1,5 +1,5 @@
 
-name: Generate Image from HTML and CSS
+name: ImageMagick Gradient Filter Directly to Image
 
 on:
   push:
@@ -10,51 +10,77 @@ on:
       - main
 
 jobs:
-  generate-image:
+  image-overlay:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Step 1: Install Node.js and Puppeteer
-    - name: Set up Node.js for Puppeteer
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-
-    - name: Install Puppeteer
+    - name: Set up ImageMagick and ffmpeg
       run: |
-        npm init -y
-        npm install puppeteer
+        sudo apt update
+        sudo apt install -y imagemagick ffmpeg
 
-    # Step 2: Copy your image to the right place (assuming it's in a directory)
+    - name: Verify ImageMagick Installation
+      run: |
+        convert -version || { echo "convert not found!"; exit 1; }
+
+    - name: List files in current directory (debugging)
+      run: ls -l
+
     - name: Ensure Image Exists
       run: |
-        if [ ! -f "images/your_image.jpeg" ]; then
+        if [ ! -f "images (31).jpeg" ]; then
           echo "Image not found!"
           exit 1
         fi
         echo "Image found."
 
-    # Step 3: Run Puppeteer to generate the image with gradient and text overlay
-    - name: Run Puppeteer to generate the image
+    - name: Get Image Dimensions
+      id: dimensions
       run: |
-        node generate_image.js
+        width=$(convert "images (31).jpeg" -format "%w" info:)
+        height=$(convert "images (31).jpeg" -format "%h" info:)
+        echo "Width: $width, Height: $height"
+        echo "IMAGE_WIDTH=$width" >> $GITHUB_ENV
+        echo "IMAGE_HEIGHT=$height" >> $GITHUB_ENV
 
-    # Step 4: Verify that the image was created
-    - name: Verify the generated image
+    - name: Apply Linear Gradient Filter Directly to Image
       run: |
-        if [ ! -f "output_image.png" ]; then
-          echo "output_image.png not created!"
+        convert "images (31).jpeg" -size ${IMAGE_WIDTH}x${IMAGE_HEIGHT} gradient:white-black -compose Multiply -gravity center -composite output.png
+
+    - name: Add Text to Image using ffmpeg
+      run: |
+        text="Samsung phones can now flip into two because they are the best"
+        font_size=13
+        font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+        max_line_width=40
+
+        # Wrap the text to the max line width using fmt
+        wrapped_text=$(echo "$text" | fmt -w $max_line_width)
+
+        # Print wrapped text for debugging
+        echo "Wrapped text:"
+        echo "$wrapped_text"
+
+        # Now use ffmpeg to add the wrapped text to the image
+        ffmpeg -i output.png -vf "drawtext=text='$(echo "$wrapped_text" | sed 's/$/\\n/'):fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
+
+    - name: Verify that output_with_text.png was created
+      run: |
+        if [ ! -f "output_with_text.png" ]; then
+          echo "output_with_text.png not created!"
           exit 1
         else
-          echo "output_image.png created successfully!"
+          echo "output_with_text.png created successfully!"
         fi
 
-    # Step 5: Upload the generated image as an artifact
-    - name: Upload the generated image as an artifact
+    - name: List files in current directory after processing
+      run: ls -l
+
+    - name: Upload Processed Image as Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: generated-image
-        path: output_image.png
+        name: image-artifact
+        path: output_with_text.png
