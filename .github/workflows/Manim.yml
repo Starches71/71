@@ -1,0 +1,63 @@
+
+name: Manim Gradient Filter and Text Overlay
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  generate-image:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python and dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y python3-pip
+        pip3 install manim
+
+    - name: Verify Manim installation
+      run: |
+        manim --version
+
+    - name: Download Image from Repository
+      run: |
+        cp "images (31).jpeg" base_image.jpeg
+
+    - name: Verify that input image exists
+      run: |
+        if [ ! -f "base_image.jpeg" ]; then
+          echo "base_image.jpeg not found!"
+          exit 1
+        else
+          echo "base_image.jpeg found!"
+        fi
+
+    - name: Generate Image with Manim
+      run: |
+        python3 generate_image.py
+
+    - name: Verify that generated image exists
+      run: |
+        if [ ! -f "media/images/GradientTextScene/1080p60/scene_1.png" ]; then
+          echo "Generated image not found!"
+          exit 1
+        else
+          echo "Generated image found!"
+        fi
+
+    - name: List files in current directory after processing
+      run: ls -l
+
+    - name: Upload Processed Image as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-artifact
+        path: media/images/GradientTextScene/1080p60/scene_1.png
