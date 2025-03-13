@@ -31,7 +31,7 @@ def apply_gradient_and_text(input_path, output_path):
         gradient_paint.setShader(
             skia.GradientShader.MakeLinear(
                 points=[(0, height * 0.7), (0, height)],  # Apply only to lower 30%
-                colors=[skia.ColorBLACK.withAlpha(0), skia.ColorBLACK.withAlpha(180)],
+                colors=[skia.ColorBLACK, skia.ColorSetA(0, 0, 0, 180)],  # Fixed alpha handling
             )
         )
         canvas.drawRect(skia.Rect.MakeWH(width, height), gradient_paint)
