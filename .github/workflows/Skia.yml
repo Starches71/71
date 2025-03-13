@@ -1,42 +1,67 @@
+name: Image Processing with Skia
 
-name: Run Skia Image Processing
-
-on: push
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  run-skia:
+  image-processing:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Rename image from repository
-        run: mv "images (31).jpeg" base_image.jpeg
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
 
-      - name: Verify input image exists
-        run: |
-          if [ ! -f "base_image.jpeg" ]; then
-            echo "Error: base_image.jpeg not found!"
-            exit 1
-          fi
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install skia-python
 
-      - name: Install dependencies
-        run: |
-          pip install skia-python
+    - name: Verify Skia Installation
+      run: |
+        python -c "import skia; print(skia.__version__)"
 
-      - name: Run Python script
-        run: python3 skia_edit.py
+    - name: List files in current directory (debugging)
+      run: ls -l
 
-      - name: Verify Output Image
-        run: |
-          if [ ! -f "output_with_text.png" ]; then
-            echo "Error: Output image not generated!"
-            exit 1
-          fi
+    - name: Download Image from Repository
+      run: |
+        mkdir -p images
+        curl -L -o images/"images (31).jpeg" https://github.com/Starches71/71/raw/main/images%20(31).jpeg
 
-      - name: Upload Processed Image as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: processed-image
-          path: output_with_text.png
+    - name: Verify that input image exists (debugging)
+      run: |
+        if [ ! -f "images/images (31).jpeg" ]; then
+          echo "Input image not found!"
+          exit 1
+        else
+          echo "Input image found!"
+        fi
+
+    - name: Run Skia Image Processing Script
+      run: |
+        python skia_edit.py
+
+    - name: Verify that output image was created (debugging)
+      run: |
+        if [ ! -f "output_image.jpeg" ]; then
+          echo "Output image not created!"
+          exit 1
+        else
+          echo "Output image created successfully!"
+        fi
+
+    - name: Upload Processed Image as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: processed-image
+        path: output_image.jpeg
