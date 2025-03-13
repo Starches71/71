@@ -1,5 +1,4 @@
-
-name: ImageMagick Gradient Filter Directly to Image
+name: ImageMagick Gradient Filter and Text Overlay with Wand
 
 on:
   push:
@@ -17,15 +16,16 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Python and Wand
+    - name: Set up Python and Install Dependencies
       run: |
         sudo apt update
-        sudo apt install -y python3-pip
-        pip3 install Wand
+        sudo apt install -y imagemagick ffmpeg
+        python3 -m pip install --upgrade pip
+        python3 -m pip install Wand
 
     - name: Verify Wand Installation
       run: |
-        python3 -c "from wand import image; print(image.__version__)"
+        python3 -c "from wand.image import Image; print('Wand is installed successfully and ready to use')"
 
     - name: Download Image from Repository
       run: cp "images (31).jpeg" base_image.jpeg
@@ -33,33 +33,28 @@ jobs:
     - name: Get Image Dimensions
       id: dimensions
       run: |
-        width=$(identify -format "%w" base_image.jpeg)
-        height=$(identify -format "%h" base_image.jpeg)
+        width=$(convert base_image.jpeg -format "%w" info:)
+        height=$(convert base_image.jpeg -format "%h" info:)
         echo "IMAGE_WIDTH=$width" >> $GITHUB_ENV
         echo "IMAGE_HEIGHT=$height" >> $GITHUB_ENV
 
     - name: Apply Linear Gradient Filter Directly to Image Using Wand
       run: |
-        python3 - <<EOF
-        from wand.image import Image
-        from wand.drawing import Drawing
-        from wand.color import Color
+        python3 -c "
+from wand.image import Image
+from wand.drawing import Drawing
+from wand.color import Color
 
-        # Open the base image
-        with Image(filename="base_image.jpeg") as img:
-            width = ${IMAGE_WIDTH}
-            height = ${IMAGE_HEIGHT}
-
-            # Create the gradient
-            with Image(width=width, height=height, background=Color("white")) as gradient:
-                gradient.colorize(color=Color("black"), alpha=0.0)  # Create the black part of the gradient
-
-                # Apply the gradient to the image
-                img.composite(gradient, left=0, top=0)
-
-                # Save the image with the gradient
-                img.save(filename="output.png")
-        EOF
+# Open the base image
+with Image(filename='base_image.jpeg') as img:
+    # Apply a gradient overlay
+    with Drawing() as draw:
+        draw.fill_color = Color('white')
+        draw.gradient = 'linear-gradient: 0, black, white'
+        draw.rectangle(left=0, top=0, right=img.width, bottom=img.height)
+        draw(img)
+    img.save(filename='output.png')
+"
 
     - name: Add Text with Padding (Avoids Left & Right Edges)
       run: |
@@ -71,35 +66,12 @@ jobs:
         padding=$(echo "$IMAGE_WIDTH * 0.1" | bc)
         x_position=$(echo "$padding" | awk '{print int($1)}')
 
-        # Apply text overlay using Wand
-        python3 - <<EOF
-        from wand.image import Image
-        from wand.drawing import Drawing
-        from wand.color import Color
-        from wand.font import Font
-
-        # Open the image with the gradient applied
-        with Image(filename="output.png") as img:
-            with Drawing() as draw:
-                draw.font = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-                draw.font_size = 13
-                draw.fill_color = Color("white")
-
-                # Set the text and padding
-                text = "Samsung phones can now flip into two because they are the best"
-                text_width, text_height = draw.get_font_metrics(img, text)
-
-                # Calculate position
-                x_position = int($padding)
-                y_position = img.height - text_height - 20  # Padding from bottom
-
-                # Draw the text
-                draw.text(x_position, y_position, text)
-                draw(img)
-
-                # Save the output image
-                img.save(filename="output_with_text.png")
-        EOF
+        # Apply text overlay with padding
+        ffmpeg -i output.png -vf "drawtext=text='$text': \
+          fontfile='$font':fontsize=$font_size:fontcolor=white: \
+          box=1:boxcolor=black@0.5:boxborderw=10: \
+          x=$x_position: y=(h-text_h)-20" \
+          -y output_with_text.png
 
     - name: Verify that output_with_text.png was created
       run: |
