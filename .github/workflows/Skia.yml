@@ -1,0 +1,51 @@
+
+name: Skia Image Processing
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  skia-processing:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python and Skia
+      run: |
+        sudo apt update
+        sudo apt install -y python3 python3-pip
+        pip install skia-python
+
+    - name: Verify Skia Installation
+      run: python3 -c "import skia; print('Skia installed successfully')"
+
+    - name: List files (debugging)
+      run: ls -l
+
+    - name: Download Image from Repository
+      run: cp "images (31).jpeg" base_image.jpeg
+
+    - name: Run Skia Image Processing Script
+      run: python3 skia_edit.py
+
+    - name: Verify that output image was created
+      run: |
+        if [ ! -f "output_with_text.png" ]; then
+          echo "Output image not created!"
+          exit 1
+        else
+          echo "Output image created successfully!"
+        fi
+
+    - name: Upload Processed Image as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: skia-image-artifact
+        path: output_with_text.png
