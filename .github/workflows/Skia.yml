@@ -11,6 +11,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Rename image from repository
+        run: mv "images (31).jpeg" base_image.jpeg
+
       - name: Verify input image exists
         run: |
           if [ ! -f "base_image.jpeg" ]; then
