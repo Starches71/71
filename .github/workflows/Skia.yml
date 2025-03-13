@@ -1,46 +1,39 @@
 
-name: Skia Image Processing
+name: Run Skia Image Processing
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: push
 
 jobs:
-  image-processing:
+  run-skia:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y python3-pip
-        pip install pillow skia-python
+      - name: Verify input image exists
+        run: |
+          if [ ! -f "base_image.jpeg" ]; then
+            echo "Error: base_image.jpeg not found!"
+            exit 1
+          fi
 
-    - name: Verify Python Libraries
-      run: |
-        python3 -c "import PIL, skia; print('Pillow and Skia installed successfully!')"
+      - name: Install dependencies
+        run: |
+          pip install skia-python
 
-    - name: Run Skia Script
-      run: python3 skia_edit.py
+      - name: Run Python script
+        run: python3 skia_edit.py
 
-    - name: Verify Output Image
-      run: |
-        if [ ! -f "output_with_text.png" ]; then
-          echo "Error: output_with_text.png was not created!"
-          exit 1
-        else
-          echo "Success: output_with_text.png was created!"
-        fi
+      - name: Verify Output Image
+        run: |
+          if [ ! -f "output_with_text.png" ]; then
+            echo "Error: Output image not generated!"
+            exit 1
+          fi
 
-    - name: Upload Processed Image as Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: skia-image
-        path: output_with_text.png
+      - name: Upload Processed Image as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: processed-image
+          path: output_with_text.png
