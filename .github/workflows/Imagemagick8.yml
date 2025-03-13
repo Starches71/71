@@ -56,7 +56,7 @@ jobs:
     - name: Wrap Text and Add to Image using ffmpeg
       run: |
         text="Samsung phones can now flip into two because they are the best"
-        font_size=30
+        font_size=10
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
         
         # Use fmt to wrap text at a reasonable width (50 characters per line in this case)
