@@ -50,29 +50,26 @@ jobs:
         echo "IMAGE_WIDTH=$width" >> $GITHUB_ENV
         echo "IMAGE_HEIGHT=$height" >> $GITHUB_ENV
 
-    - name: Apply Fully Visible Linear Gradient Filter
+    - name: Apply Linear Gradient Filter Directly to Image
       run: |
-        convert base_image.jpeg -size ${IMAGE_WIDTH}x${IMAGE_HEIGHT} gradient:white-black -compose Multiply -gravity center -composite output.png
+        convert base_image.jpeg -size ${IMAGE_WIDTH}x${IMAGE_HEIGHT} gradient:white-black -compose Multiply -gravity center -composite output.png
 
-    - name: Add Centered Text to Image using ffmpeg
+    - name: Add Text to Image using ffmpeg
       run: |
-        text="The phones are great unless you want to make them fancy"
+        text="Samsung phones can now flip into two because they are the best"
         font_size=13
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+        max_line_width=40
 
-        # Define image width with margins
-        margin=50
-        text_width=$(( IMAGE_WIDTH - 2 * margin ))
-
-        # Wrap text using fmt with controlled spacing
-        wrapped_text=$(echo "$text" | fmt -w $(( text_width / (font_size / 2) )))
+        # Wrap the text to the max line width using fmt
+        wrapped_text=$(echo "$text" | fmt -w $max_line_width)
 
         # Print wrapped text for debugging
         echo "Wrapped text:"
         echo "$wrapped_text"
 
-        # Use ffmpeg to add properly centered text
-        ffmpeg -i output.png -vf "drawtext=text='$wrapped_text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2" -y output_with_text.png
+        # Now use ffmpeg to add the wrapped text to the image
+        ffmpeg -i output.png -vf "drawtext=text='$(echo "$wrapped_text" | sed 's/$/\\n/'):fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-10" -y output_with_text.png
 
     - name: Verify that output_with_text.png was created
       run: |
