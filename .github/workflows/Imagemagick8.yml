@@ -52,25 +52,39 @@ jobs:
 
     - name: Apply Linear Gradient Filter Directly to Image
       run: |
-        convert base_image.jpeg -size ${IMAGE_WIDTH}x${IMAGE_HEIGHT} gradient:white-black -compose Multiply -gravity center -composite output.png
+        convert base_image.jpeg \
+          -size ${IMAGE_WIDTH}x${IMAGE_HEIGHT} gradient:white-black \
+          -compose Multiply -gravity center -composite output.png
 
     - name: Wrap Text and Add to Image using ffmpeg
       run: |
         text="Samsung phones can now flip into two because they are the best"
-        font_size=14
+        font_size=13
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-        
-        # Ensure text does not go edge to edge by limiting line width
-        line_width=$((IMAGE_WIDTH / 10 * 7))  # 70% of the image width
 
-        # Wrap text dynamically to fit within the calculated width
-        wrapped_text=$(convert -size ${line_width}x caption:"$text" -background none -gravity center -trim info:)
+        # Wrap text at a reasonable width (approx. 50 chars per line)
+        wrapped_text=$(echo "$text" | fmt -w 50)
 
-        # Adjust position so text appears nicely at the bottom with margin
-        bottom_margin=30  # Adjust this value to control spacing from the bottom
+        # Get image dimensions
+        image_width=$IMAGE_WIDTH
+        image_height=$IMAGE_HEIGHT
 
-        # Add text with better sharpness and alignment
-        ffmpeg -i output.png -vf "drawtext=text='$wrapped_text':fontfile=$font:fontsize=$font_size:fontcolor=white:borderw=2:x=(w-text_w)/2:y=h-text_h-${bottom_margin}" -y output_with_text.png
+        # Calculate optimal font size based on image width
+        wrapped_lines=$(echo "$wrapped_text" | wc -l)
+        if [ "$wrapped_lines" -gt 3 ]; then
+          font_size=11  # Reduce font size if text is too long
+        fi
+
+        # Print wrapped text for debugging
+        echo "Wrapped text:"
+        echo "$wrapped_text"
+
+        # Apply text overlay, ensuring it stays within image width
+        ffmpeg -i output.png -vf "drawtext=text='$wrapped_text': \
+          fontfile='$font':fontsize=$font_size:fontcolor=white: \
+          box=1:boxcolor=black@0.5:boxborderw=10: \
+          x=(w-text_w)/2: y=(h-text_h)-20" \
+          -y output_with_text.png
 
     - name: Verify that output_with_text.png was created
       run: |
