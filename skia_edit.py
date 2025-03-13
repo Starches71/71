@@ -5,7 +5,9 @@ def apply_gradient_and_text(input_path, output_path):
     # Load the image from the repository
     with open(input_path, 'rb') as f:
         image_data = f.read()
-    image = skia.Image.MakeFromEncoded(skia.Data.MakeFromBytes(image_data))
+    
+    # Use the corrected method to load the image from encoded data
+    image = skia.Image.MakeFromEncoded(image_data)
     if image is None:
         raise ValueError("Failed to load image.")
 
