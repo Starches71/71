@@ -1,5 +1,7 @@
+
 import skia
 import sys
+from PIL import Image
 
 # Constants
 INPUT_IMAGE = "base_image.jpeg"
@@ -10,13 +12,19 @@ FONT_COLOR = skia.ColorWHITE
 GRADIENT_COLORS = [skia.ColorWHITE, skia.ColorBLACK]
 
 def apply_gradient_and_text(input_path, output_path):
-    # Load image
-    surface = skia.Surface.MakeFromImage(skia.Image.open(input_path))
+    # Load image using PIL to get dimensions
+    pil_img = Image.open(input_path)
+    width, height = pil_img.size
+
+    # Convert PIL image to Skia image
+    skia_image = skia.Image.frombytes(pil_img.tobytes(), width, height, skia.kRGBA_8888_ColorType)
+
+    # Create a new Skia Surface
+    surface = skia.Surface.MakeRasterN32Premul(width, height)
     canvas = surface.getCanvas()
 
-    # Get image dimensions
-    width = surface.width()
-    height = surface.height()
+    # Draw the original image
+    canvas.drawImage(skia_image, 0, 0)
 
     # Create gradient paint
     gradient_paint = skia.Paint()
@@ -43,8 +51,9 @@ def apply_gradient_and_text(input_path, output_path):
     text_paint = skia.Paint(AntiAlias=True, Color=FONT_COLOR)
     canvas.drawTextBlob(text_blob, x, y, text_paint)
 
-    # Save output
-    surface.makeImageSnapshot().save(output_path, skia.kPNG)
+    # Save output using PIL (since Skia does not directly save images)
+    img_out = Image.frombytes("RGBA", (width, height), surface.makeImageSnapshot().toBytes())
+    img_out.save(output_path, "PNG")
 
 # Run script
 if __name__ == "__main__":
