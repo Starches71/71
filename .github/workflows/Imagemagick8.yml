@@ -57,28 +57,20 @@ jobs:
     - name: Wrap Text and Add to Image using ffmpeg
       run: |
         text="Samsung phones can now flip into two because they are the best"
-        font_size=13
+        font_size=14
         font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
         
-        # Use fmt to wrap text at a reasonable width (50 characters per line in this case)
-        wrapped_text=$(echo "$text" | fmt -w 50)
+        # Ensure text does not go edge to edge by limiting line width
+        line_width=$((IMAGE_WIDTH / 10 * 7))  # 70% of the image width
 
-        # Get width and height of the image to avoid overflow
-        image_width=$IMAGE_WIDTH
-        image_height=$IMAGE_HEIGHT
+        # Wrap text dynamically to fit within the calculated width
+        wrapped_text=$(convert -size ${line_width}x caption:"$text" -background none -gravity center -trim info:)
 
-        # Calculate optimal font size based on image width and length of wrapped text
-        wrapped_lines=$(echo "$wrapped_text" | wc -l)
-        if [ "$wrapped_lines" -gt 3 ]; then
-          font_size=11  # Increase font size slightly for more lines
-        fi
+        # Adjust position so text appears nicely at the bottom with margin
+        bottom_margin=30  # Adjust this value to control spacing from the bottom
 
-        # Print wrapped text for debugging
-        echo "Wrapped text:"
-        echo "$wrapped_text"
-
-        # Use ffmpeg to add wrapped text to the bottom of the image
-        ffmpeg -i output.png -vf "drawtext=text='$wrapped_text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-20" -y output_with_text.png
+        # Add text with better sharpness and alignment
+        ffmpeg -i output.png -vf "drawtext=text='$wrapped_text':fontfile=$font:fontsize=$font_size:fontcolor=white:borderw=2:x=(w-text_w)/2:y=h-text_h-${bottom_margin}" -y output_with_text.png
 
     - name: Verify that output_with_text.png was created
       run: |
