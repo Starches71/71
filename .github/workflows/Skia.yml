@@ -1,3 +1,4 @@
+
 name: Image Processing with Skia
 
 on:
@@ -36,7 +37,7 @@ jobs:
     - name: Download Image from Repository
       run: |
         mkdir -p images
-        curl -L -o images/"images (31).jpeg" https://github.com/Starches71/71/raw/main/images%20(31).jpeg
+        curl -L -o "images/images (31).jpeg" "https://github.com/Starches71/71/raw/main/images%20(31).jpeg"
 
     - name: Verify that input image exists (debugging)
       run: |
