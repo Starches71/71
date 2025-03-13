@@ -1,66 +1,58 @@
-
 import skia
-import sys
-import textwrap
-
-# File paths
-INPUT_IMAGE = "base_image.jpeg"
-OUTPUT_IMAGE = "output_with_text.png"
-TEXT = "Samsung phones can now flip into two"  # Example text
-FONT_SIZE = 30  # Adjusted to be smaller
-LINE_WIDTH = 25  # Max characters per line
+import os
 
 def apply_gradient_and_text(input_path, output_path):
-    try:
-        # Load the image
-        img = skia.Image.open(input_path)
+    # Load the image from the repository
+    with open(input_path, 'rb') as f:
+        image_data = f.read()
+    image = skia.Image.MakeFromEncoded(skia.Data.MakeFromBytes(image_data))
+    if image is None:
+        raise ValueError("Failed to load image.")
 
-        # Get image dimensions
-        width, height = img.width(), img.height()
+    # Create a surface to draw on
+    surface = skia.Surface(image.width(), image.height())
+    canvas = surface.getCanvas()
 
-        # Create a Skia surface matching the image size
-        surface = skia.Surface(width, height)
-        canvas = surface.getCanvas()
+    # Apply a linear gradient
+    paint = skia.Paint()
+    paint.setShader(skia.Shader.MakeLinearGradient(
+        (0, 0), (image.width(), image.height()),
+        [skia.Color(255, 255, 255), skia.Color(0, 0, 0)],
+        [0, 1],
+        skia.TileMode.kClamp_TileMode
+    ))
+    canvas.drawPaint(paint)
 
-        # Draw the original image onto the canvas
-        paint = skia.Paint()
-        canvas.drawImage(img, 0, 0)
+    # Draw the original image onto the canvas
+    canvas.drawImage(image, 0, 0)
 
-        # Apply gradient overlay (transparent to black at the bottom)
-        gradient_paint = skia.Paint()
-        gradient_paint.setShader(
-            skia.GradientShader.MakeLinear(
-                points=[(0, height * 0.7), (0, height)],  # Apply only to lower 30%
-                colors=[skia.ColorBLACK, skia.ColorSetA(0, 0, 0, 180)],  # Fixed alpha handling
-            )
-        )
-        canvas.drawRect(skia.Rect.MakeWH(width, height), gradient_paint)
+    # Set up the paint for text
+    text_paint = skia.Paint()
+    text_paint.setAntiAlias(True)
+    text_paint.setColor(skia.Color(255, 255, 255))
+    text_paint.setTextSize(14)  # Adjusted font size
+    text_paint.setTextAlign(skia.Paint.kCenter_Align)
 
-        # Prepare text for wrapping
-        wrapped_text = textwrap.fill(TEXT, width=LINE_WIDTH)
+    # Define the text to overlay
+    text = "Samsung phones can now flip into two"
 
-        # Add text overlay
-        font = skia.Font(skia.Typeface('Arial'), FONT_SIZE)
-        text_paint = skia.Paint(AntiAlias=True, Color=skia.ColorWHITE)
+    # Create a font object
+    font = skia.Font(skia.Typeface(''), 14)  # Adjusted font size
 
-        # Calculate text positioning (centered at the bottom)
-        text_x = width * 0.05  # Small left margin
-        text_y = height * 0.85  # Adjusted to be above the bottom
+    # Calculate text bounds
+    bounds = skia.Rect()
+    font.measureText(text, len(text), skia.TextEncoding.kUTF8, bounds)
+    x = (image.width() - bounds.width()) / 2
+    y = image.height() - bounds.height() - 10
 
-        # Draw each line of text
-        for line in wrapped_text.split("\n"):
-            canvas.drawString(line, text_x, text_y, font, text_paint)
-            text_y += FONT_SIZE + 5  # Move down for the next line
+    # Draw the text onto the canvas
+    canvas.drawString(text, x, y, font, text_paint)
 
-        # Save the final image
-        image = surface.makeImageSnapshot()
-        image.save(output_path, skia.kPNG)
+    # Save the modified image
+    surface.makeImageSnapshot().encodeToData().save(output_path)
 
-        print("✅ Image processing complete!")
-
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        sys.exit(1)
-
-# Run function
-apply_gradient_and_text(INPUT_IMAGE, OUTPUT_IMAGE)
+if __name__ == '__main__':
+    input_image_path = 'images (31).jpeg'
+    output_image_path = 'output_image.jpeg'
+    apply_gradient_and_text(input_image_path, output_image_path)
+    print(f"Image saved to {output_image_path}")
