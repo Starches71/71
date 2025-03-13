@@ -1,3 +1,4 @@
+
 name: ImageMagick Gradient Filter Directly to Image
 
 on:
@@ -69,15 +70,15 @@ jobs:
         # Calculate optimal font size based on image width and length of wrapped text
         wrapped_lines=$(echo "$wrapped_text" | wc -l)
         if [ "$wrapped_lines" -gt 3 ]; then
-          font_size=20  # Reduce font size if there are more than 3 lines
+          font_size=11  # Increase font size slightly for more lines
         fi
 
         # Print wrapped text for debugging
         echo "Wrapped text:"
         echo "$wrapped_text"
 
-        # Use ffmpeg to add wrapped text to the image
-        ffmpeg -i output.png -vf "drawtext=text='$wrapped_text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-10" -y output_with_text.png
+        # Use ffmpeg to add wrapped text to the bottom of the image
+        ffmpeg -i output.png -vf "drawtext=text='$wrapped_text':fontfile=$font:fontsize=$font_size:fontcolor=white:x=(w-text_w)/2:y=h-text_h-20" -y output_with_text.png
 
     - name: Verify that output_with_text.png was created
       run: |
