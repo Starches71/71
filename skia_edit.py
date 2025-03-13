@@ -1,57 +1,55 @@
+
 import skia
 import sys
 
-# Input and output file names
+# File paths
 INPUT_IMAGE = "base_image.jpeg"
 OUTPUT_IMAGE = "output_with_text.png"
+TEXT = "Samsung phones can now flip into two"
+FONT_SIZE = 40  # Adjust based on your needs
 
 def apply_gradient_and_text(input_path, output_path):
-    # Load image using Skia
     try:
-        image = skia.Image.MakeFromEncoded(skia.Data.MakeFromFileName(input_path))
-        if not image:
-            raise ValueError("Failed to load image with Skia.")
+        # Load image
+        img = skia.Image.open(input_path)
 
-        width, height = image.width(), image.height()
-        print(f"Loaded image with Skia: {width}x{height}")
+        # Get image dimensions
+        width, height = img.width(), img.height()
 
-        # Create surface with the same dimensions
+        # Create a Skia surface
         surface = skia.Surface(width, height)
         canvas = surface.getCanvas()
 
-        # Draw the original image
+        # Draw original image
         paint = skia.Paint()
-        canvas.drawImage(image, 0, 0, paint)
+        canvas.drawImage(img, 0, 0)
 
-        # Create a gradient overlay
+        # Apply gradient overlay
         gradient_paint = skia.Paint()
-        gradient_shader = skia.GradientShader.MakeLinear(
-            points=[(0, 0), (0, height)],
-            colors=[skia.ColorWHITE, skia.ColorBLACK],
-            mode=skia.TileMode.CLAMP,
+        gradient_paint.setShader(
+            skia.GradientShader.MakeLinear(
+                points=[(0, 0), (0, height)],
+                colors=[skia.ColorWHITE, skia.ColorBLACK],
+            )
         )
-        gradient_paint.setShader(gradient_shader)
-        canvas.drawPaint(gradient_paint)
+        canvas.drawRect(skia.Rect.MakeWH(width, height), gradient_paint)
 
-        # Draw text on the image
-        font = skia.Font(skia.Typeface('Arial'), 30)
+        # Add text overlay
+        font = skia.Font(skia.Typeface('Arial'), FONT_SIZE)
         text_paint = skia.Paint(AntiAlias=True, Color=skia.ColorWHITE)
-        text = "Samsung phones can now flip into two"
-        text_blob = skia.TextBlob.MakeFromString(text, font)
-        text_x = (width - font.measureText(text)) / 2
-        text_y = height - 40
-        canvas.drawTextBlob(text_blob, text_x, text_y, text_paint)
+        text_width = font.measureText(TEXT)
+        text_x = (width - text_width) / 2
+        text_y = height - 50  # Adjust positioning
+        canvas.drawString(TEXT, text_x, text_y, font, text_paint)
 
-        # Save output
-        image_snapshot = surface.makeImageSnapshot()
-        image_data = image_snapshot.encodeToData()
-        if image_data:
-            with open(output_path, "wb") as f:
-                f.write(image_data.bytes())
-        print(f"Saved output image: {output_path}")
+        # Save final image
+        image = surface.makeImageSnapshot()
+        image.save(output_path, skia.kPNG)
 
+        print("✅ Image processing complete!")
+    
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
         sys.exit(1)
 
 # Run function
