@@ -1,46 +1,44 @@
-
-name: Update Product File
+name: Update Product File and Run Scripts
 
 on:
-  workflow_dispatch:  # Trigger the workflow manually via GitHub Actions UI
+  workflow_dispatch:  # Manually trigger the workflow
 
 jobs:
-  update-product:
-    runs-on: ubuntu-latest  # The job runs on an Ubuntu virtual machine
-
+  setup:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4  # Check out the repository to get the code
+        uses: actions/checkout@v4  # Get repo files
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'  # Set up Python environment (3.x is fine)
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt  # Install any necessary Python dependencies
+          pip install -r requirements.txt  # Install all dependencies
 
   read-product:
     runs-on: ubuntu-latest
-    needs: update-product  # Run this after repo setup
+    needs: setup  # Runs after setup
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Read first product from auto.txt and save it to product.txt
+      - name: Read first product from auto.txt and save to product.txt
         run: |
           if [ -s auto.txt ]; then
             FIRST_PRODUCT=$(head -n 1 auto.txt)
             echo "$FIRST_PRODUCT" > product.txt
-            sed -i '1d' auto.txt
+            sed -i '1d' auto.txt  # Remove first line from auto.txt
             echo "Selected product: $FIRST_PRODUCT"
           else
             echo "auto.txt is empty or missing." > product.txt
           fi
 
-      - name: Commit changes
+      - name: Commit product changes
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
@@ -50,91 +48,84 @@ jobs:
 
   run-fob:
     runs-on: ubuntu-latest
-    needs: read-product  # Run after reading product
-
+    needs: read-product
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Fob.py and check output
+      - name: Run Fob.py
         run: |
-          OUTPUT=$(python Fob.py)
-          echo "Output from Fob.py: $OUTPUT"
-          if [[ "$OUTPUT" == "no" ]]; then
-            FIRST_PRODUCT=$(cat product.txt)
-            echo "$FIRST_PRODUCT" >> auto_no.txt
-          fi
-
-      - name: Commit changes
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add auto_no.txt
-          git commit -m "Updated auto_no.txt with rejected product"
-          git push
+          echo "Running Fob.py..."
+          python Fob.py
 
   run-fob1:
     runs-on: ubuntu-latest
     needs: run-fob
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Run Fob1.py
-        run: python Fob1.py
+        run: |
+          echo "Running Fob1.py..."
+          python Fob1.py
 
-  run-fon2:
+  run-fob2:
     runs-on: ubuntu-latest
     needs: run-fob1
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Fon2.py
-        run: python Fon2.py
+      - name: Run Fob2.py
+        run: |
+          echo "Running Fob2.py..."
+          python Fob2.py
 
-  run-fon3:
+  run-fob3:
     runs-on: ubuntu-latest
-    needs: run-fon2
-
+    needs: run-fob2
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Fon3.py
-        run: python Fon3.py
+      - name: Run Fob3.py
+        run: |
+          echo "Running Fob3.py..."
+          python Fob3.py
 
   run-fob4:
     runs-on: ubuntu-latest
-    needs: run-fon3
-
+    needs: run-fob3
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Run Fob4.py
-        run: python Fob4.py
+        run: |
+          echo "Running Fob4.py..."
+          python Fob4.py
 
   run-fob5:
     runs-on: ubuntu-latest
     needs: run-fob4
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Run Fob5.py
-        run: python Fob5.py
+        run: |
+          echo "Running Fob5.py..."
+          python Fob5.py
 
   run-fob6:
     runs-on: ubuntu-latest
     needs: run-fob5
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Run Fob6.py
-        run: python Fob6.py
+        run: |
+          echo "Running Fob6.py..."
+          python Fob6.py
