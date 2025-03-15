@@ -1,0 +1,64 @@
+name: Run Fob Scripts with Auto Product
+
+on: 
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Read and Save First Product from auto.txt
+        run: |
+          mkdir -p auto
+          head -n 1 auto.txt > auto/product.txt
+          tail -n +2 auto.txt > auto_no.txt  # Remove first line and save remaining
+          cat auto/product.txt  # Print to verify
+          cat auto_no.txt  # Print updated list
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Fob.py
+        run: python Fob.py
+
+      - name: Run Fob1.py
+        run: python Fob1.py
+
+      - name: Run Fob2.py
+        run: python Fob2.py
+
+      - name: Run Fob3.py
+        run: python Fob3.py
+
+      - name: Run Fob4.py
+        run: python Fob4.py
+
+      - name: Run Fob5.py
+        run: python Fob5.py
+
+      - name: Run Fob6.py
+        run: python Fob6.py
+
+      - name: Run Fob7.py
+        run: python Fob7.py  # Added step to run Fob7.py
+
+      - name: Commit and Push Updated auto_no.txt
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add auto_no.txt
+          git commit -m "Update auto_no.txt after processing first product"
+          git push
+        continue-on-error: true  # Prevent failure if no changes exist
