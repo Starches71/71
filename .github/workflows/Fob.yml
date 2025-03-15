@@ -1,0 +1,80 @@
+
+name: Update Product File
+
+on:
+  workflow_dispatch:  # Allows manual execution
+
+jobs:
+  update-product:
+    runs-on: ubuntu-latest  # The job runs on Ubuntu
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4  # Clone the repository
+
+      - name: Ensure auto directory exists
+        run: mkdir -p auto  # Create the 'auto' directory if it doesn't exist
+
+      - name: Read product from auto.txt and save it to product.txt
+        run: |
+          if [ -f auto/auto.txt ] && [ -s auto/auto.txt ]; then  # Check if auto.txt exists and is not empty
+            FIRST_PRODUCT=$(head -n 1 auto/auto.txt)  # Read the first product
+            echo "$FIRST_PRODUCT" > auto/product.txt  # Save it to product.txt
+            sed -i '1d' auto/auto.txt  # Remove the first product from auto.txt
+            echo "Selected product: $FIRST_PRODUCT"
+          else
+            echo "auto.txt is empty or missing." > auto/product.txt  # Handle empty/missing auto.txt
+            echo "No product available"
+          fi
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add auto/product.txt auto/auto.txt
+          git commit -m "Updated product.txt with a new product"
+          git push || echo "No changes to commit"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt || echo "No requirements.txt found"
+
+      - name: Run Fob.py and check output
+        run: |
+          OUTPUT=$(python Fob.py || echo "error")  # Run Fob.py and handle errors
+          echo "Output from Fob.py: $OUTPUT"
+          if [[ "$OUTPUT" == "no" ]]; then
+            echo "Replacing product..."
+            if [ -f auto/auto.txt ] && [ -s auto/auto.txt ]; then
+              FIRST_PRODUCT=$(head -n 1 auto/product.txt)
+              echo "$FIRST_PRODUCT" >> auto/auto_no.txt  # Save the rejected product
+              NEXT_PRODUCT=$(head -n 1 auto/auto.txt)  # Get the next product
+              echo "$NEXT_PRODUCT" > auto/product.txt  # Save new product
+              sed -i '1d' auto/auto.txt  # Remove from auto.txt
+              echo "Replaced with: $NEXT_PRODUCT"
+            else
+              echo "No more products available."
+            fi
+          fi
+
+      - name: Run additional Python scripts (Fob1.py to Fob6.py)
+        run: |
+          python Fob1.py || echo "Fob1.py failed"
+          python Fon2.py || echo "Fon2.py failed"
+          python Fon3.py || echo "Fon3.py failed"
+          python Fob4.py || echo "Fob4.py failed"
+          python Fob5.py || echo "Fob5.py failed"
+          python Fob6.py || echo "Fob6.py failed"
+
+      - name: Commit changes (after running scripts)
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add auto/product.txt auto/auto.txt auto/auto_no.txt
+          git commit -m "Updated product and recorded rejected product" || echo "No changes to commit"
+          git push || echo "No changes to push"
