@@ -5,5 +5,5 @@
 #HomeBarista
 #SpecialtyCoffee
 #EspressoLover
-#NespressoExpertMachine
-#CoffeeConnoisseur
+#CoffeeMachine
+#NespressoExpertEspressoMachine
