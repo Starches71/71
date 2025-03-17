@@ -1,3 +1,4 @@
+
 name: Run Fob Scripts and Manage auto.txt
 
 on: 
@@ -54,6 +55,13 @@ jobs:
           echo "Running Fob1.py..."
           python Fob1.py
 
+      - name: Run Fob2.py  # Add Fob2.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: |
+          echo "Running Fob2.py..."
+          python Fob2.py
+
       - name: Run Fob3.py
         env:
           GROQ_API: ${{ secrets.GROQ_API }}
@@ -86,6 +94,9 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
+          
+          # Pull the latest changes from the remote repository to avoid conflicts
+          git pull origin main || echo "No updates from remote"
           
           git add auto.txt myd/auto_used.txt || echo "No changes to commit"
           git commit -m "Updated auto.txt and moved first line to myd/auto_used.txt" || echo "Nothing to commit"
