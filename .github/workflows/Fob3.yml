@@ -1,0 +1,82 @@
+
+name: Run Fob Scripts with Auto Product
+
+on: 
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Read and Save First Product from auto.txt
+        run: |
+          mkdir -p auto
+          head -n 1 auto.txt > auto/product.txt
+          tail -n +2 auto.txt > auto_no.txt  # Remove first line and save remaining
+          cat auto/product.txt  # Print to verify
+          cat auto_no.txt  # Print updated list
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Fob.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: |
+          echo "Running Fob.py..."
+          python Fob.py
+
+      - name: Run Fob1.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: |
+          echo "Running Fob1.py..."
+          python Fob1.py
+
+      - name: Run Fob3.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: |
+          echo "Running Fob3.py..."
+          python Fob3.py
+
+      - name: Run Fob4.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: |
+          echo "Running Fob4.py..."
+          python Fob4.py
+
+      - name: Run Fob5.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: |
+          echo "Running Fob5.py..."
+          python Fob5.py
+
+      - name: Run Fob7a.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: |
+          echo "Running Fob7a.py..."
+          python Fob7a.py
+
+      - name: Commit and Push Updated auto_no.txt
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add auto_no.txt auto/ || echo "No changes to commit"
+          git commit -m "Update auto_no.txt and track auto directory" || echo "Nothing to commit"
+          git push || echo "Nothing to push"
