@@ -61,8 +61,6 @@ jobs:
           python Fob7a.py
 
       - name: Commit and Push Updated Files
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
@@ -70,5 +68,5 @@ jobs:
           git add auto.txt myd/auto_used.txt || echo "No changes to commit"
           git commit -m "Updated auto.txt and moved first line to myd/auto_used.txt" || echo "Nothing to commit"
           
-          # Use GITHUB_TOKEN to push securely
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git || echo "Nothing to push"
+          # Push changes without using GitHub token, just plain push
+          git push || echo "Nothing to push"
