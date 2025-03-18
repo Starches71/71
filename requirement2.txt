@@ -1,0 +1,8 @@
+ffmpeg-python
+yt-dlp
+edge-tts
+groq
+pytube
+requests
+youtube-search-python
+praw
