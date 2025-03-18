@@ -1,3 +1,4 @@
+
 name: Deploy Website to GitHub Pages
 
 on:
@@ -13,7 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2  # Checkout the code in the repository
 
+      - name: Setup GitHub Token for Deployment
+        uses: actions/setup-git@v2  # Ensures Git is set up correctly for deployment
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # Default GitHub token for authentication
           publish_dir: ./  # Publish the root directory (where your HTML and CSS files are)
