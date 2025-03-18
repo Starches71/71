@@ -14,9 +14,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2  # Checkout the code in the repository
 
-      - name: Setup GitHub Token for Deployment
-        uses: actions/setup-git@v2  # Ensures Git is set up correctly for deployment
-
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
