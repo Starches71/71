@@ -23,8 +23,9 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Upload files
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-artifact@v4  # Corrected action name
         with:
+          name: github-pages
           path: .  # Deploy all files in the root (index.html, style.css, etc.)
 
       - name: Deploy to GitHub Pages
