@@ -1,0 +1,32 @@
+
+name: Deploy Website to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Deploys when changes are pushed to the main branch
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload files
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .  # Deploy all files in the root (index.html, style.css, etc.)
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
