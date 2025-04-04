@@ -24,7 +24,7 @@ PAGES = {
 }
 
 # How recent to fetch
-TIME_WINDOW_HOURS = 12
+TIME_WINDOW_HOURS = 0.5
 
 # Output directory
 OUTPUT_DIR = "fb"
