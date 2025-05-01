@@ -1,0 +1,80 @@
+
+name: Download and Blur Faces
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  blur_faces_job:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install tor curl ffmpeg libgl1
+          sudo service tor start
+          python3 -m pip install --upgrade yt-dlp opencv-python
+
+      - name: Check Tor exit node IP
+        run: |
+          curl --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip
+
+      - name: Resolve youtube.com via Tor
+        run: |
+          curl --socks5 127.0.0.1:9050 https://dns.google.com/resolve?name=www.youtube.com&type=A
+
+      - name: Save video link
+        run: |
+          echo "https://youtu.be/79-cYFBBslo?si=Ic35W4tDmkO97yxi" > search_results.txt
+
+      - name: Download video
+        run: |
+          yt-dlp --proxy "socks5://127.0.0.1:9050" -f "bv[ext=mp4][vcodec*=avc1]+ba[ext=m4a]/best[ext=mp4][vcodec*=avc1]" --merge-output-format mp4 -o "original_video.%(ext)s" "$(cat search_results.txt)"
+
+      - name: Blur all faces in the video
+        run: |
+          python3 <<EOF
+          import cv2
+          import os
+
+          input_file = "original_video.mp4"
+          output_file = "blurred_video.mp4"
+
+          face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+
+          cap = cv2.VideoCapture(input_file)
+          width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+          height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+          fps = cap.get(cv2.CAP_PROP_FPS)
+
+          fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+          out = cv2.VideoWriter(output_file, fourcc, fps, (width, height))
+
+          while True:
+              ret, frame = cap.read()
+              if not ret:
+                  break
+
+              gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+              faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+
+              for (x, y, w, h) in faces:
+                  roi = frame[y:y+h, x:x+w]
+                  blurred = cv2.GaussianBlur(roi, (99, 99), 30)
+                  frame[y:y+h, x:x+w] = blurred
+
+              out.write(frame)
+
+          cap.release()
+          out.release()
+          print("Face blurring complete.")
+          EOF
+
+      - name: List output video
+        run: ls -lh
