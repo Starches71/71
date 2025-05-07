@@ -1,12 +1,14 @@
 
-name: Search Smartphone Videos
+name: Search Creative Commons YouTube Videos via Tor
 
 on:
-  workflow_dispatch:  # Trigger manually
+  push:
+    branches:
+      - main  # Trigger when pushing to the main branch
 
 jobs:
-  search_videos:
-    runs-on: ubuntu-latest
+  search_video:
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout repository
@@ -15,32 +17,29 @@ jobs:
       - name: Install Tor
         run: |
           sudo apt-get update
-          sudo apt-get install -y tor
+          sudo apt-get install tor
           sudo service tor start
 
-      - name: Install yt-dlp
+      - name: Update yt-dlp
         run: |
-          pip install -U yt-dlp
+          python3 -m pip install --upgrade yt-dlp
 
       - name: Check Tor exit node IP
         run: |
+          echo "Checking Tor exit node IP..."
           curl --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip
 
       - name: Resolve youtube.com via Tor
         run: |
-          curl --socks5 127.0.0.1:9050 https://dns.google.com/resolve?name=www.youtube.com&type=A
+          echo "Resolving youtube.com via Tor..."
+          curl --socks5 127.0.0.1:9050 "https://dns.google.com/resolve?name=www.youtube.com&type=A"
 
-      - name: Search and save video data
+      - name: Search YouTube for "smartphone" (Creative Commons, sorted by views)
         run: |
-          yt-dlp --proxy "socks5://127.0.0.1:9050" \
-            "ytsearch200:smart phone creative commons this year" \
-            --match-filter "license=Creative Commons & upload_date>=20240101" \
-            --print "%(title)s | %(webpage_url)s | %(view_count)s views" > sm.txt
-
-      - name: Commit results to repo
-        run: |
-          git config --global user.email "you@example.com"
-          git config --global user.name "GitHub Actions"
-          git add sm.txt
-          git commit -m "Add smartphone video search results"
-          git push
+          echo "Searching for Creative Commons videos about 'smartphone'..."
+          yt-dlp \
+            --proxy "socks5://127.0.0.1:9050" \
+            "ytsearch50:smartphone cc" \
+            --match-filter "license=Creative Commons" \
+            --print "%(view_count)s views | %(title)s | %(webpage_url)s" \
+            | sort -nr | tee search_results.txt
