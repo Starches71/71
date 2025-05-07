@@ -33,7 +33,7 @@ jobs:
       - name: Search and save video data
         run: |
           yt-dlp --proxy "socks5://127.0.0.1:9050" \
-            "ytsearch600:smart phone creative commons this year" \
+            "ytsearch200:smart phone creative commons this year" \
             --match-filter "license=Creative Commons & upload_date>=20240101" \
             --print "%(title)s | %(webpage_url)s | %(view_count)s views" > sm.txt
 
