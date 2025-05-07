@@ -1,0 +1,46 @@
+
+name: Search Smartphone Videos
+
+on:
+  workflow_dispatch:  # Trigger manually
+
+jobs:
+  search_videos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Tor
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tor
+          sudo service tor start
+
+      - name: Install yt-dlp
+        run: |
+          pip install -U yt-dlp
+
+      - name: Check Tor exit node IP
+        run: |
+          curl --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip
+
+      - name: Resolve youtube.com via Tor
+        run: |
+          curl --socks5 127.0.0.1:9050 https://dns.google.com/resolve?name=www.youtube.com&type=A
+
+      - name: Search and save video data
+        run: |
+          yt-dlp --proxy "socks5://127.0.0.1:9050" \
+            "ytsearch600:smart phone creative commons this year" \
+            --match-filter "license=Creative Commons & upload_date>=20240101" \
+            --print "%(title)s | %(webpage_url)s | %(view_count)s views" > sm.txt
+
+      - name: Commit results to repo
+        run: |
+          git config --global user.email "you@example.com"
+          git config --global user.name "GitHub Actions"
+          git add sm.txt
+          git commit -m "Add smartphone video search results"
+          git push
