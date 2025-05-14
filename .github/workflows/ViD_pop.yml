@@ -1,9 +1,10 @@
+
 name: Fetch Tech Videos from YouTube
 
 on:
   schedule:
     - cron: '0 0 * * *'  # Every day at midnight UTC
-  workflow_dispatch:     # Allow manual run
+  workflow_dispatch:
 
 jobs:
   fetch-tech-videos:
@@ -51,7 +52,8 @@ jobs:
 
           all_items = []
 
-          for page in range(TOTAL_RESULTS // MAX_RESULTS):
+          next_page = ""
+          for _ in range(TOTAL_RESULTS // MAX_RESULTS):
               search_url = (
                   f"https://www.googleapis.com/youtube/v3/search"
                   f"?part=snippet"
@@ -63,12 +65,14 @@ jobs:
                   f"&videoLicense=creativeCommon"
                   f"&key={API_KEY}"
               )
-              if page > 0 and 'nextPageToken' in data:
-                  search_url += f"&pageToken={data['nextPageToken']}"
+              if next_page:
+                  search_url += f"&pageToken={next_page}"
 
               resp = requests.get(search_url)
               data = resp.json()
               video_ids = [item['id']['videoId'] for item in data.get('items', [])]
+              next_page = data.get("nextPageToken", "")
+
               if not video_ids:
                   break
 
@@ -102,23 +106,25 @@ jobs:
           shorts = sorted([e for v, e, s in all_items if s], reverse=True)
           longs = sorted([e for v, e, s in all_items if not s], reverse=True)
 
-          with open(shorts_file, 'a+') as f:
+          with open(shorts_file, 'a+', encoding='utf-8') as f:
+              f.seek(0)
               existing = f.read()
               for item in shorts:
                   if item not in existing:
                       f.write(item)
 
-          with open(long_file, 'a+') as f:
+          with open(long_file, 'a+', encoding='utf-8') as f:
+              f.seek(0)
               existing = f.read()
               for item in longs:
                   if item not in existing:
                       f.write(item)
           EOF
 
-      - name: Commit and push
+      - name: Commit and push changes
         run: |
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
-          git add Vid_Shorts(1M).txt Vid_long(1M).txt
+          git add "Vid_Shorts(1M).txt" "Vid_long(1M).txt"
           git diff --cached --quiet || git commit -m "Update YouTube video list - $(date)"
           git push
