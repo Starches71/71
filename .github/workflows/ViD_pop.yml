@@ -125,6 +125,7 @@ jobs:
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
           git pull --rebase origin main
-          git add "Vid_Shorts(1M).txt" "Vid_long(1M).txt"
+          git add "Vid_Shorts(1Y).txt" "Vid_long(1M
+          Y).txt"
           git diff --cached --quiet || git commit -m "Update YouTube video list - $(date)"
           git push
