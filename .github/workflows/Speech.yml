@@ -1,7 +1,8 @@
+
 name: Test Speech-to-Speech Translation
 
 on:
-  workflow_dispatch:  # Allows you to trigger the workflow manually
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   test-translation:
@@ -19,44 +20,43 @@ jobs:
       - name: Install required dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl ffmpeg
+          sudo apt-get install -y ffmpeg curl
 
       - name: Download Hindi audio file
         run: |
           mkdir -p test_audio
-          curl -L -o test_audio/hindi_speech.wav "https://www.voiptroubleshooter.com/open_speech/india/OSR_in_000_0071_16k.wav"
+          curl -L -o test_audio/hindi.wav "https://www.voiptroubleshooter.com/open_speech/india/OSR_in_000_0071_16k.wav"
 
-      - name: Install Meta's SeamlessM4T
+      - name: Install SeamlessM4T and soundfile
         run: |
-          pip install seamlessm4t
+          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install git+https://github.com/facebookresearch/seamless_communication
+          pip install soundfile
 
-      - name: Convert the audio to 16kHz mono (if needed)
+      - name: Translate Hindi speech to English speech
         run: |
-          ffmpeg -i test_audio/hindi_speech.wav -ar 16000 -ac 1 test_audio/input.wav
+          python3 <<EOF
+          from seamless_communication.models.inference import Translator
+          import torchaudio
+          import os
 
-      - name: Translate Hindi speech to English (speech-to-speech)
-        run: |
-          python <<EOF
-          from seamlessm4t import M4T
-          import soundfile as sf
+          translator = Translator()
+          input_path = "test_audio/hindi.wav"
+          output_path = "test_audio/output.wav"
 
-          # Initialize the SeamlessM4T model
-          model = M4T.from_pretrained("facebook/mt5-base")
+          # Perform speech-to-speech translation from Hindi to English
+          output = translator.predict(
+              input=input_path,
+              task_str="S2ST",
+              tgt_lang="eng"
+          )
 
-          # Read the input audio file (Hindi speech)
-          audio_input_path = "test_audio/input.wav"
-          audio, sample_rate = sf.read(audio_input_path)
-
-          # Perform speech translation (from Hindi to English)
-          translated_audio = model.translate_audio(audio, source_lang="hi", target_lang="en")
-
-          # Save the translated audio
-          output_path = "test_audio/translated_output.wav"
-          sf.write(output_path, translated_audio, sample_rate)
+          # Save output waveform
+          torchaudio.save(output_path, output.audio_wav.unsqueeze(0), sample_rate=output.sample_rate)
           EOF
 
-      - name: Upload translated audio as artifact
-        uses: actions/upload-artifact@v2  # Use v2 for the artifact upload action
+      - name: Upload translated audio artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: translated_audio
-          path: test_audio/translated_output.wav
+          name: translated_speech
+          path: test_audio/output.wav
