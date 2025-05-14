@@ -1,62 +1,60 @@
-
-name: Test Speech-to-Speech Translation
+name: Demucs Music Detection
 
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 jobs:
-  test-translation:
+  detect_music:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repo
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
-      - name: Install required dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg curl
+    - name: Install Demucs
+      run: |
+        pip install -U demucs torch torchaudio
 
-      - name: Download Hindi audio file
-        run: |
-          mkdir -p test_audio
-          curl -L -o test_audio/hindi.wav "https://www.voiptroubleshooter.com/open_speech/india/OSR_in_000_0071_16k.wav"
+    - name: Download random small audio sample
+      run: |
+        mkdir -p input
+        curl -L -o input/sample.wav https://github.com/deezer/spleeter/raw/master/audio_example.mp3
 
-      - name: Install SeamlessM4T and soundfile
-        run: |
-          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install git+https://github.com/facebookresearch/seamless_communication
-          pip install soundfile
+    - name: Run Demucs (extract vocals & instruments)
+      run: |
+        demucs --two-stems=vocals input/sample.wav
 
-      - name: Translate Hindi speech to English speech
-        run: |
-          python3 <<EOF
-          from seamless_communication.models.inference import Translator
-          import torchaudio
-          import os
+    - name: Check for music presence
+      run: |
+        python3 <<EOF
+        import os
+        import wave
+        import contextlib
 
-          translator = Translator()
-          input_path = "test_audio/hindi.wav"
-          output_path = "test_audio/output.wav"
+        path = "separated/htdemucs/sample/no_vocals.wav"
+        if not os.path.exists(path):
+            print("No vocals stem not found!")
+            exit(1)
 
-          # Perform speech-to-speech translation from Hindi to English
-          output = translator.predict(
-              input=input_path,
-              task_str="S2ST",
-              tgt_lang="eng"
-          )
+        with contextlib.closing(wave.open(path, 'r')) as f:
+            frames = f.getnframes()
+            rate = f.getframerate()
+            duration = frames / float(rate)
+            print(f"Instrumental Duration: {duration:.2f} seconds")
 
-          # Save output waveform
-          torchaudio.save(output_path, output.audio_wav.unsqueeze(0), sample_rate=output.sample_rate)
-          EOF
+            if duration > 1:
+                print(">> Music detected in audio!")
+            else:
+                print(">> No music detected.")
+        EOF
 
-      - name: Upload translated audio artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: translated_speech
-          path: test_audio/output.wav
+    - name: Upload Stems as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: demucs_output
+        path: separated/
