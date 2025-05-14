@@ -1,4 +1,3 @@
-
 name: Test Speech-to-Speech Translation
 
 on:
@@ -57,7 +56,7 @@ jobs:
           EOF
 
       - name: Upload translated audio as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2  # Use v2 for the artifact upload action
         with:
           name: translated_audio
           path: test_audio/translated_output.wav
