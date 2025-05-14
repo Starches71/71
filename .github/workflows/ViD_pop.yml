@@ -1,9 +1,8 @@
-
 name: Fetch Tech Videos from YouTube
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Every day at midnight UTC
+    - cron: '0 23 * * *'  # Every day at 11:00 PM UTC
   workflow_dispatch:
 
 jobs:
@@ -125,6 +124,7 @@ jobs:
         run: |
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
+          git pull --rebase origin main
           git add "Vid_Shorts(1M).txt" "Vid_long(1M).txt"
           git diff --cached --quiet || git commit -m "Update YouTube video list - $(date)"
           git push
