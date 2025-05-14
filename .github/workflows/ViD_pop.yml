@@ -37,8 +37,8 @@ jobs:
           today = datetime.utcnow()
           published_after = f"{today.year}-01-01T00:00:00Z"
 
-          shorts_file = "Vid_Shorts(1M).txt"
-          long_file = "Vid_long(1M).txt"
+          shorts_file = "Vid_Shorts(1Y).txt"
+          long_file = "Vid_long(1Y).txt"
 
           seen_ids = set()
           for file in [shorts_file, long_file]:
