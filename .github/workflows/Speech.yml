@@ -1,0 +1,63 @@
+
+name: Test Speech-to-Speech Translation
+
+on:
+  workflow_dispatch:  # Allows you to trigger the workflow manually
+
+jobs:
+  test-translation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install required dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl ffmpeg
+
+      - name: Download Hindi audio file
+        run: |
+          mkdir -p test_audio
+          curl -L -o test_audio/hindi_speech.wav "https://www.voiptroubleshooter.com/open_speech/india/OSR_in_000_0071_16k.wav"
+
+      - name: Install Meta's SeamlessM4T
+        run: |
+          pip install seamlessm4t
+
+      - name: Convert the audio to 16kHz mono (if needed)
+        run: |
+          ffmpeg -i test_audio/hindi_speech.wav -ar 16000 -ac 1 test_audio/input.wav
+
+      - name: Translate Hindi speech to English (speech-to-speech)
+        run: |
+          python <<EOF
+          from seamlessm4t import M4T
+          import soundfile as sf
+
+          # Initialize the SeamlessM4T model
+          model = M4T.from_pretrained("facebook/mt5-base")
+
+          # Read the input audio file (Hindi speech)
+          audio_input_path = "test_audio/input.wav"
+          audio, sample_rate = sf.read(audio_input_path)
+
+          # Perform speech translation (from Hindi to English)
+          translated_audio = model.translate_audio(audio, source_lang="hi", target_lang="en")
+
+          # Save the translated audio
+          output_path = "test_audio/translated_output.wav"
+          sf.write(output_path, translated_audio, sample_rate)
+          EOF
+
+      - name: Upload translated audio as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: translated_audio
+          path: test_audio/translated_output.wav
