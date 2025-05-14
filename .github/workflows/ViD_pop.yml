@@ -1,0 +1,129 @@
+
+name: YouTube Tech Fetcher
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight UTC
+  workflow_dispatch:     # Manual run
+
+jobs:
+  fetch-tech-videos:
+    runs-on: ubuntu-latest
+
+    env:
+      YT_API_KEY: ${{ secrets.YOUTUBE_API }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch and filter YouTube videos
+        run: |
+          import requests, json, os
+          from datetime import datetime, timedelta
+
+          API_KEY = os.getenv("YT_API_KEY")
+          BASE_URL = "https://www.googleapis.com/youtube/v3/search"
+          VIDEO_DETAILS_URL = "https://www.googleapis.com/youtube/v3/videos"
+          CATEGORY_ID = "28"
+          MAX_RESULTS = 50  # YouTube max per request
+          TOTAL_VIDEOS = 200
+          THIS_YEAR = datetime.utcnow().year
+
+          def fetch_videos(page_token=None):
+              params = {
+                  "key": API_KEY,
+                  "part": "snippet",
+                  "type": "video",
+                  "videoCategoryId": CATEGORY_ID,
+                  "videoLicense": "creativeCommon",
+                  "order": "viewCount",
+                  "publishedAfter": f"{THIS_YEAR}-01-01T00:00:00Z",
+                  "maxResults": MAX_RESULTS
+              }
+              if page_token:
+                  params["pageToken"] = page_token
+              r = requests.get(BASE_URL, params=params)
+              return r.json()
+
+          def get_video_details(video_ids):
+              params = {
+                  "key": API_KEY,
+                  "part": "contentDetails,statistics",
+                  "id": ",".join(video_ids)
+              }
+              r = requests.get(VIDEO_DETAILS_URL, params=params)
+              return r.json()
+
+          shorts_file = "Vid_Shorts(1M).txt"
+          long_file = "Vid_long(1M).txt"
+
+          def load_existing(file):
+              if not os.path.exists(file):
+                  return set()
+              with open(file) as f:
+                  return set(line.split("https://www.youtube.com/watch?v=")[-1].strip() for line in f if "youtube.com/watch?v=" in line)
+
+          shorts_ids = load_existing(shorts_file)
+          long_ids = load_existing(long_file)
+
+          collected = 0
+          page_token = None
+          videos_data = []
+
+          while collected < TOTAL_VIDEOS:
+              res = fetch_videos(page_token)
+              video_ids = [item["id"]["videoId"] for item in res.get("items", [])]
+              details = get_video_details(video_ids)
+              for item in details.get("items", []):
+                  vid = item["id"]
+                  views = int(item["statistics"].get("viewCount", 0))
+                  duration = item["contentDetails"]["duration"]
+                  title = item["snippet"]["title"]
+                  link = f"https://www.youtube.com/watch?v={vid}"
+
+                  # Parse ISO 8601 duration
+                  is_short = "PT" in duration and "M" not in duration and "H" not in duration
+                  entry = f"{views:,} views | {title}\n{link}\n\n"
+
+                  if is_short and vid not in shorts_ids:
+                      shorts_ids.add(vid)
+                      videos_data.append((views, entry, shorts_file))
+                  elif not is_short and vid not in long_ids:
+                      long_ids.add(vid)
+                      videos_data.append((views, entry, long_file))
+
+                  collected += 1
+                  if collected >= TOTAL_VIDEOS:
+                      break
+              page_token = res.get("nextPageToken")
+              if not page_token:
+                  break
+
+          # Sort and write to files
+          from collections import defaultdict
+          file_entries = defaultdict(list)
+          for views, entry, file in videos_data:
+              file_entries[file].append((views, entry))
+
+          for file, entries in file_entries.items():
+              entries.sort(reverse=True)
+              with open(file, "a+") as f:
+                  for _, line in entries:
+                      f.write(line)
+
+      - name: Commit and push
+        run: |
+          git config --global user.name 'yt-bot'
+          git config --global user.email 'yt-bot@example.com'
+          git add Vid_Shorts(1M).txt Vid_long(1M).txt
+          git commit -m "Update YouTube video list - $(date)"
+          git push
