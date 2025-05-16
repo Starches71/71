@@ -2,7 +2,7 @@ name: Fetch Tech Videos from YouTube
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # Every day at 11:00 PM UTC
+    - cron: '0 23 * * 5'  # Every day at 11:00 PM UTC
   workflow_dispatch:
 
 jobs:
