@@ -129,7 +129,7 @@ jobs:
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
           git pull --rebase origin main
-          git add Vid_shortM*_laptop.txt Vid_longM*_laptop.txt
+          git add Vid_short_(M)*_laptop.txt Vid_long_(M)*_laptop.txt
           if git diff --cached --quiet; then
             echo "Nothing to commit"
           else
