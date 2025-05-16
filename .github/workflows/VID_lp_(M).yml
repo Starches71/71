@@ -139,5 +139,5 @@ jobs:
           if git diff --cached --quiet; then
             echo "Nothing to commit"
           else
-            git commit -m "Update YouTube laptop video list - $(date)"
-            git push
+            git commit -m "Update YouTube laptop video list - $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push origin main
