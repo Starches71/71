@@ -1,13 +1,13 @@
 
-name: Fetch Unboxing Tech Videos from YouTube
+name: Fetch Unboxing Videos from YouTube
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # Every day at 11:00 PM UTC
+    - cron: '0 23 * * 1'  # Every Monday at 11:00 PM UTC
   workflow_dispatch:
 
 jobs:
-  fetch-tech-videos:
+  fetch-unboxing-videos:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,17 +27,16 @@ jobs:
           YT_API_KEY: ${{ secrets.YOUTUBE_API }}
         run: |
           python <<EOF
-          import requests, json, os
+          import requests, os
           from datetime import datetime
 
           API_KEY = os.getenv("YT_API_KEY")
           MAX_RESULTS = 50
           TOTAL_RESULTS = 200
-          QUERY = "Unboxing"
+          QUERY = "unboxing"
 
           year = datetime.utcnow().year
           published_after = f"{year}-01-01T00:00:00Z"
-
           shorts_file = f"Vid_short({year})_unbx.txt"
           long_file = f"Vid_long({year})_unbx.txt"
 
@@ -125,7 +124,11 @@ jobs:
         run: |
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
+
+          git stash --include-untracked
           git pull --rebase origin main
+          git stash pop || true
+
           git add "Vid_short(20"*"_unbx.txt" "Vid_long(20"*"_unbx.txt"
           git diff --cached --quiet || git commit -m "Update YouTube unboxing video list - $(date)"
           git push
