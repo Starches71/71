@@ -1,28 +1,5 @@
 
-name: Fetch Gadget Unboxing Videos from YouTube
-
-on:
-  schedule:
-    - cron: '0 23 * * 2'  # Every Tuesday at 11:00 PM UTC
-  workflow_dispatch:
-
-jobs:
-  fetch-gadget-videos:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Install requests
-        run: pip install requests
-
-      - name: Fetch and filter YouTube videos
+- name: Fetch and filter YouTube videos (weekly)
         env:
           YT_API_KEY: ${{ secrets.YOUTUBE_API }}
         run: |
@@ -36,12 +13,12 @@ jobs:
           QUERY = "gadgets"
 
           now = datetime.utcnow()
-          # Start of the current week (Monday)
-          start_of_week = now - timedelta(days=now.weekday())
-          published_after = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0).isoformat() + "Z"
+          monday = now - timedelta(days=now.weekday())  # most recent Monday
+          published_after = monday.strftime("%Y-%m-%dT00:00:00Z")
 
-          shorts_file = f"Vid_short(W)_{QUERY}.txt"
-          long_file = f"Vid_long(W)_{QUERY}.txt"
+          file_tag = monday.strftime("%Y-%m-%d")
+          shorts_file = f"Vid_short({file_tag})_{QUERY}.txt"
+          long_file = f"Vid_long({file_tag})_{QUERY}.txt"
 
           seen_ids = set()
           for file in [shorts_file, long_file]:
@@ -122,16 +99,3 @@ jobs:
                   if item not in existing:
                       f.write(item)
           EOF
-
-      - name: Commit and push changes
-        run: |
-          git config --global user.name "yt-bot"
-          git config --global user.email "yt-bot@example.com"
-          git pull --rebase origin main
-          git add "Vid_short(W)_gadgets.txt" "Vid_long(W)_gadgets.txt"
-          if git diff --cached --quiet; then
-            echo "Nothing to commit"
-          else
-            git commit -m "Update YouTube gadget video list - $(date)"
-            git push
-          fi
