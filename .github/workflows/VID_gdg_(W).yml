@@ -1,5 +1,28 @@
 
-- name: Fetch and filter YouTube videos (weekly)
+name: Fetch Weekly Gadget Unboxing Videos from YouTube
+
+on:
+  schedule:
+    - cron: '0 23 * * 2'  # Every Tuesday at 11:00 PM UTC
+  workflow_dispatch:      # <--- Enables manual run
+
+jobs:
+  fetch-gadget-videos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Fetch and filter YouTube videos (weekly)
         env:
           YT_API_KEY: ${{ secrets.YOUTUBE_API }}
         run: |
@@ -12,13 +35,12 @@
           TOTAL_RESULTS = 200
           QUERY = "gadgets"
 
-          now = datetime.utcnow()
-          monday = now - timedelta(days=now.weekday())  # most recent Monday
-          published_after = monday.strftime("%Y-%m-%dT00:00:00Z")
-
-          file_tag = monday.strftime("%Y-%m-%d")
-          shorts_file = f"Vid_short({file_tag})_{QUERY}.txt"
-          long_file = f"Vid_long({file_tag})_{QUERY}.txt"
+          today = datetime.utcnow()
+          week_ago = today - timedelta(days=7)
+          published_after = week_ago.strftime('%Y-%m-%dT%H:%M:%SZ')
+          year, week = today.isocalendar()[0:2]
+          shorts_file = f"Vid_short(week{week})_{QUERY}.txt"
+          long_file = f"Vid_long(week{week})_{QUERY}.txt"
 
           seen_ids = set()
           for file in [shorts_file, long_file]:
@@ -99,3 +121,16 @@
                   if item not in existing:
                       f.write(item)
           EOF
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "yt-bot"
+          git config --global user.email "yt-bot@example.com"
+
+          git stash --include-untracked
+          git pull --rebase origin main
+          git stash pop || true
+
+          git add "Vid_short("*")_gadgets.txt" "Vid_long("*")_gadgets.txt"
+          git diff --cached --quiet || git commit -m "Update weekly YouTube gadget video list - $(date)"
+          git push
