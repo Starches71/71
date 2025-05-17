@@ -1,0 +1,128 @@
+
+name: Fetch Popular Tech Videos (Current Month)
+
+on:
+  schedule:
+    - cron: '0 23 * * 5'  # Every Friday at 11:00 PM UTC
+  workflow_dispatch:
+
+jobs:
+  fetch-monthly-popular-videos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Fetch popular YouTube videos from current month (category 28)
+        env:
+          YT_API_KEY: ${{ secrets.YOUTUBE_API }}
+        run: |
+          python <<EOF
+          import requests, os
+          from datetime import datetime
+
+          API_KEY = os.getenv("YT_API_KEY")
+          MAX_RESULTS = 50
+          TOTAL_RESULTS = 200
+
+          now = datetime.utcnow()
+          published_after = now.replace(day=1).strftime("%Y-%m-%dT00:00:00Z")
+          month_str = now.strftime("%Y-%m")
+
+          shorts_file = f"Vid_short({month_str})_pop.txt"
+          long_file = f"Vid_long({month_str})_pop.txt"
+
+          seen_ids = set()
+          for file in [shorts_file, long_file]:
+              if os.path.exists(file):
+                  with open(file, 'r') as f:
+                      for line in f:
+                          if 'youtube.com/watch?v=' in line:
+                              vid = line.strip().split('watch?v=')[1]
+                              seen_ids.add(vid)
+
+          all_items = []
+          next_page = ""
+
+          for _ in range(TOTAL_RESULTS // MAX_RESULTS):
+              url = (
+                  f"https://www.googleapis.com/youtube/v3/videos"
+                  f"?part=contentDetails,statistics,snippet"
+                  f"&chart=mostPopular"
+                  f"&maxResults={MAX_RESULTS}"
+                  f"&videoCategoryId=28"
+                  f"&regionCode=US"
+                  f"&key={API_KEY}"
+              )
+              if next_page:
+                  url += f"&pageToken={next_page}"
+
+              resp = requests.get(url)
+              data = resp.json()
+              next_page = data.get("nextPageToken", "")
+              items = data.get("items", [])
+
+              if not items:
+                  break
+
+              for vid in items:
+                  vid_id = vid["id"]
+                  if vid_id in seen_ids:
+                      continue
+                  seen_ids.add(vid_id)
+
+                  published_at = vid["snippet"]["publishedAt"]
+                  if published_at < published_after:
+                      continue
+
+                  duration = vid["contentDetails"]["duration"]
+                  views = int(vid["statistics"].get("viewCount", 0))
+                  title = vid["snippet"]["title"].replace('\n', ' ').strip()
+                  link = f"https://www.youtube.com/watch?v={vid_id}"
+
+                  is_short = False
+                  if "M" not in duration and "S" in duration:
+                      is_short = True
+
+                  entry = f"{views:,} views | {title}\n{link}\n\n"
+                  all_items.append((views, entry, is_short))
+
+          shorts = sorted([e for v, e, s in all_items if s], reverse=True)
+          longs = sorted([e for v, e, s in all_items if not s], reverse=True)
+
+          with open(shorts_file, 'a+', encoding='utf-8') as f:
+              f.seek(0)
+              existing = f.read()
+              for item in shorts:
+                  if item not in existing:
+                      f.write(item)
+
+          with open(long_file, 'a+', encoding='utf-8') as f:
+              f.seek(0)
+              existing = f.read()
+              for item in longs:
+                  if item not in existing:
+                      f.write(item)
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "yt-bot"
+          git config --global user.email "yt-bot@example.com"
+
+          git stash --include-untracked
+          git pull --rebase origin main
+          git stash pop || true
+
+          git add "Vid_short(20"*"_pop.txt" "Vid_long(20"*"_pop.txt"
+          git diff --cached --quiet || git commit -m "Update monthly popular videos - $(date)"
+          git push
