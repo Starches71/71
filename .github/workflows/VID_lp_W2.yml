@@ -1,0 +1,40 @@
+
+name: Fetch Laptop Unboxing Videos from YouTube
+
+on:
+  schedule:
+    - cron: '0 23 * * 4'  # Every Thursday at 11:00 PM UTC
+  workflow_dispatch:      # Manual trigger
+
+jobs:
+  fetch-laptop-videos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run video fetch script
+        env:
+          YT_API_KEY: ${{ secrets.YOUTUBE_API }}
+        run: python3 .github/scripts/fetch_laptops.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "yt-bot"
+          git config --global user.email "yt-bot@example.com"
+          git pull --rebase origin main
+          git add VID_short_lp.txt VID_long_lp.txt
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "Update YouTube laptop video list - $(date)"
+            git push
