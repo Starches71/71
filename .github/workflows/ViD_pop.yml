@@ -1,12 +1,13 @@
-name: Fetch Tech Videos from YouTube
+
+name: Fetch Popular Tech Videos (Category 28)
 
 on:
   schedule:
-    - cron: '0 23 * * 5'  # Every day at 11:00 PM UTC
+    - cron: '0 23 * * 5'  # Every Friday at 11:00 PM UTC
   workflow_dispatch:
 
 jobs:
-  fetch-tech-videos:
+  fetch-popular-videos:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,24 +22,28 @@ jobs:
       - name: Install requests
         run: pip install requests
 
-      - name: Fetch and filter YouTube videos
+      - name: Fetch popular YouTube videos (category 28)
         env:
           YT_API_KEY: ${{ secrets.YOUTUBE_API }}
         run: |
           python <<EOF
-          import requests, json, os
-          from datetime import datetime
+          import requests, os
+          from datetime import datetime, timedelta
 
           API_KEY = os.getenv("YT_API_KEY")
           MAX_RESULTS = 50
           TOTAL_RESULTS = 200
-          CATEGORY_ID = "28"  # Tech
 
-          today = datetime.utcnow()
-          published_after = f"{today.year}-01-01T00:00:00Z"
+          now = datetime.utcnow()
+          start_of_week = now - timedelta(days=now.isoweekday() - 1)
+          published_after = start_of_week.strftime("%Y-%m-%dT00:00:00Z")
 
-          shorts_file = "Vid_Shorts(1Y).txt"
-          long_file = "Vid_long(1Y).txt"
+          year = start_of_week.year
+          week_num = start_of_week.isocalendar()[1]
+          week_str = f"{week_num:02d}"
+
+          shorts_file = f"Vid_short({year}-W{week_str})_pop.txt"
+          long_file = f"Vid_long({year}-W{week_str})_pop.txt"
 
           seen_ids = set()
           for file in [shorts_file, long_file]:
@@ -50,45 +55,38 @@ jobs:
                               seen_ids.add(vid)
 
           all_items = []
-
           next_page = ""
+
           for _ in range(TOTAL_RESULTS // MAX_RESULTS):
-              search_url = (
-                  f"https://www.googleapis.com/youtube/v3/search"
-                  f"?part=snippet"
+              url = (
+                  f"https://www.googleapis.com/youtube/v3/videos"
+                  f"?part=contentDetails,statistics,snippet"
+                  f"&chart=mostPopular"
                   f"&maxResults={MAX_RESULTS}"
-                  f"&order=viewCount"
-                  f"&publishedAfter={published_after}"
-                  f"&type=video"
-                  f"&videoCategoryId={CATEGORY_ID}"
-                  f"&videoLicense=creativeCommon"
+                  f"&videoCategoryId=28"
+                  f"&regionCode=US"
                   f"&key={API_KEY}"
               )
               if next_page:
-                  search_url += f"&pageToken={next_page}"
+                  url += f"&pageToken={next_page}"
 
-              resp = requests.get(search_url)
+              resp = requests.get(url)
               data = resp.json()
-              video_ids = [item['id']['videoId'] for item in data.get('items', [])]
               next_page = data.get("nextPageToken", "")
+              items = data.get("items", [])
 
-              if not video_ids:
+              if not items:
                   break
 
-              stats_url = (
-                  f"https://www.googleapis.com/youtube/v3/videos"
-                  f"?part=contentDetails,statistics,snippet"
-                  f"&id={','.join(video_ids)}"
-                  f"&key={API_KEY}"
-              )
-              stats_resp = requests.get(stats_url)
-              stats_data = stats_resp.json()
-
-              for vid in stats_data.get("items", []):
+              for vid in items:
                   vid_id = vid["id"]
                   if vid_id in seen_ids:
                       continue
                   seen_ids.add(vid_id)
+
+                  published_at = vid["snippet"]["publishedAt"]
+                  if published_at < published_after:
+                      continue
 
                   duration = vid["contentDetails"]["duration"]
                   views = int(vid["statistics"].get("viewCount", 0))
@@ -124,7 +122,11 @@ jobs:
         run: |
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
+
+          git stash --include-untracked
           git pull --rebase origin main
-          git add "Vid_Shorts(1Y).txt" "Vid_long(1Y).txt"
-          git diff --cached --quiet || git commit -m "Update YouTube video list - $(date)"
+          git stash pop || true
+
+          git add "Vid_short(20"*"_pop.txt" "Vid_long(20"*"_pop.txt"
+          git diff --cached --quiet || git commit -m "Update popular category 28 videos - $(date)"
           git push
