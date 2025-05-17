@@ -37,8 +37,8 @@ jobs:
 
           year = datetime.utcnow().year
           published_after = f"{year}-01-01T00:00:00Z"
-          shorts_file = f"Vid_short({year})_{QUERY}.txt"
-          long_file = f"Vid_long({year})_{QUERY}.txt"
+          shorts_file = f"Vid_short({year})_lp.txt"
+          long_file = f"Vid_long({year})_lp.txt"
 
           seen_ids = set()
           for file in [shorts_file, long_file]:
@@ -124,7 +124,11 @@ jobs:
         run: |
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
+
+          git stash --include-untracked
           git pull --rebase origin main
-          git add "Vid_short(20"*"_laptop.txt" "Vid_long(20"*"_laptop.txt"
+          git stash pop || true
+
+          git add "Vid_short(20"*"_lp.txt" "Vid_long(20"*"_lp.txt"
           git diff --cached --quiet || git commit -m "Update YouTube laptop video list - $(date)"
           git push
