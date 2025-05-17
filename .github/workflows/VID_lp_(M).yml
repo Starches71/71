@@ -1,4 +1,3 @@
-
 name: Fetch Laptop Unboxing Videos from YouTube
 
 on:
@@ -26,29 +25,29 @@ jobs:
         env:
           YT_API_KEY: ${{ secrets.YOUTUBE_API }}
         run: |
-          set -x
-          python <<EOF
+          python3 <<EOF
           import requests, os
           from datetime import datetime, timezone
 
           API_KEY = os.getenv("YT_API_KEY")
           MAX_RESULTS = 50
           TOTAL_RESULTS = 200
-          QUERY = "laptop"
+          QUERY = "laptop unboxing"
 
           now = datetime.now(timezone.utc)
           published_after = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).isoformat().replace('+00:00', 'Z')
           month_code = now.strftime("%m")
           year_code = now.strftime("%Y")
-          label = f"(M){year_code}-{month_code}"
+          label = f"M_{year_code}_{month_code}"
+          query_tag = QUERY.replace(" ", "_")
 
-          shorts_file = f"Vid_short{label}_{QUERY}.txt"
-          long_file = f"Vid_long{label}_{QUERY}.txt"
+          shorts_file = f"Vid_short_{label}_{query_tag}.txt"
+          long_file = f"Vid_long_{label}_{query_tag}.txt"
 
           seen_ids = set()
           for file in [shorts_file, long_file]:
               if os.path.exists(file):
-                  with open(file, 'r') as f:
+                  with open(file, 'r', encoding='utf-8') as f:
                       for line in f:
                           if 'youtube.com/watch?v=' in line:
                               vid = line.strip().split('watch?v=')[1]
@@ -60,21 +59,14 @@ jobs:
           for _ in range(TOTAL_RESULTS // MAX_RESULTS):
               search_url = (
                   f"https://www.googleapis.com/youtube/v3/search"
-                  f"?part=snippet"
-                  f"&q={QUERY}"
-                  f"&maxResults={MAX_RESULTS}"
-                  f"&order=viewCount"
-                  f"&publishedAfter={published_after}"
-                  f"&type=video"
-                  f"&videoLicense=creativeCommon"
-                  f"&key={API_KEY}"
+                  f"?part=snippet&q={QUERY}&maxResults={MAX_RESULTS}"
+                  f"&order=viewCount&publishedAfter={published_after}"
+                  f"&type=video&videoLicense=creativeCommon&key={API_KEY}"
               )
               if next_page:
                   search_url += f"&pageToken={next_page}"
 
               resp = requests.get(search_url)
-              print("Search API URL:", search_url)
-              print("Search API Response:", resp.text)
               data = resp.json()
               video_ids = [item['id']['videoId'] for item in data.get('items', [])]
               next_page = data.get("nextPageToken", "")
@@ -85,12 +77,9 @@ jobs:
               stats_url = (
                   f"https://www.googleapis.com/youtube/v3/videos"
                   f"?part=contentDetails,statistics,snippet"
-                  f"&id={','.join(video_ids)}"
-                  f"&key={API_KEY}"
+                  f"&id={','.join(video_ids)}&key={API_KEY}"
               )
               stats_resp = requests.get(stats_url)
-              print("Stats API URL:", stats_url)
-              print("Stats API Response:", stats_resp.text)
               stats_data = stats_resp.json()
 
               for vid in stats_data.get("items", []):
@@ -131,12 +120,10 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          set -x
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
           git pull --rebase origin main
-          ls -l Vid_*.txt  # Optional debug step
-          git add Vid_short(M)*_laptop.txt Vid_long(M)*_laptop.txt
+          git add Vid_short_*.txt Vid_long_*.txt
           if git diff --cached --quiet; then
             echo "Nothing to commit"
           else
