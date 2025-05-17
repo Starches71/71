@@ -36,9 +36,12 @@ jobs:
           QUERY = "gadgets"
 
           now = datetime.utcnow()
-          published_after = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).isoformat() + "Z"
-          shorts_file = f"Vid_short(M)_{QUERY}.txt"
-          long_file = f"Vid_long(M)_{QUERY}.txt"
+          year = now.year
+          month = now.month
+          published_after = f"{year}-{month:02d}-01T00:00:00Z"
+
+          shorts_file = f"Vid_short({year}-{month:02d})_{QUERY}.txt"
+          long_file = f"Vid_long({year}-{month:02d})_{QUERY}.txt"
 
           seen_ids = set()
           for file in [shorts_file, long_file]:
@@ -124,11 +127,11 @@ jobs:
         run: |
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
+
+          git stash --include-untracked
           git pull --rebase origin main
-          git add "Vid_short(M)_gadgets.txt" "Vid_long(M)_gadgets.txt"
-          if git diff --cached --quiet; then
-            echo "Nothing to commit"
-          else
-            git commit -m "Update YouTube gadget video list - $(date)"
-            git push
-          fi
+          git stash pop || true
+
+          git add "Vid_short("*"_gadgets.txt" "Vid_long("*"_gadgets.txt"
+          git diff --cached --quiet || git commit -m "Update YouTube gadget video list - $(date)"
+          git push
