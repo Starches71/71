@@ -1,9 +1,1 @@
-#NespressoExpert
-#EspressoMachine
-#CoffeeLover
-#NespressoMachine
-#HomeBarista
-#SpecialtyCoffee
-#EspressoLover
-#NespressoExpertMachine
-#CoffeeConnoisseur
+#NespressoExpert #EspressoMachine #CoffeeLover #NespressoMachine #HomeBarista #SpecialtyCoffee #EspressoAtHome #NespressoExpertMachine #CoffeeEnthusiast
