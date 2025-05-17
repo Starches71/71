@@ -1,4 +1,5 @@
-name: Fetch Laptop Unboxing Videos from YouTube
+
+name: Fetch Laptop Videos from YouTube
 
 on:
   schedule:
@@ -25,29 +26,28 @@ jobs:
         env:
           YT_API_KEY: ${{ secrets.YOUTUBE_API }}
         run: |
-          python3 <<EOF
+          python <<EOF
           import requests, os
-          from datetime import datetime, timezone
+          from datetime import datetime
 
           API_KEY = os.getenv("YT_API_KEY")
           MAX_RESULTS = 50
           TOTAL_RESULTS = 200
-          QUERY = "laptop unboxing"
+          QUERY = "laptop"
 
-          now = datetime.now(timezone.utc)
-          published_after = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).isoformat().replace('+00:00', 'Z')
-          month_code = now.strftime("%m")
-          year_code = now.strftime("%Y")
-          label = f"M_{year_code}_{month_code}"
-          query_tag = QUERY.replace(" ", "_")
+          now = datetime.utcnow()
+          year = now.year
+          month = now.month
+          month_str = f"{month:02d}"
 
-          shorts_file = f"Vid_short_{label}_{query_tag}.txt"
-          long_file = f"Vid_long_{label}_{query_tag}.txt"
+          published_after = f"{year}-{month_str}-01T00:00:00Z"
+          shorts_file = f"Vid_short({year}-{month_str})_lp.txt"
+          long_file = f"Vid_long({year}-{month_str})_lp.txt"
 
           seen_ids = set()
           for file in [shorts_file, long_file]:
               if os.path.exists(file):
-                  with open(file, 'r', encoding='utf-8') as f:
+                  with open(file, 'r') as f:
                       for line in f:
                           if 'youtube.com/watch?v=' in line:
                               vid = line.strip().split('watch?v=')[1]
@@ -59,9 +59,14 @@ jobs:
           for _ in range(TOTAL_RESULTS // MAX_RESULTS):
               search_url = (
                   f"https://www.googleapis.com/youtube/v3/search"
-                  f"?part=snippet&q={QUERY}&maxResults={MAX_RESULTS}"
-                  f"&order=viewCount&publishedAfter={published_after}"
-                  f"&type=video&videoLicense=creativeCommon&key={API_KEY}"
+                  f"?part=snippet"
+                  f"&q={QUERY}"
+                  f"&maxResults={MAX_RESULTS}"
+                  f"&order=viewCount"
+                  f"&publishedAfter={published_after}"
+                  f"&type=video"
+                  f"&videoLicense=creativeCommon"
+                  f"&key={API_KEY}"
               )
               if next_page:
                   search_url += f"&pageToken={next_page}"
@@ -77,7 +82,8 @@ jobs:
               stats_url = (
                   f"https://www.googleapis.com/youtube/v3/videos"
                   f"?part=contentDetails,statistics,snippet"
-                  f"&id={','.join(video_ids)}&key={API_KEY}"
+                  f"&id={','.join(video_ids)}"
+                  f"&key={API_KEY}"
               )
               stats_resp = requests.get(stats_url)
               stats_data = stats_resp.json()
@@ -122,10 +128,11 @@ jobs:
         run: |
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
+
+          git stash --include-untracked
           git pull --rebase origin main
-          git add Vid_short_*.txt Vid_long_*.txt
-          if git diff --cached --quiet; then
-            echo "Nothing to commit"
-          else
-            git commit -m "Update YouTube laptop video list - $(date -u '+%Y-%m-%d %H:%M UTC')"
-            git push origin main
+          git stash pop || true
+
+          git add "Vid_short(20"*"_lp.txt" "Vid_long(20"*"_lp.txt"
+          git diff --cached --quiet || git commit -m "Update YouTube laptop video list - $(date)"
+          git push
