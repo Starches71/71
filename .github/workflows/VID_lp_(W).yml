@@ -1,3 +1,4 @@
+
 name: Fetch Laptop Unboxing Videos from YouTube
 
 on:
@@ -34,16 +35,14 @@ jobs:
           TOTAL_RESULTS = 200
           QUERY = "laptop"
 
-          now = datetime.utcnow()
-          week_number = now.isocalendar()[1]
-          year_code = now.strftime("%Y")
-          label = f"(W){year_code}-W{week_number:02d}"
+          # File names
+          shorts_file = "VID_short_lp.txt"
+          long_file = "VID_long_lp.txt"
 
+          # Time filter: from start of week
+          now = datetime.utcnow()
           start_of_week = now - timedelta(days=now.weekday())
           published_after = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0).isoformat() + "Z"
-
-          shorts_file = f"Vid_short{label}_{QUERY}.txt"
-          long_file = f"Vid_long{label}_{QUERY}.txt"
 
           seen_ids = set()
           for file in [shorts_file, long_file]:
@@ -130,7 +129,7 @@ jobs:
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
           git pull --rebase origin main
-          git add Vid_short_(W)_laptop.txt Vid_long_(W)_laptop.txt
+          git add VID_short_lp.txt VID_long_lp.txt
           if git diff --cached --quiet; then
             echo "Nothing to commit"
           else
