@@ -37,7 +37,7 @@ jobs:
           QUERY = "laptop"
 
           now = datetime.now(timezone.utc)
-          published_after = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).isoformat()
+          published_after = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).isoformat().replace('+00:00', 'Z')
           month_code = now.strftime("%m")
           year_code = now.strftime("%Y")
           label = f"(M){year_code}-{month_code}"
