@@ -19,12 +19,13 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install requests
+      - name: Install dependencies
         run: pip install requests
 
       - name: Fetch and filter YouTube videos
         env:
           YT_API_KEY: ${{ secrets.YOUTUBE_API }}
+        shell: bash
         run: |
           python3 <<EOF
 import requests, os
@@ -33,7 +34,7 @@ from datetime import datetime, timedelta
 API_KEY = os.getenv("YT_API_KEY")
 MAX_RESULTS = 50
 TOTAL_RESULTS = 200
-QUERY = "laptop"
+QUERY = "laptop unboxing"
 
 shorts_file = "VID_short_lp.txt"
 long_file = "VID_long_lp.txt"
@@ -45,7 +46,7 @@ published_after = start_of_week.replace(hour=0, minute=0, second=0, microsecond=
 seen_ids = set()
 for file in [shorts_file, long_file]:
     if os.path.exists(file):
-        with open(file, 'r') as f:
+        with open(file, 'r', encoding='utf-8') as f:
             for line in f:
                 if 'youtube.com/watch?v=' in line:
                     vid = line.strip().split('watch?v=')[1]
@@ -97,15 +98,17 @@ for _ in range(TOTAL_RESULTS // MAX_RESULTS):
         title = vid["snippet"]["title"].replace('\n', ' ').strip()
         link = f"https://www.youtube.com/watch?v={vid_id}"
 
-        is_short = False
-        if "M" not in duration and "S" in duration:
-            is_short = True
+        # Basic check for shorts (under 60 seconds, no 'M' and 'S' exists)
+        is_short = "M" not in duration and "S" in duration
 
         entry = f"{views:,} views | {title}\n{link}\n\n"
         all_items.append((views, entry, is_short))
 
-shorts = sorted([e for v, e, s in all_items if s], reverse=True)
-longs = sorted([e for v, e, s in all_items if not s], reverse=True)
+shorts = [e for v, e, s in all_items if s]
+longs = [e for v, e, s in all_items if not s]
+
+shorts.sort(reverse=True)
+longs.sort(reverse=True)
 
 with open(shorts_file, 'a+', encoding='utf-8') as f:
     f.seek(0)
