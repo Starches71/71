@@ -1,3 +1,4 @@
+
 name: Merge VID short and long text files with debug
 
 on:
@@ -16,12 +17,12 @@ jobs:
     - name: Confirm checkout success
       run: echo "✅ Repo checked out"
 
-    - name: Find all Vid*.txt or VID*.txt files
+    - name: Find all Vid*.txt files
       run: |
-        echo "Searching for Vid*.txt or VID*.txt files..."
-        ALL_VID_FILES=$(ls Vid*.txt VID*.txt 2>/dev/null || echo "")
+        echo "Searching for Vid*.txt files..."
+        ALL_VID_FILES=$(ls Vid*.txt 2>/dev/null || echo "")
         if [ -z "$ALL_VID_FILES" ]; then
-          echo "❌ No Vid*.txt or VID*.txt files found!"
+          echo "❌ No Vid*.txt files found!"
           exit 1
         else
           echo "✅ Found files:"
@@ -33,7 +34,7 @@ jobs:
       run: |
         SHORT_FILES=""
         LONG_FILES=""
-        for f in Vid*.txt VID*.txt; do
+        for f in Vid*.txt; do
           fname=$(echo "$f" | tr '[:upper:]' '[:lower:]')
           if [[ "$fname" == *short* ]]; then
             echo "Short video file: $f"
@@ -45,16 +46,6 @@ jobs:
             echo "Skipping file (not short or long): $f"
           fi
         done
-
-        echo "Short files list: $SHORT_FILES"
-        echo "Long files list: $LONG_FILES"
-
-        if [ -z "$SHORT_FILES" ]; then
-          echo "Warning: No short files detected"
-        fi
-        if [ -z "$LONG_FILES" ]; then
-          echo "Warning: No long files detected"
-        fi
 
         echo "SHORT_FILES=$SHORT_FILES" >> $GITHUB_ENV
         echo "LONG_FILES=$LONG_FILES" >> $GITHUB_ENV
@@ -92,6 +83,7 @@ jobs:
           exit 0
         else
           git commit -m "Merge VID short and long files - $(date -u)"
+          git pull --rebase origin main
           git push origin main
           echo "✅ Changes committed and pushed"
         fi
