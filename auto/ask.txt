@@ -51,3 +51,4 @@
 100. Levoit LV-H132 Air Purifier
 100. Neato Robotics Botvac D3 Connected
 100. Neato Robotics D8 Connected Robot Vacuum
+100. Neato Robotics D8 Connected Robot Vacuum
