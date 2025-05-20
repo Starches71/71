@@ -1,57 +1,60 @@
-name: Merge VID Files
+name: Merge Shorts and Longs
 
 on:
-  schedule:
-    - cron: "0 0 * * *"  # Runs daily at 00:00 UTC
-  workflow_dispatch:     # Manual trigger
+  workflow_dispatch:
 
 jobs:
   merge:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Full history needed for pull/push
+    - name: Checkout Repo
+      uses: actions/checkout@v3
 
-      - name: Merge Shorts and Longs
-        run: |
-          mkdir -p tmp
+    - name: Set Git Config
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "github-actions"
 
-          # 1. Find all relevant files
-          find . -type f -iname "vid*.txt" > tmp/all_files.txt
+    - name: Merge Shorts and Longs
+      run: |
+        mkdir -p tmp
 
-          # 2. Separate short and long
-          grep -i short tmp/all_files.txt > tmp/short_files.txt || true
-          grep -i long tmp/all_files.txt > tmp/long_files.txt || true
+        for type in short long; do
+          out_file="VID_ALL_${type^^}.txt"
+          > tmp/tmp_$out_file
 
-          # 3. Define merge function
-          process_files() {
-            out_file=$1
-            input_list=$2
+          for i in {1..7}; do
+            file="vid${i}_${type}.txt"
 
-            > $out_file
-            > tmp/tmp_$out_file
+            if [ ! -f "$file" ]; then
+              echo "Missing file: $file"
+              continue
+            fi
 
-            while read -r file; do
-              awk '/https:\/\/www\.youtube\.com\/watch\?v=/{id=gensub(/.*v=([a-zA-Z0-9_-]+).*/, "\\1", "g"); print id "||" prev; print $0; print ""; next} {prev=$0}' "$file" >> tmp/tmp_$out_file
-            done < "$input_list"
+            echo "Processing file: $file"
+            cat "$file"
 
-            # Deduplicate and sort
-            awk -F'||' '/\|\|/ {ids[$1]=$2} END {for (i in ids) print ids[i] > "tmp/final_raw.txt"}' tmp/tmp_$out_file
-            sort -t',' -k1,1nr <(awk -F ' views \\| ' '{gsub(",", "", $1); print $1","$0}' tmp/final_raw.txt) | cut -d',' -f2- > $out_file
-          }
+            awk '{
+              if ($0 ~ /watch\?v=/) {
+                match($0, /v=([a-zA-Z0-9_-]+)/, arr);
+                if (arr[1] != "") {
+                  print arr[1] "||" prev;
+                  print $0;
+                  print "";
+                }
+              } else {
+                prev = $0;
+              }
+            }' "$file" >> tmp/tmp_$out_file
+          done
 
-          # 4. Process files
-          process_files VID_ALL_SHORTS.txt tmp/short_files.txt
-          process_files VID_ALL_LONG.txt tmp/long_files.txt
+          mv tmp/tmp_$out_file $out_file
+        done
 
-      - name: Commit and Push Changes
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git pull origin main --rebase
-          git add VID_ALL_SHORTS.txt VID_ALL_LONG.txt
-          git commit -m "Auto-merge shorts and longs - $(date)" || echo "No changes to commit"
-          git push origin main
+    - name: Commit and Push Results
+      run: |
+        git pull origin main
+        git add VID_ALL_SHORT.txt VID_ALL_LONG.txt
+        git commit -m "Auto-merge shorts and longs - $(date -u)"
+        git push
