@@ -1,0 +1,81 @@
+
+name: Update YouTube Video Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs daily at 00:00 UTC
+  workflow_dispatch:     # Allows manual trigger
+
+jobs:
+  merge_videos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install requirements
+        run: sudo apt-get install -y gawk
+
+      - name: Merge Shorts and Longs
+        run: |
+          mkdir -p tmp
+
+          # Find all input files
+          find . -type f -iname "vid*.txt" -o -iname "VID*.txt" > tmp/all_files.txt
+
+          grep -i short tmp/all_files.txt > tmp/short_files.txt || true
+          grep -i long tmp/all_files.txt > tmp/long_files.txt || true
+
+          process_files() {
+            FILELIST=$1
+            OUTFILE=$2
+
+            > tmp/all_lines.txt
+            > tmp/all_ids.txt
+
+            while IFS= read -r file; do
+              awk '
+                /^[0-9,.]+ views \|/ { title=$0 }
+                /^https:\/\/www\.youtube\.com\/watch\?v=/ {
+                  id = gensub(/^.*v=([^&]+).*$/, "\\1", "g", $0)
+                  printf "%s\n%s\n", title, $0
+                  print id > "tmp/all_ids.txt"
+                }
+              ' "$file" >> tmp/all_lines.txt
+            done < "$FILELIST"
+
+            # Deduplicate by ID
+            sort tmp/all_ids.txt | uniq > tmp/unique_ids.txt
+            awk '
+              BEGIN { RS=""; ORS="\n\n" }
+              NR==FNR { ids[$0]; next }
+              {
+                url=gensub(/.*(https:\/\/www\.youtube\.com\/watch\?v=[\w-]+).*/, "\\1", "g", $0)
+                id=gensub(/^.*v=([^&]+).*$/, "\\1", "g", url)
+                if (id in ids) print
+              }
+            ' tmp/unique_ids.txt tmp/all_lines.txt > tmp/filtered_lines.txt
+
+            # Sort by view count descending
+            awk '
+              BEGIN { RS=""; ORS="\n\n" }
+              {
+                match($0, /^[0-9,]+/, views)
+                gsub(",", "", views[0])
+                print views[0] "|" $0
+              }
+            ' tmp/filtered_lines.txt | sort -nr | cut -d'|' -f2- > "$OUTFILE"
+          }
+
+          process_files tmp/short_files.txt VID_ALL_SHORTS.txt
+          process_files tmp/long_files.txt VID_ALL_LONG.txt
+
+      - name: Commit merged files
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@users.noreply.github.com"
+
+          git add VID_ALL_SHORTS.txt VID_ALL_LONG.txt
+          git commit -m "Daily update: YouTube video data merged and sorted" || echo "No changes to commit"
+          git push
