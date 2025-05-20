@@ -1,10 +1,9 @@
-
-name: Merge VID short and long text files with debug
+name: Merge, deduplicate, and sort VID files
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *'  # Daily at midnight UTC
 
 jobs:
   merge-vid-files:
@@ -46,28 +45,81 @@ jobs:
             echo "Skipping file (not short or long): $f"
           fi
         done
-
         echo "SHORT_FILES=$SHORT_FILES" >> $GITHUB_ENV
         echo "LONG_FILES=$LONG_FILES" >> $GITHUB_ENV
 
-    - name: Merge short files
+    - name: Merge, deduplicate, and sort shorts
       run: |
         if [ -z "$SHORT_FILES" ]; then
           echo "No short files to merge"
           exit 0
         fi
-        cat $SHORT_FILES > VID_SHORT_MERGED.txt
-        echo "✅ Merged shorts into VID_SHORT_MERGED.txt"
+
+        echo "Processing SHORT files..."
+        cat $SHORT_FILES > _raw_short.txt
+
+        awk '
+          BEGIN { RS=""; ORS="\n\n" }
+          {
+            gsub(/^[■□○]+\s*/, "", $1)  # Strip leading marks
+            match($0, /^[0-9,]+ views \| .*$/, views_line)
+            split(views_line[0], parts, " views | ")
+            gsub(",", "", parts[1])
+            views = parts[1] + 0
+            clean_block = $0
+            if (!(clean_block in seen)) {
+              seen[clean_block] = views
+              data[views] = clean_block
+              order[++count] = views
+            }
+          }
+          END {
+            n = asort(order)
+            for (i = n; i >= 1; i--) {
+              v = order[i]
+              print data[v]
+            }
+          }
+        ' _raw_short.txt > VID_SHORT_MERGED.txt
+
+        echo "✅ Shorts merged and sorted"
         head -n 10 VID_SHORT_MERGED.txt || echo "(file empty)"
 
-    - name: Merge long files
+    - name: Merge, deduplicate, and sort longs
       run: |
         if [ -z "$LONG_FILES" ]; then
           echo "No long files to merge"
           exit 0
         fi
-        cat $LONG_FILES > VID_LONG_MERGED.txt
-        echo "✅ Merged longs into VID_LONG_MERGED.txt"
+
+        echo "Processing LONG files..."
+        cat $LONG_FILES > _raw_long.txt
+
+        awk '
+          BEGIN { RS=""; ORS="\n\n" }
+          {
+            gsub(/^[■□○]+\s*/, "", $1)  # Strip leading marks
+            match($0, /^[0-9,]+ views \| .*$/, views_line)
+            split(views_line[0], parts, " views | ")
+            gsub(",", "", parts[1])
+            views = parts[1] + 0
+            clean_block = $0
+            if (!(clean_block in seen)) {
+              seen[clean_block] = views
+              data[views] = clean_block
+              order[++count] = views
+            }
+          }
+          END {
+            n = asort(order)
+            for (i = n; i >= 1; i--) {
+              v = order[i]
+              print data[v]
+            }
+          }
+        ' _raw_long.txt > VID_LONG_MERGED.txt
+
+        echo "✅ Longs merged and sorted"
         head -n 10 VID_LONG_MERGED.txt || echo "(file empty)"
 
     - name: Configure git user
@@ -75,14 +127,14 @@ jobs:
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
 
-    - name: Commit and push if changes
+    - name: Commit and push changes with rebase
       run: |
         git add VID_SHORT_MERGED.txt VID_LONG_MERGED.txt
         if git diff --cached --quiet; then
           echo "No changes to commit"
           exit 0
         else
-          git commit -m "Merge VID short and long files - $(date -u)"
+          git commit -m "Auto-merge & sort VID files - $(date -u)"
           git pull --rebase origin main
           git push origin main
           echo "✅ Changes committed and pushed"
