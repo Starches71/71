@@ -1,13 +1,12 @@
-
-name: Daily Data Update with Debugging
+name: Merge VID short and long text files with debug
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'  # Runs daily at midnight UTC
-  workflow_dispatch:      # Manual trigger
+    - cron: '0 0 * * *'
 
 jobs:
-  update-files:
+  merge-vid-files:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,63 +14,84 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Confirm checkout success
-      run: echo "✅ Repo checked out successfully"
+      run: echo "✅ Repo checked out"
 
-    - name: List all files and folders in repo
+    - name: Find all Vid*.txt or VID*.txt files
       run: |
-        echo "📂 Repo file structure:"
-        ls -alR
+        echo "Searching for Vid*.txt or VID*.txt files..."
+        ALL_VID_FILES=$(ls Vid*.txt VID*.txt 2>/dev/null || echo "")
+        if [ -z "$ALL_VID_FILES" ]; then
+          echo "❌ No Vid*.txt or VID*.txt files found!"
+          exit 1
+        else
+          echo "✅ Found files:"
+          echo "$ALL_VID_FILES"
+          echo
+        fi
 
-    - name: Show vid files presence and sample content
+    - name: Separate shorts and longs
       run: |
-        for f in vid1_short.txt vid2_short.txt vid3_short.txt vid1_long.txt vid2_long.txt vid3_long.txt; do
-          if [ -f "$f" ]; then
-            echo "✅ File $f exists. First 3 lines:"
-            head -n 3 "$f"
+        SHORT_FILES=""
+        LONG_FILES=""
+        for f in Vid*.txt VID*.txt; do
+          fname=$(echo "$f" | tr '[:upper:]' '[:lower:]')
+          if [[ "$fname" == *short* ]]; then
+            echo "Short video file: $f"
+            SHORT_FILES="$SHORT_FILES $f"
+          elif [[ "$fname" == *long* ]]; then
+            echo "Long video file: $f"
+            LONG_FILES="$LONG_FILES $f"
           else
-            echo "❌ File $f NOT found!"
+            echo "Skipping file (not short or long): $f"
           fi
         done
 
+        echo "Short files list: $SHORT_FILES"
+        echo "Long files list: $LONG_FILES"
+
+        if [ -z "$SHORT_FILES" ]; then
+          echo "Warning: No short files detected"
+        fi
+        if [ -z "$LONG_FILES" ]; then
+          echo "Warning: No long files detected"
+        fi
+
+        echo "SHORT_FILES=$SHORT_FILES" >> $GITHUB_ENV
+        echo "LONG_FILES=$LONG_FILES" >> $GITHUB_ENV
+
     - name: Merge short files
       run: |
-        echo "Merging short files..."
-        cat vid1_short.txt vid2_short.txt vid3_short.txt > VID_ALL_SHORTS.txt
-        echo "✅ Merged shorts into VID_ALL_SHORTS.txt"
-        echo "VID_ALL_SHORTS.txt sample content:"
-        head -n 5 VID_ALL_SHORTS.txt
+        if [ -z "$SHORT_FILES" ]; then
+          echo "No short files to merge"
+          exit 0
+        fi
+        cat $SHORT_FILES > VID_SHORT_MERGED.txt
+        echo "✅ Merged shorts into VID_SHORT_MERGED.txt"
+        head -n 10 VID_SHORT_MERGED.txt || echo "(file empty)"
 
     - name: Merge long files
       run: |
-        echo "Merging long files..."
-        cat vid1_long.txt vid2_long.txt vid3_long.txt > VID_ALL_LONG.txt
-        echo "✅ Merged longs into VID_ALL_LONG.txt"
-        echo "VID_ALL_LONG.txt sample content:"
-        head -n 5 VID_ALL_LONG.txt
+        if [ -z "$LONG_FILES" ]; then
+          echo "No long files to merge"
+          exit 0
+        fi
+        cat $LONG_FILES > VID_LONG_MERGED.txt
+        echo "✅ Merged longs into VID_LONG_MERGED.txt"
+        head -n 10 VID_LONG_MERGED.txt || echo "(file empty)"
 
     - name: Configure git user
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
-        echo "✅ Git user configured"
 
-    - name: Check if merged files changed
-      id: files_changed
+    - name: Commit and push if changes
       run: |
-        git add VID_ALL_SHORTS.txt VID_ALL_LONG.txt
-        # Check if there are changes to commit
+        git add VID_SHORT_MERGED.txt VID_LONG_MERGED.txt
         if git diff --cached --quiet; then
-          echo "changed=false" >> $GITHUB_OUTPUT
-          echo "No changes to commit."
+          echo "No changes to commit"
+          exit 0
         else
-          echo "changed=true" >> $GITHUB_OUTPUT
-          echo "Changes detected."
+          git commit -m "Merge VID short and long files - $(date -u)"
+          git push origin main
+          echo "✅ Changes committed and pushed"
         fi
-
-    - name: Commit and push if changed
-      if: steps.files_changed.outputs.changed == 'true'
-      run: |
-        git commit -m "Auto-merge shorts and longs - $(date -u)"
-        echo "✅ Committed changes"
-        git push origin main
-        echo "✅ Pushed changes"
