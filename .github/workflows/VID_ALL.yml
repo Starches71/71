@@ -1,10 +1,9 @@
-
 name: Merge VID Files
 
 on:
   schedule:
     - cron: "0 0 * * *"  # Runs daily at 00:00 UTC
-  workflow_dispatch:     # Allows manual trigger
+  workflow_dispatch:     # Manual trigger
 
 jobs:
   merge:
@@ -13,19 +12,21 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history needed for pull/push
 
       - name: Merge Shorts and Longs
         run: |
           mkdir -p tmp
 
-          # 1. Find all files starting with vid/VID
+          # 1. Find all relevant files
           find . -type f -iname "vid*.txt" > tmp/all_files.txt
 
-          # 2. Separate short and long files
+          # 2. Separate short and long
           grep -i short tmp/all_files.txt > tmp/short_files.txt || true
           grep -i long tmp/all_files.txt > tmp/long_files.txt || true
 
-          # 3. Extract and process content
+          # 3. Define merge function
           process_files() {
             out_file=$1
             input_list=$2
@@ -37,23 +38,20 @@ jobs:
               awk '/https:\/\/www\.youtube\.com\/watch\?v=/{id=gensub(/.*v=([a-zA-Z0-9_-]+).*/, "\\1", "g"); print id "||" prev; print $0; print ""; next} {prev=$0}' "$file" >> tmp/tmp_$out_file
             done < "$input_list"
 
-            # Deduplicate based on video ID and sort by views
+            # Deduplicate and sort
             awk -F'||' '/\|\|/ {ids[$1]=$2} END {for (i in ids) print ids[i] > "tmp/final_raw.txt"}' tmp/tmp_$out_file
-
-            # Sort by views (numeric, descending)
             sort -t',' -k1,1nr <(awk -F ' views \\| ' '{gsub(",", "", $1); print $1","$0}' tmp/final_raw.txt) | cut -d',' -f2- > $out_file
           }
 
-          # 4. Process shorts
+          # 4. Process files
           process_files VID_ALL_SHORTS.txt tmp/short_files.txt
-
-          # 5. Process longs
           process_files VID_ALL_LONG.txt tmp/long_files.txt
 
-      - name: Commit merged files
+      - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+          git pull origin main --rebase
           git add VID_ALL_SHORTS.txt VID_ALL_LONG.txt
           git commit -m "Auto-merge shorts and longs - $(date)" || echo "No changes to commit"
-          git push
+          git push origin main
