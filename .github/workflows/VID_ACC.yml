@@ -3,8 +3,8 @@ name: Daily Deduplicate YouTube Vids
 
 on:
   schedule:
-    - cron: "0 0 * * *"  # runs daily at midnight UTC
-  workflow_dispatch:     # allows manual triggering too
+    - cron: "0 0 * * *"  # Every day at midnight UTC
+  workflow_dispatch:     # Allow manual trigger
 
 jobs:
   deduplicate:
@@ -19,35 +19,40 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Remove duplicates and save to txt
+    - name: Run Python script to deduplicate
       run: |
-        def process_file(input_file, output_file):
-            seen_ids = set()
-            blocks = []
-            with open(input_file, 'r', encoding='utf-8') as f:
-                content = f.read().strip()
+        echo "import os
 
-            video_blocks = content.split('\n\n')
-            for block in video_blocks:
-                lines = block.strip().splitlines()
-                for line in lines:
-                    if 'youtube.com/watch?v=' in line:
-                        vid_id = line.split('watch?v=')[1].split('&')[0].strip()
-                        if vid_id not in seen_ids:
-                            seen_ids.add(vid_id)
-                            blocks.append(block.strip())
-                        break
+def process_file(input_file, output_file):
+    seen_ids = set()
+    blocks = []
+    with open(input_file, 'r', encoding='utf-8') as f:
+        content = f.read().strip()
 
-            with open(output_file, 'w', encoding='utf-8') as f:
-                f.write('\n\n'.join(blocks) + '\n')
+    video_blocks = content.split('\\n\\n')
+    for block in video_blocks:
+        lines = block.strip().splitlines()
+        for line in lines:
+            if 'youtube.com/watch?v=' in line:
+                vid_id = line.split('watch?v=')[1].split('&')[0].strip()
+                if vid_id not in seen_ids:
+                    seen_ids.add(vid_id)
+                    blocks.append(block.strip())
+                break
 
-        process_file("VID_LONG_MERGED.txt", "VID_LONG.txt")
-        process_file("VID_SHORT_MERGED.txt", "VID_SHORT.txt")
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write('\\n\\n'.join(blocks) + '\\n')
+
+process_file('VID_LONG_MERGED.txt', 'VID_LONG.txt')
+process_file('VID_SHORT_MERGED.txt', 'VID_SHORT.txt')
+" > dedup.py
+
+        python dedup.py
 
     - name: Commit and push results
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
         git add VID_LONG.txt VID_SHORT.txt
-        git commit -m "Daily deduplication of YouTube videos"
+        git commit -m "Daily deduplication of YouTube videos" || echo "No changes to commit"
         git push
