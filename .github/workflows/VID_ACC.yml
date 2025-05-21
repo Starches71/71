@@ -62,24 +62,32 @@ jobs:
         awk '
           BEGIN { RS=""; ORS="\n\n" }
           {
-            marked = $1
-            gsub(/^[■□○]+\s*/, "", marked)
-            match(marked, /^[0-9,]+ views \| .*$/, views_line)
-            split(views_line[0], parts, " views | ")
-            gsub(",", "", parts[1])
-            views = parts[1] + 0
-            clean_block = $0
-            if (!(clean_block in seen)) {
-              seen[clean_block] = views
-              data[views] = clean_block
-              order[++count] = views
+            mark = substr($0, 1, 1)
+            content = substr($0, 3)
+            match(content, /^[0-9,]+ views \|/, m)
+            if (m[0]) {
+              views_str = substr(m[0], 1, length(m[0]) - 8)
+              gsub(",", "", views_str)
+              views = views_str + 0
+            } else {
+              views = 0
+            }
+            key = content
+            if (!(key in seen)) {
+              seen[key] = 1
+              data[views mark] = mark " " content
+              order[++count] = views mark
             }
           }
+          function compare(a, b) {
+            va = substr(a, 1, index(a, substr(data[a],1,1))-1) + 0
+            vb = substr(b, 1, index(b, substr(data[b],1,1))-1) + 0
+            return (va < vb)
+          }
           END {
-            n = asort(order)
-            for (i = n; i >= 1; i--) {
-              v = order[i]
-              print data[v]
+            n = asort(order, sorted, "compare")
+            for (i = 1; i <= n; i++) {
+              print data[sorted[i]]
             }
           }
         ' _raw_short.txt > VID_SHORT_MERGED.txt
@@ -100,24 +108,32 @@ jobs:
         awk '
           BEGIN { RS=""; ORS="\n\n" }
           {
-            marked = $1
-            gsub(/^[■□○]+\s*/, "", marked)
-            match(marked, /^[0-9,]+ views \| .*$/, views_line)
-            split(views_line[0], parts, " views | ")
-            gsub(",", "", parts[1])
-            views = parts[1] + 0
-            clean_block = $0
-            if (!(clean_block in seen)) {
-              seen[clean_block] = views
-              data[views] = clean_block
-              order[++count] = views
+            mark = substr($0, 1, 1)
+            content = substr($0, 3)
+            match(content, /^[0-9,]+ views \|/, m)
+            if (m[0]) {
+              views_str = substr(m[0], 1, length(m[0]) - 8)
+              gsub(",", "", views_str)
+              views = views_str + 0
+            } else {
+              views = 0
+            }
+            key = content
+            if (!(key in seen)) {
+              seen[key] = 1
+              data[views mark] = mark " " content
+              order[++count] = views mark
             }
           }
+          function compare(a, b) {
+            va = substr(a, 1, index(a, substr(data[a],1,1))-1) + 0
+            vb = substr(b, 1, index(b, substr(data[b],1,1))-1) + 0
+            return (va < vb)
+          }
           END {
-            n = asort(order)
-            for (i = n; i >= 1; i--) {
-              v = order[i]
-              print data[v]
+            n = asort(order, sorted, "compare")
+            for (i = 1; i <= n; i++) {
+              print data[sorted[i]]
             }
           }
         ' _raw_long.txt > VID_LONG_MERGED.txt
