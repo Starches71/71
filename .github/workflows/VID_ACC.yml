@@ -62,32 +62,25 @@ jobs:
         awk '
           BEGIN { RS=""; ORS="\n\n" }
           {
-            mark = substr($0, 1, 1)
-            content = substr($0, 3)
-            match(content, /^[0-9,]+ views \|/, m)
-            if (m[0]) {
-              views_str = substr(m[0], 1, length(m[0]) - 8)
-              gsub(",", "", views_str)
-              views = views_str + 0
-            } else {
-              views = 0
+            gsub(/^[■□○●•]+[[:space:]]*/, "", $0)  # Remove leading markers and spaces
+            match($0, /https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/, m)
+            if (m[1] != "") {
+              vid = m[1]
+              if (!(vid in seen)) {
+                seen[vid] = 1
+                blocks[vid] = $0
+                match($0, /^[0-9,]+ views \| /, vline)
+                split(vline[0], parts, " views")
+                gsub(",", "", parts[1])
+                views[vid] = parts[1] + 0
+              }
             }
-            key = content
-            if (!(key in seen)) {
-              seen[key] = 1
-              data[views mark] = mark " " content
-              order[++count] = views mark
-            }
-          }
-          function compare(a, b) {
-            va = substr(a, 1, index(a, substr(data[a],1,1))-1) + 0
-            vb = substr(b, 1, index(b, substr(data[b],1,1))-1) + 0
-            return (va < vb)
           }
           END {
-            n = asort(order, sorted, "compare")
+            n = asorti(views, sorted, "@val_num_desc")
             for (i = 1; i <= n; i++) {
-              print data[sorted[i]]
+              v = sorted[i]
+              print blocks[v]
             }
           }
         ' _raw_short.txt > VID_SHORT_MERGED.txt
@@ -108,32 +101,25 @@ jobs:
         awk '
           BEGIN { RS=""; ORS="\n\n" }
           {
-            mark = substr($0, 1, 1)
-            content = substr($0, 3)
-            match(content, /^[0-9,]+ views \|/, m)
-            if (m[0]) {
-              views_str = substr(m[0], 1, length(m[0]) - 8)
-              gsub(",", "", views_str)
-              views = views_str + 0
-            } else {
-              views = 0
+            gsub(/^[■□○●•]+[[:space:]]*/, "", $0)  # Remove leading markers and spaces
+            match($0, /https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/, m)
+            if (m[1] != "") {
+              vid = m[1]
+              if (!(vid in seen)) {
+                seen[vid] = 1
+                blocks[vid] = $0
+                match($0, /^[0-9,]+ views \| /, vline)
+                split(vline[0], parts, " views")
+                gsub(",", "", parts[1])
+                views[vid] = parts[1] + 0
+              }
             }
-            key = content
-            if (!(key in seen)) {
-              seen[key] = 1
-              data[views mark] = mark " " content
-              order[++count] = views mark
-            }
-          }
-          function compare(a, b) {
-            va = substr(a, 1, index(a, substr(data[a],1,1))-1) + 0
-            vb = substr(b, 1, index(b, substr(data[b],1,1))-1) + 0
-            return (va < vb)
           }
           END {
-            n = asort(order, sorted, "compare")
+            n = asorti(views, sorted, "@val_num_desc")
             for (i = 1; i <= n; i++) {
-              print data[sorted[i]]
+              v = sorted[i]
+              print blocks[v]
             }
           }
         ' _raw_long.txt > VID_LONG_MERGED.txt
