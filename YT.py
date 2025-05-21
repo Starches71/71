@@ -23,7 +23,7 @@ def is_tech_niche(title):
     prompt = f"Is this YouTube video title related to tech, gadgets, unboxing, or product reviews? Just answer yes or no:\n\n\"{title}\""
     try:
         response = client.chat.completions.create(
-            model="Llama-3-3-70b-Versatile",
+            model="Llama-3.3-70b-Versatile",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
             max_tokens=5,
