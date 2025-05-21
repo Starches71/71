@@ -1,58 +1,144 @@
 
-name: Daily Deduplicate YouTube Vids
+name: Merge, deduplicate, and sort VID files
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"  # Every day at midnight UTC
-  workflow_dispatch:     # Allow manual trigger
+    - cron: '0 0 * * *'  # Daily at midnight UTC
 
 jobs:
-  deduplicate:
+  merge-vid-files:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+    - name: Confirm checkout success
+      run: echo "✅ Repo checked out"
 
-    - name: Run Python script to deduplicate
+    - name: Find all Vid*.txt files
       run: |
-        echo "import os
+        echo "Searching for Vid*.txt files..."
+        ALL_VID_FILES=$(ls Vid*.txt 2>/dev/null || echo "")
+        if [ -z "$ALL_VID_FILES" ]; then
+          echo "❌ No Vid*.txt files found!"
+          exit 1
+        else
+          echo "✅ Found files:"
+          echo "$ALL_VID_FILES"
+          echo
+        fi
 
-def process_file(input_file, output_file):
-    seen_ids = set()
-    blocks = []
-    with open(input_file, 'r', encoding='utf-8') as f:
-        content = f.read().strip()
-
-    video_blocks = content.split('\\n\\n')
-    for block in video_blocks:
-        lines = block.strip().splitlines()
-        for line in lines:
-            if 'youtube.com/watch?v=' in line:
-                vid_id = line.split('watch?v=')[1].split('&')[0].strip()
-                if vid_id not in seen_ids:
-                    seen_ids.add(vid_id)
-                    blocks.append(block.strip())
-                break
-
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write('\\n\\n'.join(blocks) + '\\n')
-
-process_file('VID_LONG_MERGED.txt', 'VID_LONG.txt')
-process_file('VID_SHORT_MERGED.txt', 'VID_SHORT.txt')
-" > dedup.py
-
-        python dedup.py
-
-    - name: Commit and push results
+    - name: Separate shorts and longs
       run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git add VID_LONG.txt VID_SHORT.txt
-        git commit -m "Daily deduplication of YouTube videos" || echo "No changes to commit"
-        git push
+        SHORT_FILES=""
+        LONG_FILES=""
+        for f in Vid*.txt; do
+          fname=$(echo "$f" | tr '[:upper:]' '[:lower:]')
+          if [[ "$fname" == *short* ]]; then
+            echo "Short video file: $f"
+            SHORT_FILES="$SHORT_FILES $f"
+          elif [[ "$fname" == *long* ]]; then
+            echo "Long video file: $f"
+            LONG_FILES="$LONG_FILES $f"
+          else
+            echo "Skipping file (not short or long): $f"
+          fi
+        done
+        echo "SHORT_FILES=$SHORT_FILES" >> $GITHUB_ENV
+        echo "LONG_FILES=$LONG_FILES" >> $GITHUB_ENV
+
+    - name: Merge, deduplicate, and sort shorts
+      run: |
+        if [ -z "$SHORT_FILES" ]; then
+          echo "No short files to merge"
+          exit 0
+        fi
+
+        echo "Processing SHORT files..."
+        cat $SHORT_FILES > _raw_short.txt
+
+        awk '
+          BEGIN { RS=""; ORS="\n\n" }
+          {
+            marked = $1
+            gsub(/^[■□○]+\s*/, "", marked)
+            match(marked, /^[0-9,]+ views \| .*$/, views_line)
+            split(views_line[0], parts, " views | ")
+            gsub(",", "", parts[1])
+            views = parts[1] + 0
+            clean_block = $0
+            if (!(clean_block in seen)) {
+              seen[clean_block] = views
+              data[views] = clean_block
+              order[++count] = views
+            }
+          }
+          END {
+            n = asort(order)
+            for (i = n; i >= 1; i--) {
+              v = order[i]
+              print data[v]
+            }
+          }
+        ' _raw_short.txt > VID_SHORT_MERGED.txt
+
+        echo "✅ Shorts merged and sorted"
+        head -n 10 VID_SHORT_MERGED.txt || echo "(file empty)"
+
+    - name: Merge, deduplicate, and sort longs
+      run: |
+        if [ -z "$LONG_FILES" ]; then
+          echo "No long files to merge"
+          exit 0
+        fi
+
+        echo "Processing LONG files..."
+        cat $LONG_FILES > _raw_long.txt
+
+        awk '
+          BEGIN { RS=""; ORS="\n\n" }
+          {
+            marked = $1
+            gsub(/^[■□○]+\s*/, "", marked)
+            match(marked, /^[0-9,]+ views \| .*$/, views_line)
+            split(views_line[0], parts, " views | ")
+            gsub(",", "", parts[1])
+            views = parts[1] + 0
+            clean_block = $0
+            if (!(clean_block in seen)) {
+              seen[clean_block] = views
+              data[views] = clean_block
+              order[++count] = views
+            }
+          }
+          END {
+            n = asort(order)
+            for (i = n; i >= 1; i--) {
+              v = order[i]
+              print data[v]
+            }
+          }
+        ' _raw_long.txt > VID_LONG_MERGED.txt
+
+        echo "✅ Longs merged and sorted"
+        head -n 10 VID_LONG_MERGED.txt || echo "(file empty)"
+
+    - name: Configure git user
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+
+    - name: Commit and push changes with rebase
+      run: |
+        git add VID_SHORT_MERGED.txt VID_LONG_MERGED.txt
+        if git diff --cached --quiet; then
+          echo "No changes to commit"
+          exit 0
+        else
+          git commit -m "Auto-merge & sort VID files - $(date -u)"
+          git pull --rebase origin main
+          git push origin main
+          echo "✅ Changes committed and pushed"
+        fi
