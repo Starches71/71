@@ -1,0 +1,35 @@
+
+name: Whisper CPU Transcription
+
+on:
+  workflow_dispatch:
+
+jobs:
+  whisper-cpu:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install Whisper + dependencies (CPU only)
+      run: |
+        pip install --upgrade pip
+        pip install git+https://github.com/openai/whisper.git
+        sudo apt update && sudo apt install -y ffmpeg
+
+    - name: Download test audio
+      run: |
+        mkdir audio
+        curl -L -o audio/test.mp3 "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+
+    - name: Run Whisper Transcription (tiny model)
+      run: |
+        whisper audio/test.mp3 --model tiny --language en --output_format txt --output_dir audio
+        echo "Transcription result:"
+        cat audio/test.txt
