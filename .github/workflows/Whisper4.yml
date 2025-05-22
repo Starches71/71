@@ -1,0 +1,43 @@
+name: Transcribe Audio with Whisper
+
+on:
+  push:
+    paths:
+      - 'audio/test.mp3'
+
+jobs:
+  transcribe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Python and FFmpeg
+        run: |
+          sudo apt update
+          sudo apt install ffmpeg -y
+          pip install git+https://github.com/openai/whisper
+
+      - name: Check if audio file exists
+        run: |
+          if [ -f "audio/test.mp3" ]; then
+            echo "Audio file found."
+          else
+            echo "Audio file not found!" >&2
+            exit 1
+          fi
+
+      - name: Print audio duration
+        run: |
+          DURATION=$(ffprobe -i audio/test.mp3 -show_entries format=duration -v quiet -of csv="p=0")
+          echo "Audio duration: ${DURATION} seconds"
+
+      - name: Transcribe audio using Whisper (base, auto language)
+        run: |
+          whisper audio/test.mp3 --model base --output_format txt --output_dir audio
+
+      - name: Print transcription
+        run: |
+          echo "Transcription result:"
+          cat audio/test.txt
