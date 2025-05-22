@@ -1,5 +1,5 @@
 
-name: Transcribe Audio with Whisper
+name: Transcribe Uploaded WAV Audio
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Python and FFmpeg
+      - name: Install Python, FFmpeg, and Whisper
         run: |
           sudo apt update
           sudo apt install ffmpeg -y
@@ -20,23 +20,23 @@ jobs:
 
       - name: Check if audio file exists
         run: |
-          if [ -f "audio/test.mp3" ]; then
-            echo "Audio file found."
+          if [ -f "Untitled notebook.wav" ]; then
+            echo "Audio file found: Untitled notebook.wav"
           else
-            echo "Audio file not found!" >&2
+            echo "Audio file NOT found!" >&2
             exit 1
           fi
 
       - name: Print audio duration
         run: |
-          DURATION=$(ffprobe -i audio/test.mp3 -show_entries format=duration -v quiet -of csv="p=0")
+          DURATION=$(ffprobe -i "Untitled notebook.wav" -show_entries format=duration -v quiet -of csv="p=0")
           echo "Audio duration: ${DURATION} seconds"
 
-      - name: Transcribe audio using Whisper (base, auto language)
+      - name: Transcribe audio with Whisper (base, auto-detect language)
         run: |
-          whisper audio/test.mp3 --model base --output_format txt --output_dir audio
+          whisper "Untitled notebook.wav" --model base --output_format txt --output_dir . --language auto
 
-      - name: Print transcription
+      - name: Show transcription result
         run: |
           echo "Transcription result:"
-          cat audio/test.txt
+          cat "Untitled notebook.txt"
