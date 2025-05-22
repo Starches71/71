@@ -22,6 +22,13 @@ jobs:
       - name: Install dependencies
         run: pip install groq youtube-transcript-api
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+  
+
+
       - name: Run YT.py
         env:
           GROQ_API: ${{ secrets.GROQ_API }}
