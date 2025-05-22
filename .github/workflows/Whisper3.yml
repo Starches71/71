@@ -1,0 +1,64 @@
+
+name: Transcribe Audio with Whisper
+
+on:
+  workflow_dispatch:
+
+jobs:
+  transcribe:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install ffmpeg and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+        pip install git+https://github.com/openai/whisper.git
+        pip install pydub
+
+    - name: Download test audio
+      run: |
+        echo "Downloading test.mp3..."
+        curl -L -o audio/test.mp3 https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3
+        echo "Download complete."
+        ls -lh audio/
+
+    - name: Show audio duration
+      run: |
+        ffmpeg -i audio/test.mp3 2>&1 | grep "Duration"
+
+    - name: Run Whisper transcription
+      run: |
+        echo "Starting transcription..."
+        whisper audio/test.mp3 --model tiny --language en --output_format txt --output_dir audio
+        echo "Transcription completed."
+
+    - name: Print transcription
+      run: |
+        echo "------ TRANSCRIPTION ------"
+        cat audio/test.txt
+        echo "---------------------------"
+
+    - name: Analyze transcription length
+      run: |
+        DURATION=$(ffprobe -i audio/test.mp3 -show_entries format=duration -v quiet -of csv="p=0")
+        TRANS_LENGTH=$(cat audio/test.txt | wc -w)
+        echo "Audio duration: $DURATION seconds"
+        echo "Word count of transcription: $TRANS_LENGTH"
+
+        if (( $(echo "$DURATION > 30" | bc -l) )) && [ "$TRANS_LENGTH" -lt 10 ]; then
+          echo "WARNING: Audio is long, but transcription is very short. Possible reasons:"
+          echo "- Audio is mostly music or silence"
+          echo "- Whisper tiny model may not detect speech well"
+          echo "- You may want to try the 'base' or 'small' model instead"
+        else
+          echo "Transcription seems reasonable for the audio length."
+        fi
