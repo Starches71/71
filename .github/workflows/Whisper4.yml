@@ -34,7 +34,7 @@ jobs:
 
       - name: Transcribe audio with Whisper (base, auto-detect language)
         run: |
-          whisper "Untitled notebook.wav" --model base --output_format txt --output_dir . --language auto
+          whisper "Untitled notebook.wav" --model base --output_format txt --output_dir .
 
       - name: Show transcription result
         run: |
