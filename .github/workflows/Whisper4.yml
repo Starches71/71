@@ -1,9 +1,8 @@
+
 name: Transcribe Audio with Whisper
 
 on:
-  push:
-    paths:
-      - 'audio/test.mp3'
+  workflow_dispatch:
 
 jobs:
   transcribe:
