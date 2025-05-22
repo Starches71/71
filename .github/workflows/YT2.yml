@@ -1,0 +1,52 @@
+
+name: Check if First VID is Tech Niche
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+jobs:
+  check-niche:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install groq youtube-transcript-api
+
+      - name: Install yt-dlp
+        run: |
+          sudo apt update
+          sudo apt install -y curl
+          curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+          chmod a+rx /usr/local/bin/yt-dlp
+
+      - name: Run YT.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: python YT.py
+
+      - name: Run YT1.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: python YT1.py
+
+      - name: Commit and push if changes found (□ or ○ etc)
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git pull --rebase origin main
+          if git diff --quiet; then
+            echo "No changes to commit."
+          else
+            git add .
+            git commit -m "Mark updates (□/○) - $(date -u)"
+            git push origin main
