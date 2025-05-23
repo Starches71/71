@@ -2,7 +2,7 @@
 name: Gemini 2.5 Flash Voiceover
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # manual trigger enabled
 
 jobs:
   generate-voiceover:
@@ -31,8 +31,7 @@ genai.configure(api_key='${{ secrets.GEMINI_API }}')
 
 model = genai.GenerativeModel('gemini-2.5-flash')
 
-prompt = '''
-Watch this https://www.youtube.com/watch?v=K13qt-0dkk4
+prompt = '''Watch this https://www.youtube.com/watch?v=K13qt-0dkk4
 
 Your task is to generate a professional YouTube voiceover script for this video, as if you're naturally narrating it to an audience.
 
