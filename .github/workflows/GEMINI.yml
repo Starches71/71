@@ -1,0 +1,51 @@
+
+name: Gemini 2.5 Flash Voiceover
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-voiceover:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Google Generative AI SDK
+        run: pip install google-generativeai
+
+      - name: Run Gemini 2.5 Flash Prompt
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GEMINI_API }}
+        run: |
+          python -c "
+import google.generativeai as genai
+
+genai.configure(api_key='${{ secrets.GEMINI_API }}')
+
+model = genai.GenerativeModel('gemini-2.5-flash')
+
+prompt = '''
+Watch this https://www.youtube.com/watch?v=K13qt-0dkk4
+
+Your task is to generate a professional YouTube voiceover script for this video, as if you're naturally narrating it to an audience.
+
+**Instructions:**
+- Write in a clear, modern, and conversational tone that feels natural for a voice narrator.
+- Break the voiceover into short segments with timestamps like this:   `00:00–00:04`
+- After each timestamp, write **only the sentence** to be spoken during that time.
+- If the video contains **silent scenes or music only**, use that time to describe what's happening on screen in a compelling, story-driven way. Do not insert filler like “hey” or “music.” Instead, say what the viewer would be seeing or feeling.
+- The narration should flow like a story and highlight key features naturally.
+- Do not include commentary, formatting notes, tags, or explanations. Only return the **final spoken lines with their exact time windows**.
+- Follow the pacing of the video closely based on both visuals and timing. You are allowed to interpret the visuals and create narration that would match the look and feel of the scenes, even if there’s no dialogue.
+'''
+
+response = model.generate_content(prompt)
+print(response.text)
+"
