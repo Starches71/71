@@ -1,32 +1,58 @@
 
 import os
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
-def main():
-    api_key = os.getenv("GEMINI_API")
-    if not api_key:
-        raise ValueError("GEMINI_API environment variable is not set")
+def generate():
+    client = genai.Client(
+        api_key=os.environ.get("GEMINI_API"),
+    )
 
-    genai.configure(api_key=api_key)
+    model = "gemini-2.5-flash-preview-04-17"
 
-    model = genai.GenerativeModel("gemini-2.5-flash")
-
-    prompt = """Watch this https://www.youtube.com/watch?v=K13qt-0dkk4
+    contents = [
+        types.Content(
+            role="user",
+            parts=[
+                types.Part(
+                    file_data=types.FileData(
+                        file_uri="https://www.youtube.com/watch?v=K13qt-0dkk4",
+                        mime_type="video/*",
+                    )
+                ),
+                types.Part.from_text(
+                    text="""
+Watch this video carefully: https://www.youtube.com/watch?v=K13qt-0dkk4
 
 Your task is to generate a professional YouTube voiceover script for this video, as if you're naturally narrating it to an audience.
 
-Instructions:
-- Write in a clear, modern, and conversational tone that feels natural for a voice narrator.
-- Break the voiceover into short segments with timestamps like this:   `00:00–00:04`
-- After each timestamp, write only the sentence to be spoken during that time.
-- If the video contains silent scenes or music only, use that time to describe what's happening on screen in a compelling, story-driven way. Do not insert filler like “hey” or “music.” Instead, say what the viewer would be seeing or feeling.
-- The narration should flow like a story and highlight key features naturally.
-- Do not include commentary, formatting notes, tags, or explanations. Only return the final spoken lines with their exact time windows.
-- Follow the pacing of the video closely based on both visuals and timing. You are allowed to interpret the visuals and create narration that would match the look and feel of the scenes, even if there’s no dialogue.
-"""
+--- Instructions:
+Write in a clear, modern, and conversational tone that feels natural for a voice narrator. Break the voiceover into short segments with timestamps like this:
+00:00–00:04
 
-    response = model.generate_content(prompt)
-    print(response.text)
+After each timestamp, write only the sentence to be spoken during that time. Every single scene in the video must have its own narration. Do not leave any part of the video without a corresponding spoken line.
+
+If the video contains silent scenes or music only, use that time to describe what’s happening on screen in a compelling, story-driven way. Do not insert filler like “music playing” or “no audio.” Instead, express what the viewer sees or feels in those moments.
+
+The narration should flow like a story and highlight key features naturally — not as a list. Avoid restating on-screen text directly. Instead, translate the visuals into value, emotion, or experience.
+
+Follow the pacing of the video closely. Your lines should match the timing of the visuals.
+"""
+                ),
+            ],
+        )
+    ]
+
+    generate_content_config = types.GenerateContentConfig(
+        response_mime_type="text/plain",
+    )
+
+    for chunk in client.models.generate_content_stream(
+        model=model,
+        contents=contents,
+        config=generate_content_config,
+    ):
+        print(chunk.text, end="")
 
 if __name__ == "__main__":
-    main()
+    generate()
