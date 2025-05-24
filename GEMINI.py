@@ -1,26 +1,25 @@
 
 import os
-from google import genai
-from google.genai import types
+import google.generativeai as genai
+from google.generativeai.types import Content, Part, FileData, GenerateContentConfig
 
 def generate():
-    client = genai.Client(
-        api_key=os.environ.get("GEMINI_API"),
-    )
+    # Configure the API key
+    genai.configure(api_key=os.environ.get("GEMINI_API"))
 
-    model = "gemini-2.5-flash-preview-04-17"
+    model = genai.GenerativeModel("gemini-2.5-flash-preview-04-17")
 
     contents = [
-        types.Content(
+        Content(
             role="user",
             parts=[
-                types.Part(
-                    file_data=types.FileData(
+                Part(
+                    file_data=FileData(
                         file_uri="https://www.youtube.com/watch?v=K13qt-0dkk4",
                         mime_type="video/*",
                     )
                 ),
-                types.Part.from_text(
+                Part.from_text(
                     text="""
 Watch this video carefully: https://www.youtube.com/watch?v=K13qt-0dkk4
 
@@ -43,16 +42,11 @@ Follow the pacing of the video closely. Your lines should match the timing of th
         )
     ]
 
-    generate_content_config = types.GenerateContentConfig(
-        response_mime_type="text/plain",
-    )
+    config = GenerateContentConfig(response_mime_type="text/plain")
 
-    for chunk in client.models.generate_content_stream(
-        model=model,
-        contents=contents,
-        config=generate_content_config,
-    ):
-        print(chunk.text, end="")
+    response = model.generate_content(contents=contents, generation_config=config)
+
+    print(response.text)
 
 if __name__ == "__main__":
     generate()
