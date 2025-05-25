@@ -76,3 +76,4 @@
 101. Robomow RS630 Robotic Mower
 101. Roborock S6 MaxV
 101. Tineco iFloor 3 Cordless Wet Dry Vacuum
+102. Dyson V11 Torque Drive
