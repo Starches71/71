@@ -22,10 +22,8 @@ def clean_transcript(path):
 
     cleaned = []
     for line in lines:
-        # Remove lines that are just numbers or timestamps
         if re.fullmatch(r"\d+|\d{1,2}:\d{2}", line.strip()):
             continue
-        # Remove inline timestamps like "00:12" or numbers
         cleaned_line = re.sub(r"\b\d{1,2}:\d{2}\b", "", line)
         cleaned_line = re.sub(r"\b\d+\b", "", cleaned_line)
         cleaned.append(cleaned_line.strip())
@@ -36,15 +34,16 @@ def generate():
     text_input = clean_transcript(TRANSCRIPT_PATH)
 
     client = genai.Client(
-        api_key=os.environ.get("GEMINI_API"),  # use correct env variable name
+        api_key=os.environ.get("GEMINI_API"),
     )
 
-    model = "gemini-2.5-pro-preview-tts"
+    model = "models/gemini-2.5-pro-preview-tts"  # Full model name
+
     contents = [
         types.Content(
             role="user",
             parts=[
-                types.Part.from_text(text_input),
+                types.Part.from_text(text=text_input),
             ],
         ),
     ]
@@ -55,16 +54,16 @@ def generate():
         speech_config=types.SpeechConfig(
             voice_config=types.VoiceConfig(
                 prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                    voice_name="Enceladus"
+                    voice_name="en-US-Standard-A"  # "Enceladus" may not exist yet
                 )
             )
         ),
     )
 
-    for chunk in client.models.generate_content_stream(
+    for chunk in client.generate_content_stream(
         model=model,
         contents=contents,
-        config=generate_content_config,
+        generation_config=generate_content_config,
     ):
         if (
             chunk.candidates is None
@@ -72,8 +71,9 @@ def generate():
             or chunk.candidates[0].content.parts is None
         ):
             continue
-        if chunk.candidates[0].content.parts[0].inline_data:
-            inline_data = chunk.candidates[0].content.parts[0].inline_data
+        part = chunk.candidates[0].content.parts[0]
+        if hasattr(part, "inline_data") and part.inline_data:
+            inline_data = part.inline_data
             data_buffer = inline_data.data
             file_extension = mimetypes.guess_extension(inline_data.mime_type)
             if file_extension is None:
