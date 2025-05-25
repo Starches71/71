@@ -1,5 +1,3 @@
-
-# pip install google-genai
 import base64
 import mimetypes
 import os
@@ -37,14 +35,12 @@ def generate():
         api_key=os.environ.get("GEMINI_API"),
     )
 
-    model = "models/gemini-2.5-pro-preview-tts"  # Full model name
+    model = "gemini-2.5-flash-preview-tts"
 
     contents = [
         types.Content(
             role="user",
-            parts=[
-                types.Part.from_text(text=text_input),
-            ],
+            parts=[types.Part.from_text(text=text_input)],
         ),
     ]
 
@@ -54,16 +50,16 @@ def generate():
         speech_config=types.SpeechConfig(
             voice_config=types.VoiceConfig(
                 prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                    voice_name="en-US-Standard-A"  # "Enceladus" may not exist yet
+                    voice_name="en-US-Standard-A"  # or "Enceladus" if available
                 )
             )
         ),
     )
 
-    for chunk in client.generate_content_stream(
+    for chunk in client.models.generate_content_stream(
         model=model,
         contents=contents,
-        generation_config=generate_content_config,
+        config=generate_content_config,
     ):
         if (
             chunk.candidates is None
@@ -71,6 +67,7 @@ def generate():
             or chunk.candidates[0].content.parts is None
         ):
             continue
+
         part = chunk.candidates[0].content.parts[0]
         if hasattr(part, "inline_data") and part.inline_data:
             inline_data = part.inline_data
