@@ -50,7 +50,7 @@ def generate():
         speech_config=types.SpeechConfig(
             voice_config=types.VoiceConfig(
                 prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                    voice_name="en-US-Standard-A"  # or "Enceladus" if available
+                    voice_name="en-US-Enceladus"
                 )
             )
         ),
