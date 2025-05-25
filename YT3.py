@@ -8,7 +8,7 @@ import struct
 from google import genai
 from google.genai import types
 
-TRANSCRIPT_DIR = "Vid/Transcription"
+TRANSCRIPT_DIR = "Vid/Transcript"
 TTS_OUTPUT_DIR = "Vid/tts"
 MODEL = "gemini-2.5-flash-preview-tts"
 
