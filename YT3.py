@@ -32,36 +32,39 @@ def clean_transcript(path):
 def generate():
     text_input = clean_transcript(TRANSCRIPT_PATH)
 
-    client = genai.Client(
-        api_key=os.environ.get("GEMINI_API_KEY"),  # <-- fixed
+    # -------------------- FIX 1: Configure the client properly --------------------
+    api_key = os.environ.get("GEMINI_API")  # <- CHANGED from GEMINI_API_KEY
+    if not api_key:
+        raise ValueError("GEMINI_API is not set in environment variables")
+    genai.configure(api_key=api_key)  # <- NEW: correctly configures client
+    # ------------------------------------------------------------------------------
+
+    # -------------------- FIX 2: Proper model usage --------------------
+    model = genai.GenerativeModel(
+        model_name="gemini-2.5-flash-preview-tts",
+        generation_config={"response_mime_type": "audio/wav"},
+        system_instruction="You are a narrator. Only read what is given, nothing more.",
     )
+    # -------------------------------------------------------------------
 
-    model = "gemini-2.5-flash-preview-tts"
-
-    contents = [
-        types.Content(
-            role="user",
-            parts=[types.Part.from_text(text=text_input)],
+    response = model.generate_content(
+        text_input,
+        generation_config=types.GenerationConfig(
+            temperature=1,
+            response_mime_type="audio/wav",
         ),
-    ]
-
-    generate_content_config = types.GenerateContentConfig(
-        temperature=1,
-        response_modalities=["audio"],
+        safety_settings=None,
+        stream=True,
         speech_config=types.SpeechConfig(
             voice_config=types.VoiceConfig(
-                prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                    voice_name="Enceladus"  # <-- fixed
+                prebuilt_voice=types.PrebuiltVoice(
+                    name="Enceladus"  # <- Fixed voice name (as per official)
                 )
             )
         ),
     )
 
-    for chunk in client.models.generate_content_stream(
-        model=model,
-        contents=contents,
-        config=generate_content_config,
-    ):
+    for chunk in response:
         if not chunk.candidates or not chunk.candidates[0].content or not chunk.candidates[0].content.parts:
             continue
 
