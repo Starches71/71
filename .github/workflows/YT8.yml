@@ -19,12 +19,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Upgrade pip and install dependencies
+      - name: Install Python dependencies
         run: |
           pip install --upgrade pip
-          pip uninstall -y google google-api-python-client || true
-          pip install --no-deps --force-reinstall google-generativeai
-          pip install groq pydub
+          pip install groq youtube-transcript-api google-genai pydub
 
       - name: Install yt-dlp
         run: |
@@ -33,8 +31,7 @@ jobs:
 
       - name: Install ffmpeg
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt install -y ffmpeg
 
       - name: Run YT.py
         env:
