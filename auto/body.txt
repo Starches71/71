@@ -1,8 +1,8 @@
-* Compact and modern design with a touchscreen interface
+* Compact and modern design with a 1.1 liter water tank
 * Five cup sizes: Ristretto, Espresso, Lungo, Americano, and Alto
-* Bluetooth connectivity for mobile app control and scheduling
+* Bluetooth connectivity for mobile app control and customization
 * Automatic capsule ejection and used capsule container
-* Energy-efficient with an automatic shut-off feature
-* High-pressure pump for optimal extraction and crema
-* Descale alert and notification for maintenance
-* Compatible with Nespresso capsules and Nespresso's recycling program
+* Energy-efficient design with automatic shut-off after 9 minutes of inactivity
+* 19-bar high-pressure pump for optimal espresso extraction
+* Descale alert and automatic descaling process
+* Removable water tank and drip tray for easy cleaning and maintenance
