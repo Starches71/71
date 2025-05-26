@@ -1,3 +1,4 @@
+
 import base64
 import mimetypes
 import os
@@ -32,7 +33,7 @@ def generate():
     text_input = clean_transcript(TRANSCRIPT_PATH)
 
     client = genai.Client(
-        api_key=os.environ.get("GEMINI_API"),
+        api_key=os.environ.get("GEMINI_API_KEY"),  # <-- fixed
     )
 
     model = "gemini-2.5-flash-preview-tts"
@@ -50,7 +51,7 @@ def generate():
         speech_config=types.SpeechConfig(
             voice_config=types.VoiceConfig(
                 prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                    voice_name="en-US-Enceladus"
+                    voice_name="Enceladus"  # <-- fixed
                 )
             )
         ),
@@ -61,11 +62,7 @@ def generate():
         contents=contents,
         config=generate_content_config,
     ):
-        if (
-            chunk.candidates is None
-            or chunk.candidates[0].content is None
-            or chunk.candidates[0].content.parts is None
-        ):
+        if not chunk.candidates or not chunk.candidates[0].content or not chunk.candidates[0].content.parts:
             continue
 
         part = chunk.candidates[0].content.parts[0]
@@ -73,11 +70,13 @@ def generate():
             inline_data = part.inline_data
             data_buffer = inline_data.data
             file_extension = mimetypes.guess_extension(inline_data.mime_type)
-            if file_extension is None:
+
+            if not file_extension:
                 file_extension = ".wav"
-                data_buffer = convert_to_wav(inline_data.data, inline_data.mime_type)
+                data_buffer = convert_to_wav(data_buffer, inline_data.mime_type or "audio/L16;rate=24000")
+
             save_binary_file(f"{OUTPUT_FILE}{file_extension}", data_buffer)
-        else:
+        elif hasattr(chunk, "text"):
             print(chunk.text)
 
 def convert_to_wav(audio_data: bytes, mime_type: str) -> bytes:
@@ -101,6 +100,8 @@ def convert_to_wav(audio_data: bytes, mime_type: str) -> bytes:
 def parse_audio_mime_type(mime_type: str) -> dict:
     bits_per_sample = 16
     rate = 24000
+    if not mime_type:
+        return {"bits_per_sample": bits_per_sample, "rate": rate}
     parts = mime_type.split(";")
     for param in parts:
         param = param.strip()
