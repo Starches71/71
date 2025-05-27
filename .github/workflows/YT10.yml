@@ -1,0 +1,75 @@
+
+name: Check if First VID is Tech Niche
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+jobs:
+  check-niche:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install groq youtube-transcript-api google-genai pydub
+
+      - name: Install yt-dlp
+        run: |
+          sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+          sudo chmod a+rx /usr/local/bin/yt-dlp
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt install -y ffmpeg
+
+      - name: Run YT.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: python YT.py
+
+      - name: Run YT1.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: python YT1.py
+
+      - name: Run YT2.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python YT2.py
+
+      - name: Run YT3.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python YT3.py
+
+      - name: Run YT4.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python YT4.py
+
+      - name: Inspect MP3 file type using `file` command
+        run: |
+          FILE="/home/runner/work/71/71/Vid/tts.mp3"
+          if [ -f "$FILE" ]; then
+            echo "[INFO] Found file: $FILE"
+            file "$FILE"
+          else
+            echo "[ERROR] Audio file not found at $FILE"
+            exit 1
+          fi
+
+      - name: Run YT5.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python YT5.py
