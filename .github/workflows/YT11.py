@@ -1,0 +1,90 @@
+
+name: Check if First VID is Tech Niche
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+jobs:
+  check-niche:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install groq youtube-transcript-api google-genai pydub
+
+      - name: Install yt-dlp
+        run: |
+          sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+          sudo chmod a+rx /usr/local/bin/yt-dlp
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt install -y ffmpeg
+
+      - name: Run YT.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: python YT.py
+
+      - name: Run YT1.py
+        env:
+          GROQ_API: ${{ secrets.GROQ_API }}
+        run: python YT1.py
+
+      - name: Run YT2.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python YT2.py
+
+      - name: Run YT3.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python YT3.py
+
+      - name: Run YT4.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python YT4.py
+
+      - name: Convert audio to MP3 using ffmpeg
+        run: |
+          INPUT="/home/runner/work/71/71/Vid/tts.mp3"
+          OUTPUT="/home/runner/work/71/71/Vid/tts_converted.mp3"
+          if [ -f "$INPUT" ]; then
+            echo "[INFO] Converting to MP3 format..."
+            ffmpeg -y -i "$INPUT" -acodec libmp3lame "$OUTPUT"
+            mv "$OUTPUT" "$INPUT"
+          else
+            echo "[ERROR] Original file not found at $INPUT"
+            exit 1
+          fi
+
+      - name: Inspect MP3 file type using `file` command
+        run: |
+          FILE="/home/runner/work/71/71/Vid/tts.mp3"
+          if [ -f "$FILE" ]; then
+            echo "[INFO] Found file: $FILE"
+            file_output=$(file "$FILE")
+            echo "[INFO] File info: $file_output"
+            if echo "$file_output" | grep -q 'Audio file with ID3'; then
+              echo "[SUCCESS] File is a valid MP3."
+            else
+              echo "[ERROR] File is not a valid MP3."
+              exit 1
+            fi
+          else
+            echo "[ERROR] Audio file not found at $FILE"
+            exit 1
+          fi
