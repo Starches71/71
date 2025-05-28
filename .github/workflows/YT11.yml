@@ -58,19 +58,6 @@ jobs:
           GEMINI_API: ${{ secrets.GEMINI_API }}
         run: python YT4.py
 
-      - name: Convert audio to MP3 using ffmpeg
-        run: |
-          INPUT="/home/runner/work/71/71/Vid/tts.mp3"
-          OUTPUT="/home/runner/work/71/71/Vid/tts_converted.mp3"
-          if [ -f "$INPUT" ]; then
-            echo "[INFO] Converting to MP3 format..."
-            ffmpeg -y -i "$INPUT" -acodec libmp3lame "$OUTPUT"
-            mv "$OUTPUT" "$INPUT"
-          else
-            echo "[ERROR] Original file not found at $INPUT"
-            exit 1
-          fi
-
       - name: Inspect MP3 file type using `file` command
         run: |
           FILE="/home/runner/work/71/71/Vid/tts.mp3"
@@ -88,3 +75,9 @@ jobs:
             echo "[ERROR] Audio file not found at $FILE"
             exit 1
           fi
+
+      - name: Upload MP3 as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-audio
+          path: /home/runner/work/71/71/Vid/tts.mp3
