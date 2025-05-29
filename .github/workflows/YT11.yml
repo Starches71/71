@@ -58,17 +58,17 @@ jobs:
           GEMINI_API: ${{ secrets.GEMINI_API }}
         run: python YT4.py
 
-      - name: Inspect WAV file using `file` command
+      - name: Inspect MP3 file using `file` command
         run: |
-          FILE="/home/runner/work/71/71/Vid/tts.wav"
+          FILE="/home/runner/work/71/71/Vid/tts.mp3"
           if [ -f "$FILE" ]; then
             echo "[INFO] Found file: $FILE"
             file_output=$(file "$FILE")
             echo "[INFO] File info: $file_output"
-            if echo "$file_output" | grep -q 'WAVE audio'; then
-              echo "[SUCCESS] File is a valid WAV."
+            if echo "$file_output" | grep -qi 'Audio file with ID3'; then
+              echo "[SUCCESS] File is a valid MP3."
             else
-              echo "[ERROR] File is not a valid WAV."
+              echo "[ERROR] File is not a valid MP3."
               exit 1
             fi
           else
@@ -76,8 +76,8 @@ jobs:
             exit 1
           fi
 
-      - name: Upload WAV as artifact
+      - name: Upload MP3 as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: generated-audio-wav
-          path: /home/runner/work/71/71/Vid/tts.wav
+          name: generated-audio-mp3
+          path: /home/runner/work/71/71/Vid/tts.mp3
