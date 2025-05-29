@@ -1,3 +1,4 @@
+
 import os
 import struct
 import subprocess
@@ -101,6 +102,9 @@ def generate():
     with open(script_path, "r", encoding="utf-8") as f:
         script_text = f.read()
 
+    print("\n[RAW SCRIPT TEXT]\n" + "="*30 + f"\n{script_text}\n" + "="*30 + "\n", flush=True)
+    print(f"[INFO] Script length: {len(script_text.split())} words | {len(script_text)} characters", flush=True)
+
     print("[INFO] Initializing Gemini TTS Client...", flush=True)
     client = genai.Client(api_key=os.environ.get("GEMINI_API"))
 
@@ -121,33 +125,54 @@ def generate():
         )
     )
 
-    print("[INFO] Generating TTS audio...", flush=True)
+    print("[INFO] Sending request to Gemini TTS API...", flush=True)
     chunk_count = 0
+    audio_found = False
+
     for chunk in client.models.generate_content_stream(
         model=model,
         contents=contents,
         config=config
     ):
         chunk_count += 1
-        print(f"\n[CHUNK {chunk_count}] ================\n{chunk}\n======================\n", flush=True)
+        print(f"\n[CHUNK {chunk_count}] ========================", flush=True)
+        print(chunk, flush=True)
+        print("=" * 45, flush=True)
 
-        if (
-            chunk.candidates is None
-            or chunk.candidates[0].content is None
-            or chunk.candidates[0].content.parts is None
-        ):
+        if chunk.candidates is None:
+            print("[WARN] No candidates in this chunk.", flush=True)
             continue
 
-        part = chunk.candidates[0].content.parts[0]
-        if part.inline_data:
-            inline_data = part.inline_data
-            print(f"[INFO] Received audio chunk with MIME: {inline_data.mime_type}, size: {len(inline_data.data)} bytes", flush=True)
-            decoded_audio = base64.b64decode(inline_data.data)
-            audio_params = parse_audio_mime_type(inline_data.mime_type)
-            save_binary_file(raw_path, decoded_audio)
-            convert_raw_to_mp3(raw_path, mp3_path, sample_rate=audio_params["rate"])
-        else:
-            print("[WARN] No inline data found in this chunk.", flush=True)
+        candidate = chunk.candidates[0]
+        print(f"[DEBUG] Candidate index: {candidate.index} | finish_reason: {candidate.finish_reason}", flush=True)
+
+        if candidate.content is None:
+            print("[WARN] Candidate has no content.", flush=True)
+            continue
+
+        if not candidate.content.parts:
+            print("[WARN] Candidate has content but no parts.", flush=True)
+            continue
+
+        part = candidate.content.parts[0]
+
+        if not part.inline_data:
+            print("[WARN] Part found but no inline_data (audio missing).", flush=True)
+            continue
+
+        inline_data = part.inline_data
+        print(f"[INFO] Received audio chunk with MIME: {inline_data.mime_type}, size: {len(inline_data.data)} bytes", flush=True)
+
+        decoded_audio = base64.b64decode(inline_data.data)
+        audio_params = parse_audio_mime_type(inline_data.mime_type)
+        save_binary_file(raw_path, decoded_audio)
+        convert_raw_to_mp3(raw_path, mp3_path, sample_rate=audio_params["rate"])
+        audio_found = True
+
+    if not audio_found:
+        print("\n[FINAL RESULT] ❌ No usable audio received from Gemini.", flush=True)
+    else:
+        print("\n[FINAL RESULT] ✅ Audio generation completed successfully!", flush=True)
 
 if __name__ == "__main__":
     generate()
