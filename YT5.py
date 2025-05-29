@@ -1,11 +1,6 @@
-import os
-import base64
-import subprocess
 
-def save_binary_file(file_name, data):
-    with open(file_name, "wb") as f:
-        f.write(data)
-    print(f"[INFO] File saved to: {file_name}", flush=True)
+import os
+import subprocess
 
 def get_file_info(file_path):
     if os.path.exists(file_path):
@@ -24,9 +19,9 @@ def convert_raw_to_mp3(raw_path: str, mp3_path: str, sample_rate=24000, channels
         "ffmpeg",
         "-v", "verbose",
         "-y",
-        "-f", "s16le",  # Signed 16-bit little-endian PCM
-        "-ar", str(sample_rate),
-        "-ac", str(channels),
+        "-f", "s16le",  # 16-bit PCM
+        "-ar", str(sample_rate),  # Sample rate
+        "-ac", str(channels),     # Number of audio channels
         "-i", raw_path,
         mp3_path
     ]
@@ -57,17 +52,13 @@ def get_audio_duration(file_path):
         print(f"[ERROR] Failed to get duration: {e}", flush=True)
 
 def main():
-    # === Change these paths ===
     raw_path = "/home/runner/work/71/71/Vid/tts.raw"
     mp3_path = "/home/runner/work/71/71/Vid/tts.mp3"
 
-    # If the binary is base64 encoded (as a string), decode it here:
-    with open("binary_audio.txt", "r") as f:  # ← your base64 string file
-        base64_data = f.read().strip()
-    decoded_data = base64.b64decode(base64_data)
-
-    save_binary_file(raw_path, decoded_data)
-    convert_raw_to_mp3(raw_path, mp3_path)
+    if os.path.exists(raw_path):
+        convert_raw_to_mp3(raw_path, mp3_path)
+    else:
+        print(f"[ERROR] RAW file not found at: {raw_path}", flush=True)
 
 if __name__ == "__main__":
     main()
