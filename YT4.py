@@ -108,7 +108,7 @@ def generate():
     print("[INFO] Initializing Gemini TTS Client...", flush=True)
     client = genai.Client(api_key=os.environ.get("GEMINI_API"))
 
-    model = "gemini-2.5-pro-preview-tts"
+    model = "gemini-2.5-flash-preview-tts"
     contents = [
         types.Content(
             role="user",
