@@ -58,6 +58,23 @@ jobs:
           GEMINI_API: ${{ secrets.GEMINI_API }}
         run: python YT4.py
 
+      - name: Run YT5.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python YT5.py
+
+      - name: Print MP3 Duration
+        run: |
+          FILE="/home/runner/work/71/71/Vid/tts.mp3"
+          if [ -f "$FILE" ]; then
+            echo "[INFO] Found MP3 file: $FILE"
+            ffprobe -v error -show_entries format=duration \
+              -of default=noprint_wrappers=1:nokey=1 "$FILE"
+          else
+            echo "[ERROR] MP3 file not found!"
+            exit 1
+          fi
+
       - name: Inspect MP3 file using `file` command
         run: |
           FILE="/home/runner/work/71/71/Vid/tts.mp3"
