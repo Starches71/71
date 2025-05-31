@@ -1,0 +1,32 @@
+
+name: Blur Faces with MediaPipe
+
+on:
+  workflow_dispatch:
+
+jobs:
+  blur-faces:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install opencv-python mediapipe
+
+      - name: Run face blurring script
+        run: |
+          python blur_faces.py
+
+      - name: Upload blurred video as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blurred-video
+          path: output_blurred.mp4
