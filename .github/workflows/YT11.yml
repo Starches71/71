@@ -22,7 +22,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install --upgrade pip
-          pip install groq youtube-transcript-api google-genai pydub
+          pip install groq youtube-transcript-api google-genai pydub edge-tts
 
       - name: Install yt-dlp
         run: |
@@ -48,6 +48,9 @@ jobs:
           GEMINI_API: ${{ secrets.GEMINI_API }}
         run: python YT2.py
 
+      - name: Wait 60 seconds before YT3
+        run: sleep 60
+
       - name: Run YT3.py
         env:
           GEMINI_API: ${{ secrets.GEMINI_API }}
@@ -57,44 +60,3 @@ jobs:
         env:
           GEMINI_API: ${{ secrets.GEMINI_API }}
         run: python YT4.py
-
-      - name: Run YT5.py
-        env:
-          GEMINI_API: ${{ secrets.GEMINI_API }}
-        run: python YT5.py
-
-      - name: Print MP3 Duration
-        run: |
-          FILE="/home/runner/work/71/71/Vid/tts.mp3"
-          if [ -f "$FILE" ]; then
-            echo "[INFO] Found MP3 file: $FILE"
-            ffprobe -v error -show_entries format=duration \
-              -of default=noprint_wrappers=1:nokey=1 "$FILE"
-          else
-            echo "[ERROR] MP3 file not found!"
-            exit 1
-          fi
-
-      - name: Inspect MP3 file using `file` command
-        run: |
-          FILE="/home/runner/work/71/71/Vid/tts.mp3"
-          if [ -f "$FILE" ]; then
-            echo "[INFO] Found file: $FILE"
-            file_output=$(file "$FILE")
-            echo "[INFO] File info: $file_output"
-            if echo "$file_output" | grep -qi 'Audio file with ID3'; then
-              echo "[SUCCESS] File is a valid MP3."
-            else
-              echo "[ERROR] File is not a valid MP3."
-              exit 1
-            fi
-          else
-            echo "[ERROR] Audio file not found at $FILE"
-            exit 1
-          fi
-
-      - name: Upload MP3 as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-audio-mp3
-          path: /home/runner/work/71/71/Vid/tts.mp3
