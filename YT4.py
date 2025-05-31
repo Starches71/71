@@ -1,178 +1,61 @@
 
+import asyncio
 import os
-import struct
-import subprocess
-import base64
-from google import genai
-from google.genai import types
+import re
+from edge_tts import Communicate
 
-def save_binary_file(file_name, data):
-    with open(file_name, "wb") as f:
-        f.write(data)
-    print(f"[INFO] File saved to: {file_name}", flush=True)
+# Directory where transcript and mp3s will be stored
+TRANSCRIPT_FILE = os.path.join("Vid", "Transcript.txt")
+OUTPUT_DIR = "Vid"
 
-def get_file_info(file_path):
-    if os.path.exists(file_path):
-        size = os.path.getsize(file_path)
-        with open(file_path, "rb") as f:
-            header = f.read(10)
-        print(f"[INFO] File: {file_path} | Size: {size} bytes | Header: {header.hex()}", flush=True)
-    else:
-        print(f"[WARN] File not found: {file_path}", flush=True)
+# Ensure the output directory exists
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-def get_audio_duration(file_path):
+# Voice name
+VOICE_NAME = "en-US-SteffanNeural"
+
+# Function to sanitize filenames
+def sanitize_filename(timeline):
+    return timeline.replace("–", "-").replace(":", "_").strip()
+
+# Function to split the transcript into blocks based on timeline headers
+def parse_transcript_blocks(text):
+    pattern = r"(\d{2}:\d{2}–\d{2}:\d{2})\s*(.*?)\s*(?=\n\d{2}:\d{2}–|\Z)"
+    matches = re.findall(pattern, text, re.DOTALL)
+    return [(sanitize_filename(timeline), content.strip()) for timeline, content in matches]
+
+# TTS function per block
+async def generate_tts_for_block(timeline, content):
+    filename = os.path.join(OUTPUT_DIR, f"{timeline}.mp3")
+    print(f"🔊 Generating TTS for {timeline}...")
     try:
-        result = subprocess.run(
-            ["ffprobe", "-v", "verbose", "-show_entries", "format=duration",
-             "-of", "default=noprint_wrappers=1:nokey=1", file_path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
-        )
-        print(f"[FFPROBE OUTPUT]\n{result.stdout.decode()}", flush=True)
-        duration = float(result.stdout.decode().strip())
-        minutes = int(duration // 60)
-        seconds = int(duration % 60)
-        print(f"[INFO] MP3 Duration: {duration:.2f} seconds ({minutes:02d}:{seconds:02d})", flush=True)
+        tts = Communicate(text=content, voice=VOICE_NAME)
+        await tts.save(filename)
+        print(f"✅ Saved: {filename}")
     except Exception as e:
-        print(f"[ERROR] Failed to get duration: {e}", flush=True)
+        print(f"❌ Error generating TTS for {timeline}: {e}")
 
-def convert_raw_to_mp3(raw_path: str, mp3_path: str, sample_rate=24000, channels=1):
-    print("[INFO] Analyzing RAW audio before conversion...", flush=True)
-    get_file_info(raw_path)
-
-    cmd = [
-        "ffmpeg",
-        "-v", "verbose",
-        "-y",
-        "-f", "s16le",
-        "-ar", str(sample_rate),
-        "-ac", str(channels),
-        "-i", raw_path,
-        mp3_path
-    ]
-    print("[INFO] Converting RAW to MP3 via ffmpeg...", flush=True)
-    result = subprocess.run(cmd, capture_output=True)
-    print("[FFMPEG STDOUT]\n" + result.stdout.decode(), flush=True)
-    print("[FFMPEG STDERR]\n" + result.stderr.decode(), flush=True)
-    if result.returncode != 0:
-        print(f"[ERROR] FFmpeg failed with return code {result.returncode}", flush=True)
-    else:
-        print(f"[INFO] MP3 saved to: {mp3_path}", flush=True)
-        verify_mp3(mp3_path)
-        get_audio_duration(mp3_path)
-
-def verify_mp3(mp3_path):
-    if not os.path.exists(mp3_path):
-        print(f"[ERROR] MP3 file was not created.", flush=True)
+# Main function
+async def main():
+    if not os.path.exists(TRANSCRIPT_FILE):
+        print(f"❌ Transcript file not found: {TRANSCRIPT_FILE}")
         return
-    try:
-        with open(mp3_path, "rb") as f:
-            header = f.read(3)
-        if header == b'ID3' or header[:2] == b'\xff\xfb':
-            print("[SUCCESS] Output file is a valid MP3 format ✅", flush=True)
-        else:
-            print(f"[WARN] Output file might not be a valid MP3 (Header: {header.hex()})", flush=True)
-    except Exception as e:
-        print(f"[ERROR] Couldn't verify MP3 file: {e}", flush=True)
 
-def parse_audio_mime_type(mime_type: str) -> dict[str, int | None]:
-    bits_per_sample = 16
-    rate = 24000
-    parts = mime_type.split(";")
-    for param in parts:
-        param = param.strip()
-        if param.lower().startswith("rate="):
-            try:
-                rate = int(param.split("=")[1])
-            except:
-                pass
-        elif "L" in param:
-            try:
-                bits_per_sample = int(param.split("L")[1])
-            except:
-                pass
-    return {"bits_per_sample": bits_per_sample, "rate": rate}
+    with open(TRANSCRIPT_FILE, "r", encoding="utf-8") as file:
+        transcript = file.read().strip()
 
-def generate():
-    script_path = "/home/runner/work/71/71/Vid/script.txt"
-    raw_path = "/home/runner/work/71/71/Vid/tts.raw"
-    mp3_path = "/home/runner/work/71/71/Vid/tts.mp3"
+    blocks = parse_transcript_blocks(transcript)
 
-    print(f"[INFO] Loading script from: {script_path}", flush=True)
-    with open(script_path, "r", encoding="utf-8") as f:
-        script_text = f.read()
+    if not blocks:
+        print("❌ No valid timeline blocks found.")
+        return
 
-    print("\n[RAW SCRIPT TEXT]\n" + "="*30 + f"\n{script_text}\n" + "="*30 + "\n", flush=True)
-    print(f"[INFO] Script length: {len(script_text.split())} words | {len(script_text)} characters", flush=True)
+    # Sequentially run TTS for each block (safer than parallel for Edge TTS rate limits)
+    for timeline, content in blocks:
+        await generate_tts_for_block(timeline, content)
 
-    print("[INFO] Initializing Gemini TTS Client...", flush=True)
-    client = genai.Client(api_key=os.environ.get("GEMINI_API"))
+    print("\n✅ All timeline-based TTS files have been generated.")
 
-    model = "gemini-2.5-flash-preview-tts"
-    contents = [
-        types.Content(
-            role="user",
-            parts=[types.Part.from_text(text=script_text)],
-        )
-    ]
-    config = types.GenerateContentConfig(
-        temperature=1,
-        response_modalities=["audio"],
-        speech_config=types.SpeechConfig(
-            voice_config=types.VoiceConfig(
-                prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name="Enceladus")
-            )
-        )
-    )
-
-    print("[INFO] Sending request to Gemini TTS API...", flush=True)
-    chunk_count = 0
-    audio_found = False
-
-    for chunk in client.models.generate_content_stream(
-        model=model,
-        contents=contents,
-        config=config
-    ):
-        chunk_count += 1
-        print(f"\n[CHUNK {chunk_count}] ========================", flush=True)
-        print(chunk, flush=True)
-        print("=" * 45, flush=True)
-
-        if chunk.candidates is None:
-            print("[WARN] No candidates in this chunk.", flush=True)
-            continue
-
-        candidate = chunk.candidates[0]
-        print(f"[DEBUG] Candidate index: {candidate.index} | finish_reason: {candidate.finish_reason}", flush=True)
-
-        if candidate.content is None:
-            print("[WARN] Candidate has no content.", flush=True)
-            continue
-
-        if not candidate.content.parts:
-            print("[WARN] Candidate has content but no parts.", flush=True)
-            continue
-
-        part = candidate.content.parts[0]
-
-        if not part.inline_data:
-            print("[WARN] Part found but no inline_data (audio missing).", flush=True)
-            continue
-
-        inline_data = part.inline_data
-        print(f"[INFO] Received audio chunk with MIME: {inline_data.mime_type}, size: {len(inline_data.data)} bytes", flush=True)
-
-        decoded_audio = base64.b64decode(inline_data.data)
-        audio_params = parse_audio_mime_type(inline_data.mime_type)
-        save_binary_file(raw_path, decoded_audio)
-        convert_raw_to_mp3(raw_path, mp3_path, sample_rate=audio_params["rate"])
-        audio_found = True
-
-    if not audio_found:
-        print("\n[FINAL RESULT] ❌ No usable audio received from Gemini.", flush=True)
-    else:
-        print("\n[FINAL RESULT] ✅ Audio generation completed successfully!", flush=True)
-
+# Run the script
 if __name__ == "__main__":
-    generate()
+    asyncio.run(main())
