@@ -17,22 +17,40 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: 🧪 Install Required Python Packages
+      - name: 📦 Install fallback essential packages
         run: |
           python -m pip install --upgrade pip
-          pip install av pims numpy torch torchvision pillow tqdm --break-system-packages
+          pip install tqdm numpy torch torchvision pillow av pims --break-system-packages
 
-      - name: 📦 Download RVM model (MobileNetV3)
+      - name: 🔍 Auto-install missing Python modules (failsafe)
+        run: |
+          echo "📦 Auto-installing missing modules from all *.py files..."
+          grep -hrE '^import |^from ' *.py | \
+            sed -E 's/^from ([^ ]+).*/\1/;s/^import ([^ ]+).*/\1/' | \
+            sort -u | \
+            grep -vE '^\.' > requirements-parsed.txt
+
+          echo "Modules detected:"
+          cat requirements-parsed.txt
+
+          # Try installing each, ignore errors silently
+          while read module; do
+            echo "Installing: $module"
+            pip install "$module" --break-system-packages || true
+          done < requirements-parsed.txt
+
+      - name: 📥 Download model checkpoint
         run: |
           mkdir -p rvm_models
           wget https://github.com/PeterL1n/RobustVideoMatting/releases/download/v1.0.0/rvm_mobilenetv3.pth -O rvm_models/rvm_mobilenetv3.pth
 
-      - name: 🧠 Download RVM inference script + utils
+      - name: 📥 Download inference scripts
         run: |
           wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference.py -O inference.py
           wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference_utils.py -O inference_utils.py
+          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/model.py -O model.py  # this line fixes the missing 'model'
 
-      - name: 🎥 Run RVM to remove person
+      - name: 🎥 Run inference
         run: |
           mkdir -p output
           python inference.py \
