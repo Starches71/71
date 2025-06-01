@@ -1,3 +1,4 @@
+
 name: Remove Person from Video
 
 on:
@@ -19,16 +20,17 @@ jobs:
       - name: 🧪 Install dependencies
         run: |
           pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install opencv-python numpy tqdm  # ✅ Added tqdm here
+          pip install opencv-python numpy tqdm
 
       - name: 📦 Download RVM model (MobileNetV3)
         run: |
           mkdir -p rvm_models
           wget https://github.com/PeterL1n/RobustVideoMatting/releases/download/v1.0.0/rvm_mobilenetv3.pth -O rvm_models/rvm_mobilenetv3.pth
 
-      - name: 🧠 Download RVM inference script
+      - name: 🧠 Download RVM inference script + utils
         run: |
           wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference.py -O inference.py
+          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference_utils.py -O inference_utils.py  # ✅ Download missing file
 
       - name: 🎥 Run RVM to remove person
         run: |
