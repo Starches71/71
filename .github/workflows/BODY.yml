@@ -40,7 +40,7 @@ jobs:
         ffmpeg -framerate 24 -i outframes/frame_%05d.png -c:v libx264 -pix_fmt yuv420p result.mp4
 
     - name: 📤 Upload Processed Video
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: processed-video
         path: result.mp4
