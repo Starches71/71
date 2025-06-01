@@ -1,4 +1,4 @@
-name: YOLOv7 Object Detection
+name: Run YOLOv7 Detection
 
 on:
   workflow_dispatch:
@@ -9,36 +9,34 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: 3.10
 
-      - name: Install dependencies
+      - name: Install dependencies (torch 2.5.1)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
-          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-          git clone https://github.com/WongKinYiu/yolov7.git
-          cd yolov7
-          pip install -r requirements.txt
+          pip install torch==2.5.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -r yolov7/requirements.txt
 
-      - name: Run YOLOv7 on video
+      - name: Download model weights (if not present)
         run: |
-          cd yolov7
-          mkdir -p runs/detect
-          python detect.py \
+          if [ ! -f yolov7.pt ]; then
+            wget https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7.pt
+          fi
+
+      - name: Run YOLOv7 detection
+        run: |
+          python yolov7/detect.py \
             --weights yolov7.pt \
-            --conf 0.25 \
-            --source "../iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4" \
+            --source '../iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4' \
+            --img-size 640 \
+            --conf-thres 0.25 \
+            --iou-thres 0.45 \
+            --device cpu \
+            --save-txt \
             --project runs/detect \
             --name output \
             --exist-ok
-
-      - name: Upload detection result frames
-        uses: actions/upload-artifact@v4
-        with:
-          name: yolo7-output
-          path: yolov7/runs/detect/output
