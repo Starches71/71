@@ -1,3 +1,4 @@
+
 name: Remove Person from Video
 
 on:
@@ -16,14 +17,10 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: 🧠 Auto-install all Python imports
+      - name: 🧪 Install Required Python Packages
         run: |
-          echo "Parsing Python files for imports..."
-          grep -hE '^import |^from ' *.py | awk '{print $2}' | sort -u > reqs.txt
-          echo "Installing detected modules:"
-          cat reqs.txt
-          # Attempt to install each module (some names might need pip-friendly names manually if errors appear)
-          xargs -L 1 pip install --break-system-packages < reqs.txt || true
+          python -m pip install --upgrade pip
+          pip install av pims numpy torch torchvision pillow --break-system-packages
 
       - name: 📦 Download RVM model (MobileNetV3)
         run: |
