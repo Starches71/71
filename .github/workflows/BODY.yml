@@ -1,34 +1,45 @@
 
-name: Run Ikomia YOLOv7 Detection
+name: YOLOv7 Object Detection
 
 on:
-  push:
-    paths:
-      - '**.mp4'
   workflow_dispatch:
 
 jobs:
-  detect_objects:
+  detect:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install ikomia opencv-python
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+          git clone https://github.com/WongKinYiu/yolov7.git
+          cd yolov7
+          pip install -r requirements.txt
 
-    - name: Download YOLOv7 plugin
-      run: |
-        python -c "from ikomia.utils.command import ik_download; ik_download('infer_yolo_v7')"
+      - name: Run YOLOv7 on video
+        run: |
+          cd yolov7
+          mkdir -p runs/detect
+          python detect.py \
+            --weights yolov7.pt \
+            --conf 0.25 \
+            --source "../iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4" \
+            --project runs/detect \
+            --name output \
+            --exist-ok
 
-    - name: Run object detection
-      run: |
-        python detect.py
+      - name: Upload detection result frames
+        uses: actions/upload-artifact@v3
+        with:
+          name: yolo7-output
+          path: yolov7/runs/detect/output
