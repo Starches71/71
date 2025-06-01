@@ -2,11 +2,7 @@
 name: Blur Person in Video (MediaPipe)
 
 on:
-  push:
-    paths:
-      - '**.mp4'
-      - 'blur_script.py'
-      - '.github/workflows/blur_person.yml'
+  workflow_dispatch:
 
 jobs:
   blur-video:
