@@ -9,40 +9,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout Repo
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v3
 
-      - name: 🐍 Set up Python
+      - name: 🐍 Set Up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: 📦 Install essential Python packages
+      - name: 📦 Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install tqdm numpy torch torchvision pillow av pims --break-system-packages
+          pip install lama-cleaner opencv-python-headless numpy
 
-      - name: 📥 Download Robust Video Matting scripts
+      - name: 🎞️ Extract Video Frames
         run: |
-          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference.py -O inference.py
-          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference_utils.py -O inference_utils.py
-          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/model.py -O model.py
+          mkdir -p frames
+          ffmpeg -i "iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4" frames/frame_%04d.png
 
-      - name: 📥 Download model checkpoint
+      - name: 🖼️ Process Frames with Lama Cleaner
         run: |
-          mkdir -p rvm_models
-          wget https://github.com/PeterL1n/RobustVideoMatting/releases/download/v1.0.0/rvm_mobilenetv3.pth -O rvm_models/rvm_mobilenetv3.pth
+          mkdir -p processed_frames
+          for frame in frames/*.png; do
+            # Replace this command with the actual Lama Cleaner processing command
+            # For example, if Lama Cleaner has a CLI command like:
+            # lama-cleaner --input $frame --output processed_frames/$(basename $frame) --model lama --device cpu
+            echo "Processing $frame"
+            cp "$frame" "processed_frames/$(basename $frame)"  # Placeholder for actual processing
+          done
 
-      - name: 🎥 Run inference
+      - name: 🎬 Reassemble Processed Frames into Video
         run: |
-          mkdir -p output
-          python inference.py \
-            --model-type mobilenetv3 \
-            --checkpoint rvm_models/rvm_mobilenetv3.pth \
-            --source "iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4" \
-            --output output/no_person.mp4
+          ffmpeg -framerate 30 -i processed_frames/frame_%04d.png -c:v libx264 -pix_fmt yuv420p output/no_person.mp4
 
-      - name: 📤 Upload processed video artifact
+      - name: 📤 Upload Processed Video
         uses: actions/upload-artifact@v4
         with:
           name: no_person_video
