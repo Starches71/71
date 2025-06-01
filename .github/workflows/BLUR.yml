@@ -1,32 +1,50 @@
 
-name: Blur Faces with MediaPipe
+name: Remove Person from Video
 
 on:
   workflow_dispatch:
 
 jobs:
-  blur-faces:
+  remove-person:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: 🐍 Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: 🧪 Install dependencies
         run: |
-          pip install opencv-python mediapipe
+          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install opencv-python numpy gdown
 
-      - name: Run face blurring script
+      - name: 📦 Download RVM model (ResNet50, PyTorch)
         run: |
-          python blur_faces.py
+          mkdir -p rvm_models
+          wget https://github.com/PeterL1n/RobustVideoMatting/releases/download/v1.0.0/rvm_resnet50.pth -O rvm_models/rvm_resnet50.pth
 
-      - name: Upload blurred video as artifact
+      - name: 🧠 Download and patch RVM inference script
+        run: |
+          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference.py -O inference.py
+          
+          # Invert alpha mask by inserting `pha = 1 - pha` before composition
+          sed -i '/com = fgr \* pha + bgr \* (1 - pha)/i \            pha = 1 - pha' inference.py
+
+      - name: 🎥 Run RVM to remove person (keep background)
+        run: |
+          mkdir -p output
+          python inference.py \
+            --model-type resnet50 \
+            --checkpoint rvm_models/rvm_resnet50.pth \
+            --source "iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4" \
+            --output output/no_person.mp4
+
+      - name: 📤 Upload processed video
         uses: actions/upload-artifact@v4
         with:
-          name: blurred-video
-          path: output_blurred.mp4
+          name: background_only_video
+          path: output/no_person.mp4
