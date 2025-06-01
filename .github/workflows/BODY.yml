@@ -1,3 +1,4 @@
+
 name: Remove Person from Video
 
 on:
@@ -19,20 +20,16 @@ jobs:
       - name: 🧪 Install dependencies
         run: |
           pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install opencv-python numpy gdown
+          pip install opencv-python numpy
 
-      - name: 📦 Download RVM model
+      - name: 📦 Download RVM model (resnet50)
         run: |
           mkdir -p rvm_models
-          gdown --id 1wAAxXU64Phwsr5N1_U04ih_9lDGDmqSZ -O rvm_models/rvm_resnet50.pth
+          wget https://huggingface.co/PeterL1n/RobustVideoMatting/resolve/main/rvm_resnet50.pth -O rvm_models/rvm_resnet50.pth
 
       - name: 🧠 Download RVM inference script
         run: |
           wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference.py -O inference.py
-
-      - name: 🧹 Rename video file to avoid special character issues
-        run: |
-          mv "iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4" input.mp4
 
       - name: 🎥 Run RVM to remove person
         run: |
@@ -40,11 +37,11 @@ jobs:
           python inference.py \
             --model-type resnet50 \
             --checkpoint rvm_models/rvm_resnet50.pth \
-            --source input.mp4 \
+            --source "iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4" \
             --output output/no_person.mp4
 
       - name: 📤 Upload processed video
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: no_person_clean_video
           path: output/no_person.mp4
