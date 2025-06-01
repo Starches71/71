@@ -19,7 +19,7 @@ jobs:
       - name: 🧪 Install dependencies
         run: |
           pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install opencv-python numpy
+          pip install opencv-python numpy tqdm  # ✅ Added tqdm here
 
       - name: 📦 Download RVM model (MobileNetV3)
         run: |
