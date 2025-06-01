@@ -1,23 +1,21 @@
 
-name: YOLOv8 Object Detection on Video
+name: Run Ikomia YOLOv7 Detection
 
 on:
+  push:
+    paths:
+      - '**.mp4'
   workflow_dispatch:
-    inputs:
-      video_path:
-        description: 'Relative path to the video file in the repo'
-        required: true
-        default: 'videos/iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4'
 
 jobs:
-  detect-objects:
+  detect_objects:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Setup Python 3.10
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
@@ -25,9 +23,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
-        pip install opencv-python ultralytics
+        pip install ikomia opencv-python
 
-    - name: Run YOLOv8 detection script
+    - name: Download YOLOv7 plugin
       run: |
-        python detect_objects.py "${{ github.event.inputs.video_path }}"
+        python -c "from ikomia.utils.command import ik_download; ik_download('infer_yolo_v7')"
+
+    - name: Run object detection
+      run: |
+        python detect.py
