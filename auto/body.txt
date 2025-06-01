@@ -1,11 +1,8 @@
-* Compact and modern design with a touchscreen interface
-* Five cup sizes: Ristretto, Espresso, Lungo, Americano, and Alto
-* Bluetooth connectivity for mobile app control and scheduling
-* Automatic capsule ejection and used capsule container
-* Energy-efficient with automatic shut-off after 2 hours of inactivity
-* 19-bar high-pressure pump for optimal espresso extraction
-* Removable 50-ounce water tank for easy refilling
-* Durable and easy-to-clean stainless steel and plastic construction
-* Compatible with Nespresso OriginalLine capsules
-* Adjustable coffee volume and strength settings
-* Descale alert and automatic descaling system for maintenance
+* Compact and modern design with a 1.1-liter water tank and a used capsule container that can hold up to 12 used capsules
+* Five cup sizes to choose from, including Ristretto, Espresso, Lungo, Americano, and Alto
+* Bluetooth connectivity and Nespresso app compatibility for scheduling brews and customizing settings
+* Automatic capsule ejection and automatic shut-off for energy efficiency
+* High-pressure 19-bar pump for optimal extraction and flavor
+* Fast heat-up time of just 30 seconds
+* Energy-efficient design with an automatic shut-off after 9 minutes of inactivity
+* Compatible with Nespresso's OriginalLine capsules for a wide range of flavors and blends
