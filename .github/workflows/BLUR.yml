@@ -1,50 +1,36 @@
 
-name: Remove Person from Video
+name: Blur Person in Video (MediaPipe)
 
 on:
-  workflow_dispatch:
+  push:
+    paths:
+      - '**.mp4'
+      - 'blur_script.py'
+      - '.github/workflows/blur_person.yml'
 
 jobs:
-  remove-person:
+  blur-video:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout Repo
-        uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
-      - name: 🐍 Set up Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
-      - name: 🧪 Install dependencies
+      - name: Install dependencies
         run: |
-          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install opencv-python numpy gdown
+          python -m pip install --upgrade pip
+          pip install mediapipe opencv-python numpy
 
-      - name: 📦 Download RVM model (ResNet50, PyTorch)
-        run: |
-          mkdir -p rvm_models
-          wget https://github.com/PeterL1n/RobustVideoMatting/releases/download/v1.0.0/rvm_resnet50.pth -O rvm_models/rvm_resnet50.pth
+      - name: Run blur script
+        run: python blur_script.py
 
-      - name: 🧠 Download and patch RVM inference script
-        run: |
-          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference.py -O inference.py
-          
-          # Invert alpha mask by inserting `pha = 1 - pha` before composition
-          sed -i '/com = fgr \* pha + bgr \* (1 - pha)/i \            pha = 1 - pha' inference.py
-
-      - name: 🎥 Run RVM to remove person (keep background)
-        run: |
-          mkdir -p output
-          python inference.py \
-            --model-type resnet50 \
-            --checkpoint rvm_models/rvm_resnet50.pth \
-            --source "iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4" \
-            --output output/no_person.mp4
-
-      - name: 📤 Upload processed video
+      - name: Upload blurred video (v4)
         uses: actions/upload-artifact@v4
         with:
-          name: background_only_video
-          path: output/no_person.mp4
+          name: blurred_v4
+          path: blurred_v4.mp4
