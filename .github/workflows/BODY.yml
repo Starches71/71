@@ -1,4 +1,3 @@
-
 name: Remove Person from Video
 
 on:
@@ -17,10 +16,14 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: 🧪 Install dependencies
+      - name: 🧠 Auto-install all Python imports
         run: |
-          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install opencv-python numpy tqdm
+          echo "Parsing Python files for imports..."
+          grep -hE '^import |^from ' *.py | awk '{print $2}' | sort -u > reqs.txt
+          echo "Installing detected modules:"
+          cat reqs.txt
+          # Attempt to install each module (some names might need pip-friendly names manually if errors appear)
+          xargs -L 1 pip install --break-system-packages < reqs.txt || true
 
       - name: 📦 Download RVM model (MobileNetV3)
         run: |
@@ -30,7 +33,7 @@ jobs:
       - name: 🧠 Download RVM inference script + utils
         run: |
           wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference.py -O inference.py
-          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference_utils.py -O inference_utils.py  # ✅ Download missing file
+          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference_utils.py -O inference_utils.py
 
       - name: 🎥 Run RVM to remove person
         run: |
