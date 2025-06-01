@@ -1,3 +1,4 @@
+
 name: Remove Person from Video
 
 on:
@@ -25,15 +26,14 @@ jobs:
         run: |
           wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference.py -O inference.py
           wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/inference_utils.py -O inference_utils.py
-          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/model_archs.py -O model_archs.py
-          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/annotator.py -O annotator.py
+          wget https://raw.githubusercontent.com/PeterL1n/RobustVideoMatting/master/model.py -O model.py
 
       - name: 📥 Download model checkpoint
         run: |
           mkdir -p rvm_models
           wget https://github.com/PeterL1n/RobustVideoMatting/releases/download/v1.0.0/rvm_mobilenetv3.pth -O rvm_models/rvm_mobilenetv3.pth
 
-      - name: 🧠 Run Robust Video Matting
+      - name: 🎥 Run inference
         run: |
           mkdir -p output
           python inference.py \
@@ -42,7 +42,7 @@ jobs:
             --source "iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4" \
             --output output/no_person.mp4
 
-      - name: 📤 Upload processed video
+      - name: 📤 Upload processed video artifact
         uses: actions/upload-artifact@v4
         with:
           name: no_person_video
