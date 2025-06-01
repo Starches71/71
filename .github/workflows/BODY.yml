@@ -2,9 +2,7 @@
 name: Remove Person from Video
 
 on:
-  push:
-    paths:
-      - 'iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4'
+  workflow_dispatch:
 
 jobs:
   remove-person:
@@ -40,8 +38,7 @@ jobs:
             --model-type resnet50 \
             --checkpoint rvm_models/rvm_resnet50.pth \
             --source "iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4" \
-            --output output/no_person.mp4 \
-            --remove-person
+            --output output/no_person.mp4
 
       - name: 📤 Upload processed video
         uses: actions/upload-artifact@v3
