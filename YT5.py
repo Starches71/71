@@ -3,13 +3,25 @@ import cv2
 import numpy as np
 import mediapipe as mp
 import os
+import sys
 
-# Input & output paths
-input_path = os.path.join("Vid", "video.webm")
-output_path = os.path.join("Vid", "blur.webm")  # You can change this to .mp4 if preferred
+# --- Auto-detect input video file ---
+video_dir = "Vid"
+input_path = None
+for file in os.listdir(video_dir):
+    if file.startswith("video.") and file.endswith((".webm", ".mp4", ".mkv")):
+        input_path = os.path.join(video_dir, file)
+        break
+
+if not input_path:
+    print("❌ No video file found in Vid/")
+    sys.exit(1)
+
+# Set output path (always .webm for consistency)
+output_path = os.path.join(video_dir, "blur.webm")
 
 # Ensure Vid folder exists
-os.makedirs("Vid", exist_ok=True)
+os.makedirs(video_dir, exist_ok=True)
 
 # Initialize MediaPipe models
 mp_face = mp.solutions.face_detection
@@ -22,21 +34,18 @@ selfie_seg = mp_selfie.SelfieSegmentation(model_selection=1)
 cap = cv2.VideoCapture(input_path)
 if not cap.isOpened():
     print(f"❌ Could not open video: {input_path}")
-    exit(1)
+    sys.exit(1)
 
-# Video properties
+# Get video properties
 width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps    = cap.get(cv2.CAP_PROP_FPS)
 
-# Use appropriate codec for webm or mp4
-if output_path.endswith(".webm"):
-    fourcc = cv2.VideoWriter_fourcc(*'VP90')  # For webm
-else:
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # For mp4
-
+# Define video writer codec
+fourcc = cv2.VideoWriter_fourcc(*'VP90')  # VP90 for .webm
 out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
+# Process each frame
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -44,11 +53,11 @@ while True:
 
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    # Step 1: Get person segmentation mask
+    # Person segmentation
     seg_result = selfie_seg.process(rgb)
     seg_mask = (seg_result.segmentation_mask > 0.3).astype(np.uint8) * 255
 
-    # Step 2: Get face bounding box
+    # Face detection
     face_result = face_det.process(rgb)
     head_mask = np.zeros((height, width), dtype=np.uint8)
 
@@ -60,7 +69,7 @@ while True:
             w = int(box.width * width)
             h = int(box.height * height)
 
-            # Expand bounding box for better head coverage
+            # Expand bounding box
             x = max(x - 20, 0)
             y = max(y - 40, 0)
             w = min(w + 40, width - x)
@@ -68,10 +77,10 @@ while True:
 
             head_mask[y:y+h, x:x+w] = 255
 
-    # Step 3: Combine selfie mask and head mask
+    # Combine segmentation and face mask
     head_only_mask = cv2.bitwise_and(seg_mask, head_mask)
 
-    # Step 4: Apply blur to the head region
+    # Apply blur to head region only
     blurred = cv2.GaussianBlur(frame, (61, 61), 51)
     mask_inv = cv2.bitwise_not(head_only_mask)
     head_blur = cv2.bitwise_and(blurred, blurred, mask=head_only_mask)
@@ -83,7 +92,7 @@ while True:
 cap.release()
 out.release()
 
-# Confirm output
+# Done
 if os.path.exists(output_path):
     print(f"✅ Done! Head-blurred video saved as {output_path}")
 else:
