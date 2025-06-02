@@ -6,9 +6,9 @@ import os
 
 # Input and output paths
 input_path = "iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4"
-output_path = "blurred_v4.mp4"
+output_path = "blurred_v4.avi"  # Use AVI for MJPG compatibility
 
-# Initialize MediaPipe
+# Initialize MediaPipe solutions
 mp_selfie_segmentation = mp.solutions.selfie_segmentation
 mp_hands = mp.solutions.hands
 
@@ -25,23 +25,18 @@ width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = cap.get(cv2.CAP_PROP_FPS)
 
-# Use higher-quality encoding
-fourcc = cv2.VideoWriter_fourcc(*'avc1')  # H.264
+# Use MJPG codec (widely supported, avoids encoder issues on GitHub Actions)
+fourcc = cv2.VideoWriter_fourcc(*'MJPG')
 out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
 def exclude_full_hand_from_mask(mask, hand_landmarks, width, height):
+    # Create a convex hull from all 21 landmarks of the hand
     points = [(int(lm.x * width), int(lm.y * height)) for lm in hand_landmarks.landmark]
     if len(points) >= 3:
         hull = cv2.convexHull(np.array(points))
-        cv2.fillConvexPoly(mask, hull, 0)
+        cv2.fillConvexPoly(mask, hull, 0)  # Exclude entire hand from blur
 
-        # Expand the hand region slightly to ensure complete exclusion
-        hand_mask = np.zeros_like(mask)
-        cv2.fillConvexPoly(hand_mask, hull, 255)
-        hand_mask = cv2.dilate(hand_mask, np.ones((30, 30), np.uint8), iterations=1)
-        mask[hand_mask == 255] = 0
-
-# Process frames
+# Process each frame
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
@@ -49,18 +44,18 @@ while cap.isOpened():
 
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    # Person segmentation
+    # Step 1: Person segmentation
     seg_result = selfie_segmentation.process(rgb)
     seg_mask = (seg_result.segmentation_mask > 0.1).astype(np.uint8) * 255
 
-    # Hand detection
+    # Step 2: Hand detection and mask exclusion
     hand_result = hands.process(rgb)
     if hand_result.multi_hand_landmarks:
         for hand_landmarks in hand_result.multi_hand_landmarks:
             exclude_full_hand_from_mask(seg_mask, hand_landmarks, width, height)
 
-    # Apply blur to person area (excluding hands)
-    blurred = cv2.GaussianBlur(frame, (31, 31), 15)
+    # Step 3: Apply Gaussian blur only to segmented person (excluding hands)
+    blurred = cv2.GaussianBlur(frame, (61, 61), 51)
     mask_inv = cv2.bitwise_not(seg_mask)
     blurred_part = cv2.bitwise_and(blurred, blurred, mask=seg_mask)
     original_part = cv2.bitwise_and(frame, frame, mask=mask_inv)
