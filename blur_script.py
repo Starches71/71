@@ -4,18 +4,15 @@ import numpy as np
 import mediapipe as mp
 import os
 
-# Input and output paths
+# Paths
 input_path = "iPhone_16_Pro_Max_VS_S24_Ultra_-_Ultimate_selfie_test!(360p).mp4"
-output_path = "blurred_v4.avi"  # Using MJPG to avoid codec error
+output_path = "blurred_v4.avi"
 
-# Initialize MediaPipe
-mp_selfie_segmentation = mp.solutions.selfie_segmentation
+# MediaPipe Hands
 mp_hands = mp.solutions.hands
-
-selfie_segmentation = mp_selfie_segmentation.SelfieSegmentation(model_selection=1)
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.6)
 
-# Load video
+# Open video
 cap = cv2.VideoCapture(input_path)
 if not cap.isOpened():
     print(f"❌ Could not open video: {input_path}")
@@ -24,49 +21,46 @@ if not cap.isOpened():
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = cap.get(cv2.CAP_PROP_FPS)
+
+# Video writer (MJPG is broadly compatible)
 fourcc = cv2.VideoWriter_fourcc(*'MJPG')
 out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
-def exclude_expanded_hand_area(mask, hand_landmarks, width, height):
-    points = [(int(lm.x * width), int(lm.y * height)) for lm in hand_landmarks.landmark]
-    if len(points) >= 3:
-        hull = cv2.convexHull(np.array(points))
-        # Create black mask with only hand region white
-        hand_mask = np.zeros((height, width), dtype=np.uint8)
-        cv2.fillConvexPoly(hand_mask, hull, 255)
-        # Dilate hand mask to enlarge area
-        kernel = np.ones((70, 70), np.uint8)  # increase size for more safety
-        dilated_hand_mask = cv2.dilate(hand_mask, kernel, iterations=1)
-        # Remove hand area from blur mask
-        mask[dilated_hand_mask == 255] = 0
+def get_hand_mask(rgb_frame, width, height):
+    mask = np.zeros((height, width), dtype=np.uint8)
+    result = hands.process(rgb_frame)
+    if result.multi_hand_landmarks:
+        for hand_landmarks in result.multi_hand_landmarks:
+            points = [(int(lm.x * width), int(lm.y * height)) for lm in hand_landmarks.landmark]
+            if len(points) >= 3:
+                hull = cv2.convexHull(np.array(points))
+                temp_mask = np.zeros_like(mask)
+                cv2.fillConvexPoly(temp_mask, hull, 255)
+                kernel = np.ones((70, 70), np.uint8)
+                temp_mask = cv2.dilate(temp_mask, kernel, iterations=1)
+                mask = cv2.bitwise_or(mask, temp_mask)
+    return mask
 
-# Process each frame
+# Process frames
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
         break
 
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    hand_mask = get_hand_mask(rgb, width, height)
 
-    # Step 1: Person segmentation
-    seg_result = selfie_segmentation.process(rgb)
-    seg_mask = (seg_result.segmentation_mask > 0.1).astype(np.uint8) * 255
-
-    # Step 2: Detect and preserve hands
-    hand_result = hands.process(rgb)
-    if hand_result.multi_hand_landmarks:
-        for hand_landmarks in hand_result.multi_hand_landmarks:
-            exclude_expanded_hand_area(seg_mask, hand_landmarks, width, height)
-
-    # Step 3: Apply selective blur
+    # Blur full frame
     blurred = cv2.GaussianBlur(frame, (61, 61), 51)
-    mask_inv = cv2.bitwise_not(seg_mask)
-    blurred_part = cv2.bitwise_and(blurred, blurred, mask=seg_mask)
-    original_part = cv2.bitwise_and(frame, frame, mask=mask_inv)
-    final_frame = cv2.add(blurred_part, original_part)
 
-    out.write(final_frame)
+    # Keep hand areas unblurred
+    hand_area = cv2.bitwise_and(frame, frame, mask=hand_mask)
+    background_area = cv2.bitwise_and(blurred, blurred, mask=cv2.bitwise_not(hand_mask))
+    final = cv2.add(hand_area, background_area)
 
+    out.write(final)
+
+# Cleanup
 cap.release()
 out.release()
 
