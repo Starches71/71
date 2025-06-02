@@ -31,7 +31,7 @@ def generate():
         "The narration should flow like a story and highlight key features naturally — not as a list. "
         "Avoid restating on-screen text directly. Instead, translate the visuals into value, emotion, or experience. "
         "Follow the pacing of the video closely. Your lines should match the timing of the visuals. "
-        "IMPORTANT: If the video contains speech in a language other than English, please translate and write the entire transcript in fluent English,make sure timeline format is like (00:00-00:20)."
+        "IMPORTANT: If the video contains speech in a language other than English, please translate and write the entire transcript in fluent English,make sure timeline format is like (00:00-00:20) format."
     )
 
     contents = [
