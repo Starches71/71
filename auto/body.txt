@@ -1,9 +1,8 @@
-* Sleek and compact design with a range of colors to match any kitchen decor
+* Compact and modern design with a range of colors to fit any kitchen decor
 * Five cup sizes: Ristretto, Espresso, Lungo, Americano, and Alto
-* Bluetooth connectivity for scheduling brewing and customization through the Nespresso app
-* Automatic capsule ejection and used capsule container for easy maintenance
-* High-pressure pump for optimal extraction and rich crema
-* Energy-efficient with automatic shut-off after 9 minutes of inactivity
-* 19-bar pressure for professional-grade espresso
-* Descale alert and automatic descaling system for easy maintenance
-* Compatible with Nespresso OriginalLine capsules for a wide range of coffee flavors
+* Bluetooth connectivity for scheduling brews and customizing settings through the Nespresso app
+* Automatic capsule ejection and used capsule container
+* Energy-efficient with an automatic shut-off after 9 minutes of inactivity
+* High-pressure pump for optimal extraction and crema formation
+* Descale alert and automatic notification when maintenance is required
+* Compatible with Nespresso capsules for a wide range of coffee blends and flavors
