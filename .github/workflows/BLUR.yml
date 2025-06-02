@@ -29,4 +29,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: blurred_v4
-          path: blurred_v4.mp4
+          path: blurred_v4.avi
