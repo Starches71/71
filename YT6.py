@@ -1,12 +1,13 @@
 
-from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
 import os
 import re
+import subprocess
 
 VIDEO_PATH = "Vid/blurred_output.mp4"
 AUDIO_DIR = "Vid"
+OUTPUT_PATH = "Vid/final_output.mp4"
 
-# Pattern to extract time from filename like 00_37-00_42.mp3
+# Regex to extract time segments like 00_09-00_18
 time_pattern = re.compile(r"(\d{2})_(\d{2})-(\d{2})_(\d{2})")
 
 def time_to_seconds(hh, mm):
@@ -20,29 +21,44 @@ def parse_filename(filename):
     end = time_to_seconds(match.group(3), match.group(4))
     return start, end
 
-# Load video
-video = VideoFileClip(VIDEO_PATH)
-audio_clips = []
+# Generate complex filter for FFmpeg
+filter_complex = []
+input_args = ['-i', VIDEO_PATH]  # first input: video
+index = 1  # input index counter (video is 0)
 
-for file in os.listdir(AUDIO_DIR):
-    if file.endswith(".mp3") and time_pattern.search(file):
+for file in sorted(os.listdir(AUDIO_DIR)):
+    if file.endswith('.mp3') and time_pattern.search(file):
         full_path = os.path.join(AUDIO_DIR, file)
-        start_time, end_time = parse_filename(file)
-        max_duration = end_time - start_time
+        start, end = parse_filename(file)
+        duration = end - start
 
-        audio = AudioFileClip(full_path)
-        # Trim if audio is longer than the target duration
-        if audio.duration > max_duration:
-            audio = audio.subclip(0, max_duration)
+        input_args += ['-i', full_path]
+        filter_complex.append(
+            f"[{index}:a]atrim=duration={duration},adelay={start * 1000}|{start * 1000}[a{index}]"
+        )
+        index += 1
 
-        # Shift audio to start time
-        audio = audio.set_start(start_time)
-        audio_clips.append(audio)
+# Combine all delayed audio tracks
+if index == 1:
+    print("❌ No audio files found.")
+    exit(1)
 
-# Combine all audio overlays
-final_audio = CompositeAudioClip(audio_clips)
-# Set final audio to video
-final_video = video.set_audio(final_audio)
+# Join all audio overlays together
+overlay = ''.join(f"[a{i}]" for i in range(1, index))
+filter_complex.append(f"{overlay}amix=inputs={index-1}[mixed]")
 
-# Export the final video
-final_video.write_videofile("Vid/final_output.mp4", codec="libx264", audio_codec="aac")
+# Final FFmpeg command
+ffmpeg_command = [
+    'ffmpeg',
+    *input_args,
+    '-filter_complex', ';'.join(filter_complex),
+    '-map', '0:v',
+    '-map', '[mixed]',
+    '-c:v', 'libx264',
+    '-c:a', 'aac',
+    '-shortest',
+    OUTPUT_PATH
+]
+
+# Run it
+subprocess.run(ffmpeg_command)
