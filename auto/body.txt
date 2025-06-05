@@ -3,6 +3,7 @@
 * Bluetooth connectivity for mobile app control and customization
 * Automatic capsule ejection and used capsule container
 * Energy-efficient with automatic shut-off after 2 hours of inactivity
-* High-pressure pump for optimal extraction and crema formation
-* Compatible with Nespresso capsules for a wide range of coffee flavors
-* Durable and easy-to-clean materials with a removable water tank
+* 19-bar high-pressure pump for optimal extraction
+* Descale alert and automatic descaling process
+* Removable 50-ounce water tank for easy refilling
+* Used capsule container holds up to 10 used capsules
