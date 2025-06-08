@@ -1,0 +1,44 @@
+
+name: Refresh YouTube Access Token
+
+on:
+  schedule:
+    - cron: "0 * * * *"  # Runs every hour
+  workflow_dispatch:
+
+jobs:
+  refresh_token:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Refresh Access Token
+        run: |
+          CLIENT_ID="60660374044-78lne6ja6mate7ggitngnhb6nvths0h5.apps.googleusercontent.com"
+          CLIENT_SECRET="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"
+          REFRESH_TOKEN="1//09-T4ZLLHJniVCgYIARAAGAkSNwF-L9Ir97eY3qQ5aeSGPPvuOG-4DMmN0efxfsENlQ-2iQofev6yTqsaSlbCLO_7SrjEzq4eku8"
+
+          echo "🔄 Requesting new access token from Google OAuth..."
+          RESPONSE=$(curl -s -X POST https://oauth2.googleapis.com/token \
+            -d client_id="$CLIENT_ID" \
+            -d client_secret="$CLIENT_SECRET" \
+            -d refresh_token="$REFRESH_TOKEN" \
+            -d grant_type=refresh_token)
+
+          echo "🧾 Response: $RESPONSE"
+
+          ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+
+          if [ "$ACCESS_TOKEN" == "null" ] || [ -z "$ACCESS_TOKEN" ]; then
+            echo "❌ Failed to refresh access token."
+            exit 1
+          fi
+
+          echo "✅ Refreshed Access Token: $ACCESS_TOKEN"
+
+          echo "$ACCESS_TOKEN" > access_token.txt
+
+      - name: Upload Access Token File
+        uses: actions/upload-artifact@v3
+        with:
+          name: access_token
+          path: access_token.txt
