@@ -2,7 +2,7 @@
 name: Clean YouTube List and Save to ooo
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # 👈 Manual trigger enabled
 
 jobs:
   clean-and-save:
