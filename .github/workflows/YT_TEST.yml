@@ -38,7 +38,7 @@ jobs:
           echo "$ACCESS_TOKEN" > access_token.txt
 
       - name: Upload Access Token File
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: access_token
           path: access_token.txt
