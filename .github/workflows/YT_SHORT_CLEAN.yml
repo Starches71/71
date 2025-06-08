@@ -1,0 +1,62 @@
+
+name: Clean YouTube List and Save to ooo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  clean-and-save:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: Clean and sort YouTube data
+        run: |
+          python3 <<EOF
+          import re
+
+          # Load raw lines from file
+          with open("VID_SHORT_MERGED.txt", "r", encoding="utf-8") as f:
+              lines = [line.strip() for line in f if line.strip()]
+
+          # Group entries (title_line, link_line)
+          entries = []
+          for i in range(0, len(lines) - 1, 2):
+              title_line = lines[i]
+              link_line = lines[i+1]
+              views_match = re.match(r"([\d,]+) views", title_line)
+              if views_match:
+                  views = int(views_match.group(1).replace(",", ""))
+                  entries.append((link_line, views, title_line))
+
+          # Deduplicate by link (keep highest view count)
+          unique = {}
+          for link, views, title in entries:
+              if link not in unique or views > unique[link][0]:
+                  unique[link] = (views, title)
+
+          # Sort by view count (descending)
+          sorted_entries = sorted(unique.items(), key=lambda x: x[1][0], reverse=True)
+
+          # Save to new file
+          with open("VID_SHORT_ooo.txt", "w", encoding="utf-8") as f:
+              for link, (views, title) in sorted_entries:
+                  f.write(f"{title}\n{link}\n")
+
+          print("✅ Finished cleaning and saving to VID_SHORT_ooo.txt")
+          EOF
+
+      - name: Commit and push cleaned file
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add VID_SHORT_ooo.txt
+          git commit -m "Cleaned YouTube list and saved to VID_SHORT_ooo.txt"
+          git push
