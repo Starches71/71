@@ -19,7 +19,7 @@ jobs:
 
       - name: Clean and sort YouTube data
         run: |
-          python3 <<EOF
+          python3 - <<EOF
 import re
 
 # Load raw lines from file
