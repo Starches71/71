@@ -1,0 +1,87 @@
+
+name: Run ASHORT Scripts Safely
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+jobs:
+  run-ashort-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Update apt sources and install ffmpeg
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/*
+          sudo sed -i 's|mirror+file:/etc/apt/apt-mirrors.txt|http://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          sudo apt-get update --fix-missing
+          sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install google-genai
+          pip install mediapipe opencv-python numpy moviepy
+          pip install spleeter
+
+      - name: Install yt-dlp
+        run: |
+          sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+          sudo chmod a+rx /usr/local/bin/yt-dlp
+
+      - name: Select unused YouTube link from VID_SHORT_ooo.txt
+        run: |
+          mkdir -p Vid
+          touch ASHORT.txt
+          > Vid/yt_link
+          while read -r line; do
+            if [[ "$line" =~ ^https:// ]] && ! grep -q "$line" ASHORT.txt; then
+              echo "$line" > Vid/yt_link
+              echo "$line" >> ASHORT.txt
+              echo "✅ New link selected: $line"
+              break
+            fi
+          done < VID_SHORT_ooo.txt
+
+          if [ ! -s Vid/yt_link ]; then
+            echo "❌ No new links found. All links already used."
+            exit 1
+          fi
+
+      - name: Run ASHORT.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python ASHORT.py
+
+      - name: Wait before ASHORT1
+        run: sleep 90
+
+      - name: Run ASHORT1.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python ASHORT1.py
+
+      - name: Wait before ASHORT2
+        run: sleep 90
+
+      - name: Run ASHORT2.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python ASHORT2.py
+
+      - name: Wait before ASHORT3
+        run: sleep 90
+
+      - name: Run ASHORT3.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python ASHORT3.py
