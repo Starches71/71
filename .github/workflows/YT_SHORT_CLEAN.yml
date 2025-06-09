@@ -1,63 +1,136 @@
 
-name: Clean YouTube List and Save to ooo
+name: Merge, deduplicate, and sort VID files (no dupes, update views)
 
 on:
-  workflow_dispatch:  # 👈 Manual trigger enabled
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
 
 jobs:
-  clean-and-save:
+  merge-vid-files:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repo
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    - name: Confirm checkout success
+      run: echo "✅ Repo checked out"
 
-      - name: Clean and sort YouTube data
-        run: |
-          python3 - <<EOF
-import re
+    - name: Find all Vid*.txt files
+      run: |
+        echo "Searching for Vid*.txt files..."
+        ALL_VID_FILES=$(ls Vid*.txt 2>/dev/null || echo "")
+        if [ -z "$ALL_VID_FILES" ]; then
+          echo "❌ No Vid*.txt files found!"
+          exit 1
+        else
+          echo "✅ Found files:"
+          echo "$ALL_VID_FILES"
+        fi
 
-# Load raw lines from file
-with open("VID_SHORT_MERGED.txt", "r", encoding="utf-8") as f:
-    lines = [line.strip() for line in f if line.strip()]
+    - name: Separate shorts and longs
+      run: |
+        SHORT_FILES=""
+        LONG_FILES=""
+        for f in Vid*.txt; do
+          fname=$(echo "$f" | tr '[:upper:]' '[:lower:]')
+          if [[ "$fname" == *short* ]]; then
+            SHORT_FILES="$SHORT_FILES $f"
+          elif [[ "$fname" == *long* ]]; then
+            LONG_FILES="$LONG_FILES $f"
+          fi
+        done
+        echo "SHORT_FILES=$SHORT_FILES" >> $GITHUB_ENV
+        echo "LONG_FILES=$LONG_FILES" >> $GITHUB_ENV
 
-# Group entries (title_line, link_line)
-entries = []
-for i in range(0, len(lines) - 1, 2):
-    title_line = lines[i]
-    link_line = lines[i+1]
-    views_match = re.match(r"([\d,]+) views", title_line)
-    if views_match:
-        views = int(views_match.group(1).replace(",", ""))
-        entries.append((link_line, views, title_line))
+    - name: Merge & deduplicate shorts (VID_SHORT_ooo.txt)
+      run: |
+        if [ -z "$SHORT_FILES" ]; then
+          echo "No short files to process"
+          exit 0
+        fi
 
-# Deduplicate by link (keep highest view count)
-unique = {}
-for link, views, title in entries:
-    if link not in unique or views > unique[link][0]:
-        unique[link] = (views, title)
+        cat $SHORT_FILES > _raw_short.txt
 
-# Sort by view count (descending)
-sorted_entries = sorted(unique.items(), key=lambda x: x[1][0], reverse=True)
+        awk '
+          BEGIN { RS=""; ORS="\n\n" }
+          {
+            gsub(/^[■□○●•]+[[:space:]]*/, "", $0)  # Clean bullet prefixes
+            match($0, /https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/, m)
+            if (m[1] != "") {
+              vid = m[1]
+              match($0, /^([0-9,]+) views \| /, v)
+              viewcount = (v[1] != "") ? gensub(",", "", "g", v[1]) + 0 : 0
+              if (!(vid in seen) || viewcount > views[vid]) {
+                seen[vid] = 1
+                views[vid] = viewcount
+                blocks[vid] = $0
+              }
+            }
+          }
+          END {
+            n = asorti(views, sorted, "@val_num_desc")
+            for (i = 1; i <= n; i++) {
+              v = sorted[i]
+              print blocks[v]
+            }
+          }
+        ' _raw_short.txt > VID_SHORT_ooo.txt
 
-# Save to new file
-with open("VID_SHORT_ooo.txt", "w", encoding="utf-8") as f:
-    for link, (views, title) in sorted_entries:
-        f.write(f"{title}\n{link}\n")
+        echo "✅ Shorts deduplicated and saved to VID_SHORT_ooo.txt"
+        head -n 10 VID_SHORT_ooo.txt || echo "(empty)"
 
-print("✅ Finished cleaning and saving to VID_SHORT_ooo.txt")
-EOF
+    - name: Merge & deduplicate longs (VID_LONG_ooo.txt)
+      run: |
+        if [ -z "$LONG_FILES" ]; then
+          echo "No long files to process"
+          exit 0
+        fi
 
-      - name: Commit and push cleaned file
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add VID_SHORT_ooo.txt
-          git commit -m "Cleaned YouTube list and saved to VID_SHORT_ooo.txt" || echo "Nothing to commit"
-          git pull origin main --rebase
+        cat $LONG_FILES > _raw_long.txt
+
+        awk '
+          BEGIN { RS=""; ORS="\n\n" }
+          {
+            gsub(/^[■□○●•]+[[:space:]]*/, "", $0)
+            match($0, /https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/, m)
+            if (m[1] != "") {
+              vid = m[1]
+              match($0, /^([0-9,]+) views \| /, v)
+              viewcount = (v[1] != "") ? gensub(",", "", "g", v[1]) + 0 : 0
+              if (!(vid in seen) || viewcount > views[vid]) {
+                seen[vid] = 1
+                views[vid] = viewcount
+                blocks[vid] = $0
+              }
+            }
+          }
+          END {
+            n = asorti(views, sorted, "@val_num_desc")
+            for (i = 1; i <= n; i++) {
+              v = sorted[i]
+              print blocks[v]
+            }
+          }
+        ' _raw_long.txt > VID_LONG_ooo.txt
+
+        echo "✅ Longs deduplicated and saved to VID_LONG_ooo.txt"
+        head -n 10 VID_LONG_ooo.txt || echo "(empty)"
+
+    - name: Configure Git user
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+
+    - name: Commit and push deduplicated files
+      run: |
+        git add VID_SHORT_ooo.txt VID_LONG_ooo.txt
+        if git diff --cached --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "✅ Updated deduplicated VID files - $(date -u)"
+          git pull --rebase origin main
           git push origin main
+          echo "✅ Changes pushed"
+        fi
