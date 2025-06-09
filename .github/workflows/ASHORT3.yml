@@ -1,0 +1,127 @@
+
+name: Run ASHORT Scripts Safely
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+jobs:
+  run-ashort-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade typing_extensions
+          pip install \
+            google-genai==0.2.2 \
+            pydantic==2.6.4 \
+            mediapipe \
+            opencv-python \
+            numpy \
+            moviepy \
+            spleeter
+
+      - name: Install yt-dlp
+        run: |
+          sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+          sudo chmod a+rx /usr/local/bin/yt-dlp
+
+      - name: Select unused YouTube link from VID_SHORT_ooo.txt
+        run: |
+          mkdir -p Vid
+          touch ASHORT.txt
+          > Vid/yt_link
+          while read -r line; do
+            if [[ "$line" =~ ^https:// ]] && ! grep -q "$line" ASHORT.txt; then
+              echo "$line" > Vid/yt_link
+              echo "$line" >> ASHORT.txt
+              echo "✅ New link selected: $line"
+              break
+            fi
+          done < VID_SHORT_ooo.txt
+
+          if [ ! -s Vid/yt_link ]; then
+            echo "❌ No new links found. All links already used."
+            exit 1
+          fi
+
+      - name: Run ASHORT.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python ASHORT.py
+
+      - name: Wait before ASHORT1
+        run: sleep 90
+
+      - name: Run ASHORT1.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python ASHORT1.py
+
+      - name: Wait before ASHORT2
+        run: sleep 90
+
+      - name: Run ASHORT2.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python ASHORT2.py
+
+      - name: Wait before ASHORT3
+        run: sleep 90
+
+      - name: Run ASHORT3.py
+        env:
+          GEMINI_API: ${{ secrets.GEMINI_API }}
+        run: python ASHORT3.py
+
+      - name: Commit ASHORT.txt if Vid/haram.txt contains yes or Yes
+        run: |
+          if grep -iq '^yes$' Vid/haram.txt; then
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git add ASHORT.txt
+            git commit -m "Update ASHORT.txt for haram video"
+            git push
+          else
+            echo "No 'yes' found in Vid/haram.txt — skipping commit."
+          fi
+
+      - name: Commit ASHORT.txt if Vid/female.txt contains yes or Yes
+        run: |
+          if grep -iq '^yes$' Vid/female.txt; then
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git add ASHORT.txt
+            git commit -m "Update ASHORT.txt for female video"
+            git push
+          else
+            echo "No 'yes' found in Vid/female.txt — skipping commit."
+          fi
+
+      - name: Commit ASHORT.txt if Vid/product.txt contains no or No
+        run: |
+          if grep -iq '^no$' Vid/product.txt; then
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git add ASHORT.txt
+            git commit -m "Update ASHORT.txt for product no"
+            git push
+          else
+            echo "No 'no' found in Vid/product.txt — skipping commit."
+          fi
