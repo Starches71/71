@@ -56,7 +56,7 @@ jobs:
         awk '
           BEGIN { RS=""; ORS="\n\n" }
           {
-            gsub(/^[■□○●•]+[[:space:]]*/, "", $0)  # Clean bullet prefixes
+            gsub(/^[■□○●•]+[[:space:]]*/, "", $0)
             match($0, /https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/, m)
             if (m[1] != "") {
               vid = m[1]
@@ -72,8 +72,8 @@ jobs:
           END {
             n = asorti(views, sorted, "@val_num_desc")
             for (i = 1; i <= n; i++) {
-              v = sorted[i]
-              print blocks[v]
+              vid_key = sorted[i]
+              print blocks[vid_key]
             }
           }
         ' _raw_short.txt > VID_SHORT_ooo.txt
@@ -109,8 +109,8 @@ jobs:
           END {
             n = asorti(views, sorted, "@val_num_desc")
             for (i = 1; i <= n; i++) {
-              v = sorted[i]
-              print blocks[v]
+              vid_key = sorted[i]
+              print blocks[vid_key]
             }
           }
         ' _raw_long.txt > VID_LONG_ooo.txt
