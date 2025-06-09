@@ -1,45 +1,50 @@
 
-name: Analyze Short Videos
+name: Unbox Short Video Tracker
 
 on:
+  schedule:
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
-  process-shorts:
+  process-video:
     runs-on: ubuntu-latest
 
-    env:
-      GEMINI_API: ${{ secrets.GEMINI_API }}
-
     steps:
-      - name: 📥 Checkout repo
+      - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: 🐍 Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: 3.10
 
-      - name: 📦 Install pandas
+      - name: Install Dependencies
         run: |
           pip install pandas
+          pip install --upgrade typing_extensions
+          pip install google-genai==0.2.2 pydantic==2.6.4
 
-      - name: ▶️ Run ASHORT scripts
+      - name: Select new video (skip if processed)
+        run: python ASHORT.py
+
+      - name: Wait before processing
+        run: sleep 60
+
+      - name: Run classifiers
         run: |
-          python3 ASHORT.py
-          python3 ASHORT1.py
-          python3 ASHORT2.py
-          python3 ASHORT3.py
-          python3 ASHORT4.py
+          python ASHORT1.py
+          python ASHORT2.py
+          python ASHORT3.py
+          python ASHORT4.py
 
-      - name: 🧾 Run ASHORT_PANDA.py to generate report
-        run: |
-          python3 ASHORT_PANDA.py
+      - name: Create or update report using pandas
+        run: python ASHORT_PANDA.py
 
-      - name: 📤 Commit short_video_report.csv
+      - name: Commit and push CSV + memory
         run: |
           git config --global user.name "yt-bot"
           git config --global user.email "yt-bot@example.com"
-          git add short_video_report.csv
-          git diff --cached --quiet || git commit -m "📊 Add short video report"
+          git add short_video_report.csv processed_links.txt
+          git diff --cached --quiet || git commit -m "Update CSV from new video - $(date)"
           git push
