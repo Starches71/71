@@ -1,6 +1,7 @@
 
 import os
 import subprocess
+from datetime import datetime
 
 SOURCE_FILE = "VID_SHORT_ooo.txt"
 USED_LINKS_FILE = "ASHORT.txt"
@@ -29,7 +30,7 @@ def get_next_unused_link():
     for i in range(1, len(lines), 2):
         link = lines[i]
         if link not in used_links:
-            return lines[i-1], link  # (description, link)
+            return lines[i - 1], link  # (description, link)
 
     return None, None
 
@@ -41,10 +42,15 @@ def save_link_to_file(link):
 def git_commit_changes():
     subprocess.run(["git", "config", "--global", "user.name", "yt-bot"], check=True)
     subprocess.run(["git", "config", "--global", "user.email", "yt-bot@example.com"], check=True)
+
+    subprocess.run(["git", "pull", "--rebase"], check=True)  # ✅ pull before pushing
+
     subprocess.run(["git", "add", USED_LINKS_FILE], check=True)
     result = subprocess.run(["git", "diff", "--cached", "--quiet"])
+
     if result.returncode != 0:
-        subprocess.run(["git", "commit", "-m", f"Update used links - {__import__('datetime').datetime.now()}"], check=True)
+        commit_msg = f"Update used links - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        subprocess.run(["git", "commit", "-m", commit_msg], check=True)
         subprocess.run(["git", "push"], check=True)
     else:
         print("✅ No changes to commit.")
