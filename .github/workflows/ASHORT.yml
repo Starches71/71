@@ -19,19 +19,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Update apt sources and install ffmpeg
+      - name: Install ffmpeg
         run: |
-          sudo rm -f /etc/apt/sources.list.d/*
-          sudo sed -i 's|mirror+file:/etc/apt/apt-mirrors.txt|http://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
-          sudo apt-get update --fix-missing
+          sudo apt-get update
           sudo apt-get install -y ffmpeg
 
       - name: Install Python dependencies
         run: |
           pip install --upgrade pip
           pip install google-genai
-          pip install mediapipe opencv-python numpy moviepy
-          pip install spleeter
+          pip install mediapipe opencv-python numpy moviepy spleeter
 
       - name: Install yt-dlp
         run: |
