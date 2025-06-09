@@ -1,0 +1,56 @@
+
+name: Unbox Short Video Tracker
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  process-video:
+    runs-on: ubuntu-latest
+
+    env:
+      GEMINI_API: ${{ secrets.GEMINI_API }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install Dependencies
+        run: |
+          pip install pandas
+          pip install --upgrade typing_extensions
+          pip install google-genai==0.2.2 pydantic==2.6.4
+
+      - name: 🔁 Run ASHORT_START.py (prepare new video)
+        run: python ASHORT_START.py
+
+      - name: 🧠 Select new video (skip if processed)
+        run: python ASHORT.py
+
+      - name: ⏱️ Wait before processing
+        run: sleep 60
+
+      - name: 🧪 Run classifiers
+        run: |
+          python ASHORT1.py
+          python ASHORT2.py
+          python ASHORT3.py
+          python ASHORT4.py
+
+      - name: 📊 Create or update report using pandas
+        run: python ASHORT_PANDA.py
+
+      - name: 📤 Commit and push CSV + memory
+        run: |
+          git config --global user.name "yt-bot"
+          git config --global user.email "yt-bot@example.com"
+          git add short_video_report.csv ASHORT.txt
+          git diff --cached --quiet || git commit -m "Update CSV and memory - $(date)"
+          git push
