@@ -1,49 +1,63 @@
 
+# ASHORT_PANDA.py
+
 import pandas as pd
+import os
 
-# === STEP 1: Read the TXT file ===
-with open("VID_SHORT_ooo.txt", "r", encoding="utf-8") as f:
-    lines = f.read().splitlines()
+# File paths
+yt_link_file = "Vid_yt_link.txt"
+csv_output = "short_video_report.csv"
+processed_links_file = "processed_links.txt"
 
-# === STEP 2: Extract video data ===
-videos = []
-for i in range(0, len(lines), 2):
-    views_title = lines[i]
-    link = lines[i + 1]
+# Read video link and title
+with open(yt_link_file, "r") as f:
+    link = f.readline().strip()
+    title = f.readline().strip()
 
-    # Extract view count (first part before 'views')
-    views, title = views_title.split(' views | ', 1)
-    views = views.replace(",", "").strip()
+# Extract view count
+views = title.split(" views ")[0].replace(",", "").strip()
 
-    videos.append({
-        "Title": title.strip(),
-        "Views": int(views),
-        "Link": link.strip()
-    })
+# Function to read yes/no tags
+def read_tag(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            return f.read().strip().lower()
+    return "no"
 
-# === STEP 3: Load detection flags ===
-def load_flag(file_path):
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return [x.strip().lower() for x in f.readlines()]
-    except FileNotFoundError:
-        return ["no"] * len(videos)
+# Tags
+tags = {
+    "haram": read_tag("Vid/haram.txt"),
+    "female": read_tag("Vid/female.txt"),
+    "person": read_tag("Vid/person.txt"),
+    "music": read_tag("Vid/music.txt"),
+    "product": read_tag("Vid/product.txt")
+}
 
-haram_flags = load_flag("Vid/haram.txt")
-female_flags = load_flag("Vid/female.txt")
-person_flags = load_flag("Vid/person.txt")
-music_flags = load_flag("Vid/music.txt")
-product_flags = load_flag("Vid/product.txt")
+# New row
+row = {
+    "title": title,
+    "link": link,
+    "views": views,
+    **tags
+}
 
-# === STEP 4: Add flags to videos ===
-for i in range(len(videos)):
-    videos[i]["Haram"] = haram_flags[i]
-    videos[i]["Female"] = female_flags[i]
-    videos[i]["Person"] = person_flags[i]
-    videos[i]["Music"] = music_flags[i]
-    videos[i]["Product"] = product_flags[i]
+# Check if CSV exists and read it
+if os.path.exists(csv_output):
+    df = pd.read_csv(csv_output)
+else:
+    df = pd.DataFrame()
 
-# === STEP 5: Create DataFrame and save as CSV ===
-df = pd.DataFrame(videos)
-df.to_csv("short_video_report.csv", index=False)
-print("✅ Report saved as short_video_report.csv")
+# Avoid duplicates
+if (df["link"] == link).any():
+    print("Already in CSV.")
+else:
+    df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+    df.to_csv(csv_output, index=False)
+    print("Saved to CSV.")
+
+# Update memory log
+with open(processed_links_file, "a+") as f:
+    f.seek(0)
+    seen = f.read().splitlines()
+    if link not in seen:
+        f.write(link + "\n")
