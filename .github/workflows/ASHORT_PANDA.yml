@@ -1,0 +1,45 @@
+
+name: Analyze Short Videos
+
+on:
+  workflow_dispatch:
+
+jobs:
+  process-shorts:
+    runs-on: ubuntu-latest
+
+    env:
+      GEMINI_API: ${{ secrets.GEMINI_API }}
+
+    steps:
+      - name: 📥 Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Install pandas
+        run: |
+          pip install pandas
+
+      - name: ▶️ Run ASHORT scripts
+        run: |
+          python3 ASHORT.py
+          python3 ASHORT1.py
+          python3 ASHORT2.py
+          python3 ASHORT3.py
+          python3 ASHORT4.py
+
+      - name: 🧾 Run ASHORT_PANDA.py to generate report
+        run: |
+          python3 ASHORT_PANDA.py
+
+      - name: 📤 Commit short_video_report.csv
+        run: |
+          git config --global user.name "yt-bot"
+          git config --global user.email "yt-bot@example.com"
+          git add short_video_report.csv
+          git diff --cached --quiet || git commit -m "📊 Add short video report"
+          git push
