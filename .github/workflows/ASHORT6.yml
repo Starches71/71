@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Required to allow pull and rebase
+          fetch-depth: 0  # Required for pull --rebase to work
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -100,19 +100,18 @@ jobs:
           GEMINI_API: ${{ secrets.GEMINI_API }}
         run: python ASHORT4.py
 
-      - name: Git config (safe directory)
-        run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
       - name: Commit ASHORT.txt if Vid/product.txt contains no or No
         run: |
           if grep -iq '^no$' Vid/product.txt; then
-            git config --global user.name "github-actions[bot]"
-            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git config --global user.name "yt-bot"
+            git config --global user.email "yt-bot@example.com"
+
+            git stash --include-untracked
             git pull --rebase origin main
+            git stash pop || true
+
             git add ASHORT.txt
-            git commit -m "Update ASHORT.txt for product no"
-            git push origin main
+            git diff --cached --quiet || git commit -m "Update ASHORT.txt for product no - $(date)"
+            git push
           else
             echo "No 'no' found in Vid/product.txt — skipping commit."
-          fi
