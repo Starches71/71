@@ -43,17 +43,25 @@ def git_commit_changes():
     subprocess.run(["git", "config", "--global", "user.name", "yt-bot"], check=True)
     subprocess.run(["git", "config", "--global", "user.email", "yt-bot@example.com"], check=True)
 
-    subprocess.run(["git", "pull", "--rebase"], check=True)  # ✅ pull before pushing
+    # Stage files first
+    subprocess.run(["git", "add", USED_LINKS_FILE, OUTPUT_LINK_FILE], check=True)
 
-    subprocess.run(["git", "add", USED_LINKS_FILE], check=True)
+    # Check if there is anything to commit
     result = subprocess.run(["git", "diff", "--cached", "--quiet"])
-
-    if result.returncode != 0:
-        commit_msg = f"Update used links - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        subprocess.run(["git", "commit", "-m", commit_msg], check=True)
-        subprocess.run(["git", "push"], check=True)
-    else:
+    if result.returncode == 0:
         print("✅ No changes to commit.")
+        return
+
+    # Commit the changes
+    commit_msg = f"Auto-save used link - {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC"
+    subprocess.run(["git", "commit", "-m", commit_msg], check=True)
+
+    # Now pull with rebase (safe after committing)
+    subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=True)
+
+    # Push changes
+    subprocess.run(["git", "push", "origin", "main"], check=True)
+    print("✅ Changes committed and pushed.")
 
 def main():
     desc, link = get_next_unused_link()
