@@ -1,4 +1,3 @@
-
 name: Unbox Short Video Tracker
 
 on:
@@ -27,6 +26,9 @@ jobs:
           pip install pandas
           pip install --upgrade typing_extensions
           pip install google-genai==0.2.2 pydantic==2.6.4
+
+      - name: Pre-process Git and Select Link
+        run: python AASHORT.py
 
       - name: Select new video (skip if processed)
         run: python ASHORT.py
