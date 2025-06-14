@@ -31,19 +31,31 @@ jobs:
       - name: Run ASHORT.py
         run: python ASHORT.py
 
+      - name: Sleep after ASHORT.py
+        run: sleep 70
+
       - name: Run ASHORT1.py
         run: python ASHORT1.py
+
+      - name: Sleep after ASHORT1.py
+        run: sleep 70
 
       - name: Run ASHORT2.py
         run: python ASHORT2.py
 
+      - name: Sleep after ASHORT2.py
+        run: sleep 70
+
       - name: Run ASHORT3.py
         run: python ASHORT3.py
+
+      - name: Sleep after ASHORT3.py
+        run: sleep 70
 
       - name: Run ASHORT4.py
         run: python ASHORT4.py
 
-      - name: Wait 70 seconds before final step
+      - name: Sleep after ASHORT4.py
         run: sleep 70
 
       - name: Run ABASE1.py (Commit logic)
