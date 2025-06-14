@@ -10,6 +10,8 @@ on:
 jobs:
   run-python-scripts:
     runs-on: ubuntu-latest
+    env:
+      GEMINI_API: ${{ secrets.GEMINI_API }}  # ✅ Define once here for all steps
 
     steps:
       - name: Checkout repo
@@ -20,7 +22,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Stable with pydantic-core
+          python-version: '3.10'  # Safe version for Gemini and Pydantic
 
       - name: Install Rust (required for pydantic-core)
         run: |
