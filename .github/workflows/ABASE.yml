@@ -20,7 +20,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.10'  # Stable with pydantic-core
+
+      - name: Install Rust (required for pydantic-core)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          source $HOME/.cargo/env
 
       - name: Install Gemini dependencies
         run: |
