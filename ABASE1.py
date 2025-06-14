@@ -9,24 +9,26 @@ def read_answer(filepath):
     except:
         return ""
 
+def git_setup_and_pull():
+    subprocess.run(["git", "config", "--global", "user.name", "github-actions[bot]"], check=True)
+    subprocess.run(["git", "config", "--global", "user.email", "you@example.com"], check=True)
+    
+    # Pull before doing anything else
+    subprocess.run(["git", "pull", "--rebase"], check=True)
+
 def commit_file(commit_target):
-    os.makedirs("Vid", exist_ok=True)
-    with open(commit_target, 'w', encoding='utf-8') as out:
-        for fname in ["tittle.txt", "view.txt", "yt_link"]:
-            fpath = os.path.join("Vid", fname)
-            if os.path.exists(fpath):
-                with open(fpath, 'r', encoding='utf-8') as f:
-                    content = f.read().strip()
-                    out.write(f"{fname.upper().replace('.TXT','')}: {content}\n")
     try:
-        # Git config
-        subprocess.run(["git", "config", "--global", "user.name", "github-actions[bot]"], check=True)
-        subprocess.run(["git", "config", "--global", "user.email", "you@example.com"], check=True)
+        git_setup_and_pull()  # Setup + pull before writing file
 
-        # Pull before push
-        subprocess.run(["git", "pull", "--rebase"], check=True)
+        os.makedirs("Vid", exist_ok=True)
+        with open(commit_target, 'w', encoding='utf-8') as out:
+            for fname in ["tittle.txt", "view.txt", "yt_link"]:
+                fpath = os.path.join("Vid", fname)
+                if os.path.exists(fpath):
+                    with open(fpath, 'r', encoding='utf-8') as f:
+                        content = f.read().strip()
+                        out.write(f"{fname.upper().replace('.TXT','')}: {content}\n")
 
-        # Add, commit, push
         subprocess.run(["git", "add", commit_target], check=True)
         subprocess.run(["git", "commit", "-m", f"Auto commit: {commit_target}"], check=True)
         subprocess.run(["git", "push"], check=True)
@@ -36,7 +38,6 @@ def commit_file(commit_target):
         print(f"Commit failed: {e}")
 
 def main():
-    # Step 1: Check haram, female, product
     haram = read_answer("Vid/haram.txt")
     female = read_answer("Vid/female.txt")
     product = read_answer("Vid/product.txt")
@@ -45,7 +46,6 @@ def main():
         commit_file("AHARAM.txt")
         return
 
-    # Step 2: Check person and music
     person = read_answer("Vid/person.txt")
     music = read_answer("Vid/music.txt")
 
