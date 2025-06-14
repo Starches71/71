@@ -9,16 +9,22 @@ def read_answer(filepath):
     except:
         return ""
 
-def git_setup_and_pull():
+def git_setup_and_pull_with_stash():
     subprocess.run(["git", "config", "--global", "user.name", "github-actions[bot]"], check=True)
     subprocess.run(["git", "config", "--global", "user.email", "you@example.com"], check=True)
     
-    # Pull before doing anything else
+    # Stash all changes including untracked
+    subprocess.run(["git", "stash", "--include-untracked"], check=True)
+    
+    # Pull latest changes with rebase
     subprocess.run(["git", "pull", "--rebase"], check=True)
+    
+    # Pop stash to restore local changes; ignore failure if nothing to pop
+    subprocess.run(["git", "stash", "pop"], check=False)
 
 def commit_file(commit_target):
     try:
-        git_setup_and_pull()  # Setup + pull before writing file
+        git_setup_and_pull_with_stash()  # stash, pull, pop before modifying file
 
         os.makedirs("Vid", exist_ok=True)
         with open(commit_target, 'w', encoding='utf-8') as out:
@@ -30,10 +36,16 @@ def commit_file(commit_target):
                         out.write(f"{fname.upper().replace('.TXT','')}: {content}\n")
 
         subprocess.run(["git", "add", commit_target], check=True)
-        subprocess.run(["git", "commit", "-m", f"Auto commit: {commit_target}"], check=True)
-        subprocess.run(["git", "push"], check=True)
 
-        print(f"Committed: {commit_target}")
+        # Commit only if there are staged changes
+        result = subprocess.run(["git", "diff", "--cached", "--quiet"])
+        if result.returncode != 0:
+            subprocess.run(["git", "commit", "-m", f"Auto commit: {commit_target}"], check=True)
+            subprocess.run(["git", "push"], check=True)
+            print(f"Committed: {commit_target}")
+        else:
+            print(f"No changes to commit for {commit_target}")
+
     except subprocess.CalledProcessError as e:
         print(f"Commit failed: {e}")
 
