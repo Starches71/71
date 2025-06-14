@@ -8,14 +8,15 @@ def extract_video_info():
     base_dir = "Vid"
     os.makedirs(base_dir, exist_ok=True)
 
-    link_path = os.path.join(base_dir, "link.txt")
+    # Updated: save links to yt_link instead of link.txt
+    link_path = os.path.join(base_dir, "yt_link")  # changed here
     title_path = os.path.join(base_dir, "tittle.txt")
     view_path = os.path.join(base_dir, "view.txt")
 
     # Temp memory (simulate env variable or memory-based storage)
     seen_links = set()
 
-    # If already processed links exist in link.txt, load them
+    # If already processed links exist in yt_link, load them
     if os.path.exists(link_path):
         with open(link_path, 'r', encoding='utf-8') as f:
             seen_links = set(line.strip() for line in f if line.strip())
@@ -36,7 +37,7 @@ def extract_video_info():
             if url_line in seen_links:
                 continue
 
-            # Extract view count
+            # Extract view count and title
             match = re.match(r"([\d,]+) views \| (.+)", info_line)
             if not match:
                 continue
@@ -54,7 +55,7 @@ def extract_video_info():
         except IndexError:
             continue  # In case of unmatched lines
 
-    # Write new data (just for this session – optional in GH Actions)
+    # Write new data to files
     with open(link_path, 'w', encoding='utf-8') as f:
         f.write("\n".join(new_links))
     with open(title_path, 'w', encoding='utf-8') as f:
