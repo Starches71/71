@@ -1,0 +1,78 @@
+
+name: Run Hotel Video Pipeline
+
+on:
+  push:
+    paths:
+      - '**.py'
+  workflow_dispatch:
+  schedule:
+    - cron: '*/10 * * * *'  # ⏰ Every 10 minutes (UTC)
+
+jobs:
+  run-python-scripts:
+    runs-on: ubuntu-latest
+    env:
+      GEMINI_API: ${{ secrets.GEMINI_API }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Rust (required for pydantic-core)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          source $HOME/.cargo/env
+
+      - name: Install Gemini dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade typing_extensions
+          pip install \
+            google-genai==0.2.2 \
+            pydantic==2.6.4
+
+      - name: Run ABASE.py
+        run: python ABASE.py
+
+      - name: Run ASHORT.py
+        run: python ASHORT.py
+
+      - name: Sleep after ASHORT.py
+        run: sleep 70
+
+      - name: Run ASHORT1.py
+        run: python ASHORT1.py
+
+      - name: Sleep after ASHORT1.py
+        run: sleep 70
+
+      - name: Run ASHORT2.py
+        run: python ASHORT2.py
+
+      - name: Sleep after ASHORT2.py
+        run: sleep 70
+
+      - name: Run ASHORT3.py
+        run: python ASHORT3.py
+
+      - name: Sleep after ASHORT3.py
+        run: sleep 70
+
+      - name: Run ASHORT4.py
+        run: python ASHORT4.py
+
+      - name: Sleep after ASHORT4.py
+        run: sleep 70
+
+      - name: Run ABASE1.py (Commit logic)
+        run: python ABASE1.py
