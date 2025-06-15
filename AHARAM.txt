@@ -66,3 +66,8 @@ YT_LINK: https://www.youtube.com/watch?v=vMNXDeCsk4E
 TITTLE: This Smart Board Just Changed Everything! ✨🧠✏️
 VIEW: 6956130
 YT_LINK: https://www.youtube.com/watch?v=Pvj3Wk7UTzE
+
+--- NEW ENTRY @ 2025-06-15 19:54:50 ---
+TITTLE: Как команда виндовс создает инфоповоды
+VIEW: 6927207
+YT_LINK: https://www.youtube.com/watch?v=f4AhblE4qc0
