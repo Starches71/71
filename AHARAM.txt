@@ -74,3 +74,8 @@ YT_LINK: https://www.youtube.com/watch?v=Pvj3Wk7UTzE
 TITTLE: Как команда виндовс создает инфоповоды
 VIEW: 6927207
 YT_LINK: https://www.youtube.com/watch?v=f4AhblE4qc0
+
+--- NEW ENTRY @ 2025-06-16 22:02:07 ---
+TITTLE: Huawei Just Changed the Game! 💻🔥 | World’s First Foldable PC
+VIEW: 6734493
+YT_LINK: https://www.youtube.com/watch?v=--5n6E6EI08
