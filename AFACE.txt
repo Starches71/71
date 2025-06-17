@@ -24,3 +24,8 @@ YT_LINK: https://www.youtube.com/watch?v=xCIYOJlIxvc
 TITTLE: USB-C ALL the things!
 VIEW: 4779569
 YT_LINK: https://www.youtube.com/watch?v=acaAW3p5Tqw
+
+--- NEW ENTRY @ 2025-06-17 05:06:29 ---
+TITTLE: Here’s Why GPUs Prefer DisplayPort Over HDMI
+VIEW: 4678727
+YT_LINK: https://www.youtube.com/watch?v=ueRMPFjWrDc
