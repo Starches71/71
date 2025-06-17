@@ -114,3 +114,8 @@ YT_LINK: https://www.youtube.com/watch?v=_7LUszWRqco
 TITTLE: Trippi Troppi vs Garam Mararam - italian brainrot
 VIEW: 4446778
 YT_LINK: https://www.youtube.com/watch?v=8QGw9DiuY50
+
+--- NEW ENTRY @ 2025-06-17 06:58:38 ---
+TITTLE: Por qué el logo de Apple tiene un mordisco
+VIEW: 4403755
+YT_LINK: https://www.youtube.com/watch?v=eVA9W8AjWLE
