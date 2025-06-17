@@ -109,3 +109,8 @@ YT_LINK: https://www.youtube.com/watch?v=62jYWNB72Kc
 TITTLE: Using dead spiders as quasi-cyborgs to pick things up
 VIEW: 4840894
 YT_LINK: https://www.youtube.com/watch?v=_7LUszWRqco
+
+--- NEW ENTRY @ 2025-06-17 05:34:19 ---
+TITTLE: Trippi Troppi vs Garam Mararam - italian brainrot
+VIEW: 4446778
+YT_LINK: https://www.youtube.com/watch?v=8QGw9DiuY50
