@@ -119,3 +119,8 @@ YT_LINK: https://www.youtube.com/watch?v=8QGw9DiuY50
 TITTLE: Por qué el logo de Apple tiene un mordisco
 VIEW: 4403755
 YT_LINK: https://www.youtube.com/watch?v=eVA9W8AjWLE
+
+--- NEW ENTRY @ 2025-06-17 07:43:05 ---
+TITTLE: This is a official mlbb video i shared in my shorts. #mlbb #mobilelegends #tiktokmlbb #tiktokfranko
+VIEW: 4013389
+YT_LINK: https://www.youtube.com/watch?v=TTxUCE7jIsc
