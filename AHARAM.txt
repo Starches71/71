@@ -234,3 +234,8 @@ YT_LINK: https://www.youtube.com/watch?v=13h3Ta3rsiw
 TITTLE: This is the best gadget for pouring oil 😮 #shorts
 VIEW: 2167850
 YT_LINK: https://www.youtube.com/watch?v=3QaVAo-pzC0
+
+--- NEW ENTRY @ 2025-06-17 23:23:25 ---
+TITTLE: Understand network requests with AI assistance #DevToolsAI
+VIEW: 2152745
+YT_LINK: https://www.youtube.com/watch?v=He7Pkpaec74
