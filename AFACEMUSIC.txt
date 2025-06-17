@@ -44,3 +44,8 @@ YT_LINK: https://www.youtube.com/watch?v=BSBDThd8oV4
 TITTLE: Move Master
 VIEW: 3040613
 YT_LINK: https://www.youtube.com/watch?v=bGm1L--6Fbc
+
+--- NEW ENTRY @ 2025-06-17 16:57:08 ---
+TITTLE: iPhone 15 Pro Max vs Sony Camera 😳
+VIEW: 2900153
+YT_LINK: https://www.youtube.com/watch?v=E5zmSKNUQ1E
