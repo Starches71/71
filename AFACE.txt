@@ -44,3 +44,8 @@ YT_LINK: https://www.youtube.com/watch?v=rKW5kUS7ySA
 TITTLE: Testing a Rare Currency Note Value App🤑
 VIEW: 3711859
 YT_LINK: https://www.youtube.com/watch?v=KauwbL1dBEU
+
+--- NEW ENTRY @ 2025-06-17 11:37:56 ---
+TITTLE: El nuevo dron que caza drones enemigos
+VIEW: 3402197
+YT_LINK: https://www.youtube.com/watch?v=B_DyZae3i1w
