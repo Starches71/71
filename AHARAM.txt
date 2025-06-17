@@ -214,3 +214,8 @@ YT_LINK: https://www.youtube.com/watch?v=uX1MXfzmeUo
 TITTLE: GTA 6 on your GPU #pc #gamingpc #gpu #graphicscard #gta6
 VIEW: 2701848
 YT_LINK: https://www.youtube.com/watch?v=t-MkKgsuNvA
+
+--- NEW ENTRY @ 2025-06-17 20:06:28 ---
+TITTLE: ZEISS Multifocal Portrait on vivo V50 5G brings them to life
+VIEW: 2579897
+YT_LINK: https://www.youtube.com/watch?v=G2pia0fHgGs
