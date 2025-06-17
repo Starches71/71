@@ -49,3 +49,8 @@ YT_LINK: https://www.youtube.com/watch?v=KauwbL1dBEU
 TITTLE: El nuevo dron que caza drones enemigos
 VIEW: 3402197
 YT_LINK: https://www.youtube.com/watch?v=B_DyZae3i1w
+
+--- NEW ENTRY @ 2025-06-17 17:45:10 ---
+TITTLE: The Rarest PlayStation Console Made?
+VIEW: 2825040
+YT_LINK: https://www.youtube.com/watch?v=xcYtmzHkXak
