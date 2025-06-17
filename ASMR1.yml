@@ -1,0 +1,160 @@
+
+name: Fetch ASMR Videos by Category
+
+on:
+  schedule:
+    - cron: '30 23 * * 2'  # Tuesday 23:30 UTC → Smartphones
+    - cron: '30 23 * * 3'  # Wednesday 23:30 UTC → Tablets
+    - cron: '30 23 * * 4'  # Thursday 23:30 UTC → Laptops
+    - cron: '30 23 * * 5'  # Friday 23:30 UTC → Smartwatches
+    - cron: '30 23 * * 6'  # Saturday 23:30 UTC → Smart glasses
+    - cron: '30 23 * * 7'  # Sunday 23:30 UTC → Headphones & Earbuds & Gadget & Unbox
+  workflow_dispatch:
+
+jobs:
+  fetch-asmr-videos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Fetch ASMR videos
+        env:
+          YT_API_KEY: ${{ secrets.YOUTUBE_API }}
+        run: |
+          python <<EOF
+          import os, requests
+          from datetime import datetime
+
+          API_KEY = os.getenv("YT_API_KEY")
+          MAX_RESULTS = 50
+          TOTAL_RESULTS = 100
+
+          # Full list of all topics
+          ALL_TOPICS = {
+              "ASMR_SMARTPHONE": "smartphone asmr",
+              "ASMR_TABLET": "tablet asmr",
+              "ASMR_LAPTOP": "laptop asmr",
+              "ASMR_SMARTWATCH": "smartwatch asmr",
+              "ASMR_SMARTGLASSES": "smart glasses asmr",
+              "ASMR_HEADPHONES": "headphones asmr",
+              "ASMR_EARBUDS": "earbuds asmr",
+              "ASMR_GADGET": "gadget asmr",
+              "ASMR_UNBOX": "unboxing asmr",
+              **{f"ASMR_{b.upper().replace(' ', '_')}": f"{b} asmr" for b in [
+                  "samsung", "apple iphone", "xiaomi", "redmi", "oppo", "vivo", "realme",
+                  "motorola", "nokia", "infinix", "tecno", "lenovo phone", "oneplus", "sony xperia",
+                  "google pixel", "asus rog phone", "honor", "huawei", "itel", "lava mobile",
+                  "micromax", "iqoo", "nothing phone", "meizu", "bluboo", "ulefone", "doogee", "blackview"
+              ]},
+              **{f"ASMR_{b.upper().replace(' ', '_')}": f"{b} tablet asmr" for b in [
+                  "ipad", "samsung", "lenovo", "xiaomi pad", "huawei", "amazon fire",
+                  "realme pad", "oppo pad", "tecno", "infinix", "nokia", "alldocube",
+                  "blackview", "chuwi"
+              ]},
+              **{f"ASMR_{b.upper().replace(' ', '_')}": f"{b} laptop asmr" for b in [
+                  "macbook", "dell", "hp", "lenovo", "asus", "acer", "msi",
+                  "razer blade", "lg gram", "samsung", "huawei", "xiaomi", "chuwi",
+                  "honor magicbook", "avita", "infinix"
+              ]},
+              **{f"ASMR_{b.upper().replace(' ', '_')}": f"{b} watch asmr" for b in [
+                  "apple", "samsung", "huawei", "xiaomi", "amazfit", "realme",
+                  "noise", "fire boltt", "boat", "oneplus", "oppo", "honor",
+                  "mobvoi ticwatch", "fitbit", "garmin", "fastrack"
+              ]}
+          }
+
+          # Map weekday → subset of topics
+          # datetime.utcnow().isoweekday(): 1=Mon … 7=Sun
+          DAY = datetime.utcnow().isoweekday()
+
+          CATEGORY_MAP = {
+              2: [k for k in ALL_TOPICS if k.startswith("ASMR_SMARTPHONE")],
+              3: [k for k in ALL_TOPICS if k.startswith("ASMR_TABLET")],
+              4: [k for k in ALL_TOPICS if k.startswith("ASMR_LAPTOP")],
+              5: [k for k in ALL_TOPICS if k.startswith("ASMR_SMARTWATCH")],
+              6: [k for k in ALL_TOPICS if k.startswith("ASMR_SMARTGLASSES")],
+              7: [k for k in ALL_TOPICS if k in (
+                      "ASMR_HEADPHONES","ASMR_EARBUDS","ASMR_GADGET","ASMR_UNBOX"
+                  )]
+          }
+
+          TOPICS = {k: ALL_TOPICS[k] for k in CATEGORY_MAP.get(DAY, [])}
+
+          def fetch_and_save(query, suffix):
+              seen = set()
+              long_file, short_file = f"ASMR_LONG{suffix}.txt", f"ASMR_SHORT{suffix}.txt"
+              for fn in (long_file, short_file):
+                  if os.path.exists(fn):
+                      with open(fn) as f:
+                          for l in f:
+                              if "watch?v=" in l:
+                                  seen.add(l.split("watch?v=")[1].strip())
+
+              entries = []
+              token = ""
+              pages = TOTAL_RESULTS // MAX_RESULTS
+
+              for _ in range(pages):
+                  url = (
+                      "https://www.googleapis.com/youtube/v3/search"
+                      f"?part=snippet&q={query}&maxResults={MAX_RESULTS}"
+                      "&order=relevance&type=video&videoLicense=creativeCommon"
+                      f"&key={API_KEY}"
+                      + (f"&pageToken={token}" if token else "")
+                  )
+                  resp = requests.get(url).json()
+                  vids = [i["id"]["videoId"] for i in resp.get("items",[])]
+                  token = resp.get("nextPageToken","")
+                  if not vids: break
+
+                  stats = requests.get(
+                      "https://www.googleapis.com/youtube/v3/videos"
+                      f"?part=contentDetails,statistics,snippet"
+                      f"&id={','.join(vids)}&key={API_KEY}"
+                  ).json().get("items",[])
+
+                  for v in stats:
+                      vid = v["id"]
+                      if vid in seen: continue
+                      seen.add(vid)
+                      dur = v["contentDetails"]["duration"]
+                      views = int(v["statistics"].get("viewCount",0))
+                      title = v["snippet"]["title"].replace("\n"," ")
+                      link  = f"https://youtube.com/watch?v={vid}"
+                      is_short = ("M" not in dur and "S" in dur)
+                      entries.append((views, f"{views:,} views | {title}\n{link}\n\n", is_short))
+
+              shorts = [e for v,e,s in sorted(entries, reverse=True) if s]
+              longs  = [e for v,e,s in sorted(entries, reverse=True) if not s]
+
+              for fn, dataset in ((short_file,shorts),(long_file,longs)):
+                  with open(fn,"a+",encoding="utf-8") as f:
+                      f.seek(0)
+                      exist = f.read()
+                      for e in dataset:
+                          if e not in exist: f.write(e)
+
+          # Run
+          for suffix, q in TOPICS.items():
+              fetch_and_save(q, "")
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "yt-bot"
+          git config --global user.email "yt-bot@example.com"
+          git stash --include-untracked
+          git pull --rebase origin main
+          git stash pop || true
+          git add ASMR_*.txt
+          git diff --cached --quiet || git commit -m "Update ASMR video lists - $(date)"
+          git push
