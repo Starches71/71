@@ -194,3 +194,8 @@ YT_LINK: https://www.youtube.com/watch?v=e--p8AfisAE
 TITTLE: Cuando Alexa te dice esto 💀
 VIEW: 2933543
 YT_LINK: https://www.youtube.com/watch?v=AsbiPa_aPfI
+
+--- NEW ENTRY @ 2025-06-17 17:23:28 ---
+TITTLE: Nintendo Switch At School!
+VIEW: 2829872
+YT_LINK: https://www.youtube.com/watch?v=7Fzr2dvr-ZQ
