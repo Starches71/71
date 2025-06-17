@@ -1,16 +1,14 @@
 
-
-name: Fetch Laptop Videos from YouTube
+name: Fetch ASMR Videos from YouTube
 
 on:
   schedule:
-    - cron: '0 23 * * 4'  # Every Thursday at 11:00 PM UTC
+    - cron: '30 23 * * 4'  # Every Thursday at 11:30 PM UTC
   workflow_dispatch:
 
 jobs:
-  fetch-laptop-videos:
+  fetch-asmr-videos:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -23,106 +21,124 @@ jobs:
       - name: Install requests
         run: pip install requests
 
-      - name: Fetch and filter YouTube videos
+      - name: Fetch ASMR videos
         env:
           YT_API_KEY: ${{ secrets.YOUTUBE_API }}
         run: |
           python <<EOF
           import requests, os
-          from datetime import datetime
+          from datetime import datetime, timedelta
 
           API_KEY = os.getenv("YT_API_KEY")
           MAX_RESULTS = 50
           TOTAL_RESULTS = 200
-          QUERY = "laptop"
 
-          now = datetime.utcnow()
-          year = now.year
-          month = now.month
-          month_str = f"{month:02d}"
+          TOPICS = {
+              "ASMR_GD": "gadget asmr",
+              "ASMR_UNB": "unboxing asmr"
+          }
 
-          published_after = f"{year}-{month_str}-01T00:00:00Z"
-          shorts_file = f"Vid_short({year}-{month_str})_lp.txt"
-          long_file = f"Vid_long({year}-{month_str})_lp.txt"
+          NOW = datetime.utcnow()
+          YEAR = NOW.year
+          MONTH = NOW.month
+          WEEK_AGO = NOW - timedelta(days=7)
 
-          seen_ids = set()
-          for file in [shorts_file, long_file]:
-              if os.path.exists(file):
-                  with open(file, 'r') as f:
-                      for line in f:
-                          if 'youtube.com/watch?v=' in line:
-                              vid = line.strip().split('watch?v=')[1]
-                              seen_ids.add(vid)
+          TIME_FILTERS = {
+              "_M": f"{YEAR}-{MONTH:02d}-01T00:00:00Z",
+              "_W": WEEK_AGO.strftime('%Y-%m-%dT%H:%M:%SZ'),
+              "_Y": f"{YEAR}-01-01T00:00:00Z",
+              "": None  # No time filter
+          }
 
-          all_items = []
-          next_page = ""
+          def fetch_and_save(query, time_suffix, published_after):
+              seen_ids = set()
+              long_file = f"ASMR_LONG{time_suffix}.txt"
+              short_file = f"ASMR_SHORT{time_suffix}.txt"
 
-          for _ in range(TOTAL_RESULTS // MAX_RESULTS):
-              search_url = (
-                  f"https://www.googleapis.com/youtube/v3/search"
-                  f"?part=snippet"
-                  f"&q={QUERY}"
-                  f"&maxResults={MAX_RESULTS}"
-                  f"&order=viewCount"
-                  f"&publishedAfter={published_after}"
-                  f"&type=video"
-                  f"&videoLicense=creativeCommon"
-                  f"&key={API_KEY}"
-              )
-              if next_page:
-                  search_url += f"&pageToken={next_page}"
+              # Load existing video IDs to avoid duplicates
+              for file in [long_file, short_file]:
+                  if os.path.exists(file):
+                      with open(file, 'r', encoding='utf-8') as f:
+                          for line in f:
+                              if 'youtube.com/watch?v=' in line:
+                                  vid = line.strip().split('watch?v=')[1]
+                                  seen_ids.add(vid)
 
-              resp = requests.get(search_url)
-              data = resp.json()
-              video_ids = [item['id']['videoId'] for item in data.get('items', [])]
-              next_page = data.get("nextPageToken", "")
+              all_items = []
+              next_page = ""
 
-              if not video_ids:
-                  break
+              for _ in range(TOTAL_RESULTS // MAX_RESULTS):
+                  search_url = (
+                      f"https://www.googleapis.com/youtube/v3/search"
+                      f"?part=snippet"
+                      f"&q={query}"
+                      f"&maxResults={MAX_RESULTS}"
+                      f"&order=viewCount"
+                      f"&type=video"
+                      f"&videoLicense=creativeCommon"
+                      f"&key={API_KEY}"
+                  )
+                  if published_after:
+                      search_url += f"&publishedAfter={published_after}"
+                  if next_page:
+                      search_url += f"&pageToken={next_page}"
 
-              stats_url = (
-                  f"https://www.googleapis.com/youtube/v3/videos"
-                  f"?part=contentDetails,statistics,snippet"
-                  f"&id={','.join(video_ids)}"
-                  f"&key={API_KEY}"
-              )
-              stats_resp = requests.get(stats_url)
-              stats_data = stats_resp.json()
+                  resp = requests.get(search_url)
+                  data = resp.json()
+                  video_ids = [item['id']['videoId'] for item in data.get('items', [])]
+                  next_page = data.get("nextPageToken", "")
+                  if not video_ids:
+                      break
 
-              for vid in stats_data.get("items", []):
-                  vid_id = vid["id"]
-                  if vid_id in seen_ids:
-                      continue
-                  seen_ids.add(vid_id)
+                  stats_url = (
+                      f"https://www.googleapis.com/youtube/v3/videos"
+                      f"?part=contentDetails,statistics,snippet"
+                      f"&id={','.join(video_ids)}"
+                      f"&key={API_KEY}"
+                  )
+                  stats_resp = requests.get(stats_url)
+                  stats_data = stats_resp.json()
 
-                  duration = vid["contentDetails"]["duration"]
-                  views = int(vid["statistics"].get("viewCount", 0))
-                  title = vid["snippet"]["title"].replace('\n', ' ').strip()
-                  link = f"https://www.youtube.com/watch?v={vid_id}"
+                  for vid in stats_data.get("items", []):
+                      vid_id = vid["id"]
+                      if vid_id in seen_ids:
+                          continue
+                      seen_ids.add(vid_id)
 
-                  is_short = False
-                  if "M" not in duration and "S" in duration:
-                      is_short = True
+                      duration = vid["contentDetails"]["duration"]
+                      views = int(vid["statistics"].get("viewCount", 0))
+                      title = vid["snippet"]["title"].replace('\n', ' ').strip()
+                      link = f"https://www.youtube.com/watch?v={vid_id}"
 
-                  entry = f"{views:,} views | {title}\n{link}\n\n"
-                  all_items.append((views, entry, is_short))
+                      is_short = False
+                      if "M" not in duration and "S" in duration:
+                          is_short = True
 
-          shorts = sorted([e for v, e, s in all_items if s], reverse=True)
-          longs = sorted([e for v, e, s in all_items if not s], reverse=True)
+                      entry = f"{views:,} views | {title}\n{link}\n\n"
+                      all_items.append((views, entry, is_short))
 
-          with open(shorts_file, 'a+', encoding='utf-8') as f:
-              f.seek(0)
-              existing = f.read()
-              for item in shorts:
-                  if item not in existing:
-                      f.write(item)
+              # Sort descending by views
+              shorts = sorted([e for v, e, s in all_items if s], reverse=True)
+              longs = sorted([e for v, e, s in all_items if not s], reverse=True)
 
-          with open(long_file, 'a+', encoding='utf-8') as f:
-              f.seek(0)
-              existing = f.read()
-              for item in longs:
-                  if item not in existing:
-                      f.write(item)
+              with open(short_file, 'a+', encoding='utf-8') as f:
+                  f.seek(0)
+                  existing = f.read()
+                  for item in shorts:
+                      if item not in existing:
+                          f.write(item)
+
+              with open(long_file, 'a+', encoding='utf-8') as f:
+                  f.seek(0)
+                  existing = f.read()
+                  for item in longs:
+                      if item not in existing:
+                          f.write(item)
+
+          # Loop over time filters first, then over topics to accumulate all in same files
+          for suffix, after in TIME_FILTERS.items():
+              for prefix, query in TOPICS.items():
+                  fetch_and_save(query, suffix, after)
           EOF
 
       - name: Commit and push changes
@@ -134,6 +150,6 @@ jobs:
           git pull --rebase origin main
           git stash pop || true
 
-          git add "Vid_short(20"*"_lp.txt" "Vid_long(20"*"_lp.txt"
-          git diff --cached --quiet || git commit -m "Update YouTube laptop video list - $(date)"
+          git add ASMR_*.txt
+          git diff --cached --quiet || git commit -m "Update ASMR video lists - $(date)"
           git push
