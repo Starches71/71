@@ -54,3 +54,8 @@ YT_LINK: https://www.youtube.com/watch?v=B_DyZae3i1w
 TITTLE: The Rarest PlayStation Console Made?
 VIEW: 2825040
 YT_LINK: https://www.youtube.com/watch?v=xcYtmzHkXak
+
+--- NEW ENTRY @ 2025-06-17 18:07:34 ---
+TITTLE: Nintendo Switch 2 Gone Wrong!
+VIEW: 2800537
+YT_LINK: https://www.youtube.com/watch?v=CijszPAoJEw
