@@ -204,3 +204,8 @@ YT_LINK: https://www.youtube.com/watch?v=7Fzr2dvr-ZQ
 TITTLE: Long Password…
 VIEW: 2804015
 YT_LINK: https://www.youtube.com/watch?v=5hDZp7HdvlU
+
+--- NEW ENTRY @ 2025-06-17 18:43:23 ---
+TITTLE: Huge Apple update fail 😭
+VIEW: 2755001
+YT_LINK: https://www.youtube.com/watch?v=uX1MXfzmeUo
