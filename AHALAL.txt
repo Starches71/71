@@ -89,3 +89,8 @@ YT_LINK: https://www.youtube.com/watch?v=iKTIpTEJYcc
 TITTLE: What's Inside A Phone Battery? 📱
 VIEW: 1243777
 YT_LINK: https://www.youtube.com/watch?v=OeDf3EHiC-g
+
+--- NEW ENTRY @ 2025-06-18 19:06:21 ---
+TITTLE: Ventilador y lámpara en uno
+VIEW: 1167256
+YT_LINK: https://www.youtube.com/watch?v=PnN_XMBGngA
