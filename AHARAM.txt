@@ -329,3 +329,8 @@ YT_LINK: https://www.youtube.com/watch?v=F4f8tcs5I3A
 TITTLE: Introducing the "VitaWear SmartBand," a next-generation wearable gadget#shortsfeed#trending
 VIEW: 1457570
 YT_LINK: https://www.youtube.com/watch?v=aBADn-pYM_8
+
+--- NEW ENTRY @ 2025-06-18 13:27:20 ---
+TITTLE: Tarihin en büyük telif hakkı davası başladı #shortvideo
+VIEW: 1421292
+YT_LINK: https://www.youtube.com/watch?v=YJRsa2UyDoM
