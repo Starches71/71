@@ -1,0 +1,91 @@
+
+name: Merge, deduplicate, and sort ASMR files
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+
+jobs:
+  merge-asmr-files:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Confirm checkout success
+      run: echo "✅ Repo checked out"
+
+    - name: Find all ASMR_SHORT*.txt files
+      id: find_files
+      run: |
+        echo "Searching for ASMR_SHORT*.txt files..."
+        ALL_ASMR_FILES=$(ls ASMR_SHORT*.txt 2>/dev/null || echo "")
+        if [ -z "$ALL_ASMR_FILES" ]; then
+          echo "❌ No ASMR_SHORT*.txt files found!"
+          exit 1
+        else
+          echo "✅ Found files:"
+          echo "$ALL_ASMR_FILES"
+          {
+            echo "ASMR_FILES<<EOF"
+            echo "$ALL_ASMR_FILES"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+        fi
+
+    - name: Merge, deduplicate, and sort ASMR files
+      run: |
+        if [ -z "$ASMR_FILES" ]; then
+          echo "No ASMR files to merge"
+          exit 0
+        fi
+
+        echo "Processing ASMR_SHORT*.txt files..."
+        cat $ASMR_FILES > _raw_asmr.txt
+
+        awk '
+          BEGIN { RS=""; ORS="\n\n" }
+          {
+            gsub(/^[■□○]+\s*/, "", $1)
+            match($0, /^[0-9,]+ views \| .*$/, views_line)
+            split(views_line[0], parts, " views | ")
+            gsub(",", "", parts[1])
+            views = parts[1] + 0
+            clean_block = $0
+            if (!(clean_block in seen)) {
+              seen[clean_block] = views
+              data[views] = clean_block
+              order[++count] = views
+            }
+          }
+          END {
+            n = asort(order)
+            for (i = n; i >= 1; i--) {
+              v = order[i]
+              print data[v]
+            }
+          }
+        ' _raw_asmr.txt > ASMR_ALL.txt
+
+        echo "✅ ASMR files merged and sorted"
+        head -n 10 ASMR_ALL.txt || echo "(file empty)"
+
+    - name: Configure git user
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+
+    - name: Commit and push ASMR_ALL.txt
+      run: |
+        git add ASMR_ALL.txt
+        if git diff --cached --quiet; then
+          echo "No changes to commit"
+          exit 0
+        else
+          git commit -m "Auto-merge & sort ASMR files - $(date -u)"
+          git pull --rebase origin main
+          git push origin main
+          echo "✅ Changes committed and pushed"
+        fi
