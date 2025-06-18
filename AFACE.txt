@@ -119,3 +119,8 @@ YT_LINK: https://www.youtube.com/watch?v=yyMLbdFpCD8
 TITTLE: Nintendo Switch 2 vs Switch 1
 VIEW: 1127561
 YT_LINK: https://www.youtube.com/watch?v=h7gitVlPx4Q
+
+--- NEW ENTRY @ 2025-06-18 21:40:06 ---
+TITTLE: REMOVING THE SWITCH 2'S SCREEN PROTECTOR... #shorts  @PhoneRepairGuru
+VIEW: 1016093
+YT_LINK: https://www.youtube.com/watch?v=B4YF_XSbYXk
