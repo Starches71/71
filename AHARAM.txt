@@ -304,3 +304,8 @@ YT_LINK: https://www.youtube.com/watch?v=nS1uBYOfXsA
 TITTLE: This Kid Is A Pro Hacker!! 👦💻🧠
 VIEW: 1672491
 YT_LINK: https://www.youtube.com/watch?v=IRgcGHjUrlM
+
+--- NEW ENTRY @ 2025-06-18 10:34:26 ---
+TITTLE: Never Do This To Apple 😳
+VIEW: 1671346
+YT_LINK: https://www.youtube.com/watch?v=RcCi_lEid7I
