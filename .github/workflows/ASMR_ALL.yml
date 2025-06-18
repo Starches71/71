@@ -1,4 +1,3 @@
-
 name: Combine ASMR Shorts
 
 on:
@@ -13,13 +12,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0  # Needed for pull
 
       - name: Combine and sort ASMR_SHORT files
         run: |
           # Combine all ASMR_SHORT*.txt files
           cat ASMR_SHORT*.txt > combined.txt
 
-          # Extract valid 2-line blocks and sort by views (cleaning commas)
+          # Extract valid 2-line blocks and sort by views
           awk '
             /^.*views \|/ {
               viewsStr = $1
@@ -33,10 +35,11 @@ jobs:
             }
           ' combined.txt | sort -nr -k1,1 | awk -F"|" '{ print $2 ORS $3 "\n" }' > ASMR_ALL.txt
 
-      - name: Commit ASMR_ALL.txt
+      - name: Commit and Push
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"
+          git pull --rebase
           git add ASMR_ALL.txt
           git commit -m "Update ASMR_ALL.txt with sorted ASMR shorts" || echo "No changes to commit"
           git push
