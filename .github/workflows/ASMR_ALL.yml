@@ -1,0 +1,47 @@
+
+name: Collect and Sort ASMR Shorts
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '**/ASMR_SHORT*.txt'
+
+jobs:
+  sort_asmr:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Combine and sort ASMR_SHORT files
+      run: |
+        # Create a temp file to collect entries
+        > combined_asmr.txt
+
+        # Loop through ASMR_SHORT*.txt files and append to temp file
+        for file in ASMR_SHORT*.txt; do
+          if [ -f "$file" ]; then
+            echo "Processing $file..."
+            cat "$file" >> combined_asmr.txt
+            echo "" >> combined_asmr.txt  # Add spacing
+          fi
+        done
+
+        # Sort lines based on views (extract numbers, remove commas)
+        awk '
+          /^[0-9,]+ views \|/ {
+            views = $1;
+            gsub(",", "", views);
+            printf "%08d|%s\n", views, $0;
+          }
+        ' combined_asmr.txt | sort -r | cut -d'|' -f2- > ASMR_ALL.txt
+
+    - name: Commit ASMR_ALL.txt
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git add ASMR_ALL.txt
+        git commit -m "Updated ASMR_ALL.txt with sorted shorts" || echo "No changes to commit"
+        git push
