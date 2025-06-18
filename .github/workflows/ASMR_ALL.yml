@@ -1,45 +1,48 @@
-name: Combine ASMR Shorts
+
+name: Collect and Sort ASMR Shorts
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 6 * * *'  # Runs daily at 06:00 UTC
+  push:
+    paths:
+      - '**/ASMR_SHORT*.txt'
 
 jobs:
-  combine-asmr-shorts:
+  sort_asmr:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-          fetch-depth: 0  # Needed for pull
 
-      - name: Combine and sort ASMR_SHORT files
-        run: |
-          # Combine all ASMR_SHORT*.txt files
-          cat ASMR_SHORT*.txt > combined.txt
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-          # Extract valid 2-line blocks and sort by views
-          awk '
-            /^.*views \|/ {
-              viewsStr = $1
-              gsub(",", "", viewsStr)
-              views = viewsStr + 0
-              title = $0
-              getline
-              if ($0 ~ /^https:\/\/www\.youtube\.com\/watch\?v=/) {
-                print views "|" title "|" $0
-              }
-            }
-          ' combined.txt | sort -nr -k1,1 | awk -F"|" '{ print $2 ORS $3 "\n" }' > ASMR_ALL.txt
+    - name: Combine and sort ASMR_SHORT files with regex
+      run: |
+        # Create a temp file to collect entries
+        > combined_asmr.txt
 
-      - name: Commit and Push
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@users.noreply.github.com"
-          git pull --rebase
-          git add ASMR_ALL.txt
-          git commit -m "Update ASMR_ALL.txt with sorted ASMR shorts" || echo "No changes to commit"
-          git push
+        # Loop through ASMR_SHORT*.txt files and append to temp file
+        for file in ASMR_SHORT*.txt; do
+          if [ -f "$file" ]; then
+            echo "Processing $file..."
+            cat "$file" >> combined_asmr.txt
+            echo "" >> combined_asmr.txt  # Add spacing
+          fi
+        done
+
+        # Sort lines by views extracted with regex and remove commas
+        # Assumes lines start with: "123,456 views | ..."
+        awk '
+          /^[0-9,]+ views \|/ {
+            views = $1;
+            gsub(",", "", views);
+            printf "%08d|%s\n", views, $0;
+          }
+        ' combined_asmr.txt | sort -r | cut -d"|" -f2- > ASMR_ALL.txt
+
+    - name: Commit ASMR_ALL.txt
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git add ASMR_ALL.txt
+        git commit -m "Updated ASMR_ALL.txt with sorted shorts" || echo "No changes to commit"
+        git push
