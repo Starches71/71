@@ -299,3 +299,8 @@ YT_LINK: https://www.youtube.com/watch?v=UZ5d5UYx2jc
 TITTLE: Step by step  Here’s how to get a clear shot of the moon on your iPhone! 🌕📲 1. Switch to video mode
 VIEW: 1680031
 YT_LINK: https://www.youtube.com/watch?v=nS1uBYOfXsA
+
+--- NEW ENTRY @ 2025-06-18 10:05:18 ---
+TITTLE: This Kid Is A Pro Hacker!! 👦💻🧠
+VIEW: 1672491
+YT_LINK: https://www.youtube.com/watch?v=IRgcGHjUrlM
