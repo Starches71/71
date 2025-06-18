@@ -99,3 +99,8 @@ YT_LINK: https://www.youtube.com/watch?v=J_um3Rizscs
 TITTLE: Nintendo Switch Airplane Mode Trick?
 VIEW: 1303840
 YT_LINK: https://www.youtube.com/watch?v=IDAQs2CNb5I
+
+--- NEW ENTRY @ 2025-06-18 17:46:22 ---
+TITTLE: Joe Rogan On Buying a Huawei Phone
+VIEW: 1242757
+YT_LINK: https://www.youtube.com/watch?v=LHc2I7khT88
