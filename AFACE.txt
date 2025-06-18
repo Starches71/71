@@ -84,3 +84,8 @@ YT_LINK: https://www.youtube.com/watch?v=Wema2TN5QEw
 TITTLE: @mkbhd  vs Bowers and Wilkins vs Tariffs!
 VIEW: 1879969
 YT_LINK: https://www.youtube.com/watch?v=RrrdX7S-lDY
+
+--- NEW ENTRY @ 2025-06-18 07:03:09 ---
+TITTLE: Can
+VIEW: 1872313
+YT_LINK: https://www.youtube.com/watch?v=rUY7oJ72TTo
