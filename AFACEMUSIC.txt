@@ -114,3 +114,8 @@ YT_LINK: https://www.youtube.com/watch?v=42Ixmf3bqS0
 TITTLE: Marques Develops the Best Smartphone 📱💫
 VIEW: 1049494
 YT_LINK: https://www.youtube.com/watch?v=rnwqNASRMSM
+
+--- NEW ENTRY @ 2025-06-18 23:31:55 ---
+TITTLE: AMD + NVIDIA = The Christmas PC!?
+VIEW: 887749
+YT_LINK: https://www.youtube.com/watch?v=0EA7L5wm2GQ
