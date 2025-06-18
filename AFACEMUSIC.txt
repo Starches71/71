@@ -69,3 +69,8 @@ YT_LINK: https://www.youtube.com/watch?v=UTni4MydbbY
 TITTLE: Unboxing Lin Gang Melon
 VIEW: 2255413
 YT_LINK: https://www.youtube.com/watch?v=3TMsXbhSRDU
+
+--- NEW ENTRY @ 2025-06-18 00:02:37 ---
+TITTLE: Tahsan got the new vivo V50 Lite on hand | What's next?
+VIEW: 2132686
+YT_LINK: https://www.youtube.com/watch?v=5CnoKf3YCUc
