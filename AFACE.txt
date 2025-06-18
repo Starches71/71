@@ -134,3 +134,8 @@ YT_LINK: https://www.youtube.com/watch?v=Ttjd-MqM118
 TITTLE: Is The Most Expensive Switch FAKE?
 VIEW: 981513
 YT_LINK: https://www.youtube.com/watch?v=f-N49gPWbPc
+
+--- NEW ENTRY @ 2025-06-18 22:56:45 ---
+TITTLE: Mon téléphone a 19 ANS !
+VIEW: 945778
+YT_LINK: https://www.youtube.com/watch?v=cVzObezAAVY
