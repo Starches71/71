@@ -3165,4 +3165,3 @@
 99. iRobot Roomba i9+
 99. iRobot Roomba j7+ Robot Vacuum
 wnd
-11. Nuro (Autonomous Delivery Vehicle)
