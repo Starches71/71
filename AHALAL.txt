@@ -84,3 +84,8 @@ YT_LINK: https://www.youtube.com/watch?v=GKjUWzD3gbE
 TITTLE: Smaller Than a Fingerprint
 VIEW: 1372630
 YT_LINK: https://www.youtube.com/watch?v=iKTIpTEJYcc
+
+--- NEW ENTRY @ 2025-06-18 17:24:09 ---
+TITTLE: What's Inside A Phone Battery? 📱
+VIEW: 1243777
+YT_LINK: https://www.youtube.com/watch?v=OeDf3EHiC-g
