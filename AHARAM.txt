@@ -259,3 +259,8 @@ YT_LINK: https://www.youtube.com/watch?v=CpHiw4128I0
 TITTLE: Inscreva-se para mais dicas de codificação⬆️ #ti #ddev #desenvolvimentodesktop #direito
 VIEW: 1987579
 YT_LINK: https://www.youtube.com/watch?v=pFr8uRDKt8c
+
+--- NEW ENTRY @ 2025-06-18 05:07:59 ---
+TITTLE: Understand performance with AI assistance #DevToolsAI
+VIEW: 1981024
+YT_LINK: https://www.youtube.com/watch?v=swyV1OmaCvE
