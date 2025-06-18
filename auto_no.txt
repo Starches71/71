@@ -1,6 +1,3 @@
-11. Philips Sonicare ProtectiveClean
-11. Robomow RS630
-11. Roborock S7
 11. Tineco Pure One S12 Smart Cordless Vacuum
 11. Whirlpool Smart Dryer
 11. Wyze Cam Pan
@@ -3165,4 +3162,3 @@
 99. iRobot Roomba i9+
 99. iRobot Roomba j7+ Robot Vacuum
 wnd
-11. Nuro (Autonomous Delivery Vehicle)
