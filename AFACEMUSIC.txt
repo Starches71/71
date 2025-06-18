@@ -79,3 +79,8 @@ YT_LINK: https://www.youtube.com/watch?v=5CnoKf3YCUc
 TITTLE: what makes the vivo V50 Lite stand out?
 VIEW: 1712764
 YT_LINK: https://www.youtube.com/watch?v=G35VXzux4Nc
+
+--- NEW ENTRY @ 2025-06-18 11:25:48 ---
+TITTLE: Why PS5 Controllers Are SO EXPENSIVE 🎮
+VIEW: 1650041
+YT_LINK: https://www.youtube.com/watch?v=jmBWVdQ5Cn0
