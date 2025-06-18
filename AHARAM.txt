@@ -289,3 +289,8 @@ YT_LINK: https://www.youtube.com/watch?v=1qwtB5SRm_M
 TITTLE: Hành động trên được thực hiện bởi chuyên gia #nhactrendtiktok #unboxing #tiktokdance
 VIEW: 1712347
 YT_LINK: https://www.youtube.com/watch?v=Bc7CTRcu890
+
+--- NEW ENTRY @ 2025-06-18 09:39:20 ---
+TITTLE: Wave Soldering Explained in 30 Seconds
+VIEW: 1691204
+YT_LINK: https://www.youtube.com/watch?v=UZ5d5UYx2jc
