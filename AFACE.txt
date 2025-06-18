@@ -74,3 +74,8 @@ YT_LINK: https://www.youtube.com/watch?v=RKPmLPF9rCg
 TITTLE: vivo Y29 | Tech Expert Review
 VIEW: 2143342
 YT_LINK: https://www.youtube.com/watch?v=TXl9aKhoXRQ
+
+--- NEW ENTRY @ 2025-06-18 04:33:25 ---
+TITTLE: RTX 5090 Micro Center Scam
+VIEW: 2046480
+YT_LINK: https://www.youtube.com/watch?v=Wema2TN5QEw
