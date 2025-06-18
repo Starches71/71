@@ -84,3 +84,8 @@ YT_LINK: https://www.youtube.com/watch?v=G35VXzux4Nc
 TITTLE: Why PS5 Controllers Are SO EXPENSIVE 🎮
 VIEW: 1650041
 YT_LINK: https://www.youtube.com/watch?v=jmBWVdQ5Cn0
+
+--- NEW ENTRY @ 2025-06-18 13:56:28 ---
+TITTLE: Unboxing Lin Gang Melon Complete Edition
+VIEW: 1420118
+YT_LINK: https://www.youtube.com/watch?v=XHniLXS3fuI
