@@ -109,3 +109,8 @@ YT_LINK: https://www.youtube.com/watch?v=s-lyhRYhbts
 TITTLE: @mkbhd vs apple vs macbook
 VIEW: 1291882
 YT_LINK: https://www.youtube.com/watch?v=itkS-6qrju8
+
+--- NEW ENTRY @ 2025-06-18 17:59:16 ---
+TITTLE: I Bought the World’s Smallest DRONE
+VIEW: 1230679
+YT_LINK: https://www.youtube.com/watch?v=yyMLbdFpCD8
