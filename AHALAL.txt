@@ -109,3 +109,8 @@ YT_LINK: https://www.youtube.com/watch?v=e9yaPJXGbFc
 TITTLE: Unboxing Lin Gang Melon
 VIEW: 839202
 YT_LINK: https://www.youtube.com/watch?v=4vduOdEY3Zc
+
+--- NEW ENTRY @ 2025-06-19 05:06:17 ---
+TITTLE: Switch or Switch 2?
+VIEW: 835955
+YT_LINK: https://www.youtube.com/watch?v=srhVO3QmKEw
