@@ -94,3 +94,8 @@ YT_LINK: https://www.youtube.com/watch?v=OeDf3EHiC-g
 TITTLE: Ventilador y lámpara en uno
 VIEW: 1167256
 YT_LINK: https://www.youtube.com/watch?v=PnN_XMBGngA
+
+--- NEW ENTRY @ 2025-06-19 00:01:01 ---
+TITTLE: Unboxing Cappuchina Ballerina
+VIEW: 866914
+YT_LINK: https://www.youtube.com/watch?v=Cy_zO0RKMD0
