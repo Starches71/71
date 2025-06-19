@@ -134,3 +134,8 @@ YT_LINK: https://www.youtube.com/watch?v=gW3nuWUMy4M
 TITTLE: Why You Should NEVER Underspec Your PSU!
 VIEW: 707808
 YT_LINK: https://www.youtube.com/watch?v=RnXgPwHEcGE
+
+--- NEW ENTRY @ 2025-06-19 11:23:02 ---
+TITTLE: 벽돌보다 큰 RTX 5090...
+VIEW: 683899
+YT_LINK: https://www.youtube.com/watch?v=uVzn5fz3RfI
