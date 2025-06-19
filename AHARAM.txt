@@ -539,3 +539,8 @@ YT_LINK: https://www.youtube.com/watch?v=iMRh2ST0Xbc
 TITTLE: BTS of how we used an LED Wall and Unreal Engine to recreate #severance
 VIEW: 517674
 YT_LINK: https://www.youtube.com/watch?v=gTwA6OHC7EY
+
+--- NEW ENTRY @ 2025-06-19 22:44:16 ---
+TITTLE: اگه میخوای از گوشی دل بکنی ،اینو ببین!!!
+VIEW: 511601
+YT_LINK: https://www.youtube.com/watch?v=Our-SlcXL4s
