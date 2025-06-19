@@ -129,3 +129,8 @@ YT_LINK: https://www.youtube.com/watch?v=7GjapEglwmo
 TITTLE: USB type data cable
 VIEW: 682235
 YT_LINK: https://www.youtube.com/watch?v=Pkh7PQC4nXs
+
+--- NEW ENTRY @ 2025-06-19 12:42:55 ---
+TITTLE: Unboxing Assassino Cappuccino Robot VS Tralaleritos Robot
+VIEW: 663138
+YT_LINK: https://www.youtube.com/watch?v=7RcSo_9y4tM
