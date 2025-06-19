@@ -139,3 +139,8 @@ YT_LINK: https://www.youtube.com/watch?v=7RcSo_9y4tM
 TITTLE: Unboxing Ballerina Cappuccino Baby VS Old (Mix Version)
 VIEW: 644847
 YT_LINK: https://www.youtube.com/watch?v=m1iTadAIzt4
+
+--- NEW ENTRY @ 2025-06-19 14:46:02 ---
+TITTLE: Unboxing Rat Dance Joy X Chicken Banana Ivo
+VIEW: 644661
+YT_LINK: https://www.youtube.com/watch?v=HyofvVMWdvg
