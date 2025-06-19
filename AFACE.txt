@@ -164,3 +164,8 @@ YT_LINK: https://www.youtube.com/watch?v=hFo1YYmsdK4
 TITTLE: should liquid metal thermal paste go directly on your CPU?
 VIEW: 631023
 YT_LINK: https://www.youtube.com/watch?v=sm57rMUifmw
+
+--- NEW ENTRY @ 2025-06-19 16:05:49 ---
+TITTLE: The phone fell 🤣
+VIEW: 622976
+YT_LINK: https://www.youtube.com/watch?v=h0NKl3KcDo4
