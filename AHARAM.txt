@@ -504,3 +504,8 @@ YT_LINK: https://www.youtube.com/watch?v=TsnmrFvEdiw
 TITTLE: World’s Loudest Mechanical Keyboard 🙈
 VIEW: 604026
 YT_LINK: https://www.youtube.com/watch?v=P8BvvCjgSfU
+
+--- NEW ENTRY @ 2025-06-19 17:57:26 ---
+TITTLE: Nintendo Switch 2 Camera Gone WRONG! 💀
+VIEW: 591226
+YT_LINK: https://www.youtube.com/watch?v=uq4mCG094b0
