@@ -124,3 +124,8 @@ YT_LINK: https://www.youtube.com/watch?v=p72C9bRZvws
 TITTLE: Unboxing Espressona Signora & Cappuccino Ballerina
 VIEW: 786227
 YT_LINK: https://www.youtube.com/watch?v=7GjapEglwmo
+
+--- NEW ENTRY @ 2025-06-19 11:37:49 ---
+TITTLE: USB type data cable
+VIEW: 682235
+YT_LINK: https://www.youtube.com/watch?v=Pkh7PQC4nXs
