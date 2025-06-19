@@ -174,3 +174,8 @@ YT_LINK: https://www.youtube.com/watch?v=h0NKl3KcDo4
 TITTLE: Fiber kabloların yerine geçecek teknoloji belli oldu #shortvideo
 VIEW: 613168
 YT_LINK: https://www.youtube.com/watch?v=Ac4r-4_px98
+
+--- NEW ENTRY @ 2025-06-19 19:34:58 ---
+TITTLE: Jak montuje się procesor za 20 000 PLN? #shorts #threadripper
+VIEW: 576837
+YT_LINK: https://www.youtube.com/watch?v=P5XzkBnVVFU
