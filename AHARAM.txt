@@ -409,3 +409,8 @@ YT_LINK: https://www.youtube.com/watch?v=MGFhTLYg9P8
 TITTLE: احفظ هذا الدعاء لزيادة الرزق بإذن الله
 VIEW: 871207
 YT_LINK: https://www.youtube.com/watch?v=zX3vVWF5Ho4
+
+--- NEW ENTRY @ 2025-06-19 01:31:42 ---
+TITTLE: لن تصدق ماوجده العلماء في البرق
+VIEW: 859240
+YT_LINK: https://www.youtube.com/watch?v=KiGVRHMoAME
