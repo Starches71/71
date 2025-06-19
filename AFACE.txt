@@ -179,3 +179,8 @@ YT_LINK: https://www.youtube.com/watch?v=Ac4r-4_px98
 TITTLE: Jak montuje się procesor za 20 000 PLN? #shorts #threadripper
 VIEW: 576837
 YT_LINK: https://www.youtube.com/watch?v=P5XzkBnVVFU
+
+--- NEW ENTRY @ 2025-06-19 21:25:24 ---
+TITTLE: cooling a pc with oil
+VIEW: 533376
+YT_LINK: https://www.youtube.com/watch?v=mL-CxvhJuRo
