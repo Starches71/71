@@ -154,3 +154,8 @@ YT_LINK: https://www.youtube.com/watch?v=DERjjQQfsPE
 TITTLE: Do NOT make this mistake with your Switch 2
 VIEW: 707493
 YT_LINK: https://www.youtube.com/watch?v=2zPfS7vd1HE
+
+--- NEW ENTRY @ 2025-06-19 14:58:31 ---
+TITTLE: Knicklichter SUPERCHARGEN #experiment #science #wissenschaft #chemie #vorgartenalchemist
+VIEW: 635737
+YT_LINK: https://www.youtube.com/watch?v=hFo1YYmsdK4
