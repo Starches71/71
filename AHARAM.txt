@@ -459,3 +459,8 @@ YT_LINK: https://www.youtube.com/watch?v=ah_YZt8ERX0
 TITTLE: O 1% DE BATERIA DO CELULAR É FALSO? #interessante #curiosidade #curiosidades
 VIEW: 730371
 YT_LINK: https://www.youtube.com/watch?v=VFWFaaYA-uM
+
+--- NEW ENTRY @ 2025-06-19 10:02:00 ---
+TITTLE: 英語で言えるかな 中学理科編 #英語 #理科 #ナイスガイ須貝
+VIEW: 708450
+YT_LINK: https://www.youtube.com/watch?v=HUKiMHg5xWI
