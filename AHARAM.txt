@@ -489,3 +489,8 @@ YT_LINK: https://www.youtube.com/watch?v=4zwaEHH9tGs
 TITTLE: Terry's Chocolate Easter Ball Unboxing! The Perfect Gift for Easter
 VIEW: 653322
 YT_LINK: https://www.youtube.com/watch?v=7Qni5I4aFcg
+
+--- NEW ENTRY @ 2025-06-19 14:02:35 ---
+TITTLE: 😱 পুরোনো পেন্সিলকে ফেলে দিয়ে এই পেন্সিল ব্যবহার করুন | Smart Pencil Bangla
+VIEW: 649160
+YT_LINK: https://www.youtube.com/watch?v=Zky6Qg7uqxM
