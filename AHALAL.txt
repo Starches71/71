@@ -174,3 +174,8 @@ YT_LINK: https://www.youtube.com/watch?v=fJArro4JpQg
 TITTLE: The Nintendo Switch 2 lives up to the hype. Unboxing and impressions.
 VIEW: 554091
 YT_LINK: https://www.youtube.com/watch?v=0X7PG0ny8k4
+
+--- NEW ENTRY @ 2025-06-19 20:51:33 ---
+TITTLE: Unboxing Lin Gang Melon vs Cowboy Melon vs Giant Melon vs Giant Melon 2
+VIEW: 539289
+YT_LINK: https://www.youtube.com/watch?v=uTXigxTGWuM
