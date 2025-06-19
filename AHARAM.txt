@@ -479,3 +479,8 @@ YT_LINK: https://www.youtube.com/watch?v=PU4IsprMPxw
 TITTLE: iShowSpeed Gives $5,000 Gaming PC To This Kid ❤️‍🩹
 VIEW: 663910
 YT_LINK: https://www.youtube.com/watch?v=dKcajNH1A9g
+
+--- NEW ENTRY @ 2025-06-19 13:25:21 ---
+TITTLE: How Nvidia treats Budget PC Gamers
+VIEW: 656079
+YT_LINK: https://www.youtube.com/watch?v=4zwaEHH9tGs
