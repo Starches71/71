@@ -129,3 +129,8 @@ YT_LINK: https://www.youtube.com/watch?v=Vtw_oKK1spk
 TITTLE: Retro PC Case Gets a 5080 Upgrade?!
 VIEW: 754307
 YT_LINK: https://www.youtube.com/watch?v=gW3nuWUMy4M
+
+--- NEW ENTRY @ 2025-06-19 10:26:08 ---
+TITTLE: Why You Should NEVER Underspec Your PSU!
+VIEW: 707808
+YT_LINK: https://www.youtube.com/watch?v=RnXgPwHEcGE
