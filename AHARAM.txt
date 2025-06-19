@@ -534,3 +534,8 @@ YT_LINK: https://www.youtube.com/watch?v=P1X2cDoylzU
 TITTLE: Switch 2 Online Requirement
 VIEW: 519147
 YT_LINK: https://www.youtube.com/watch?v=iMRh2ST0Xbc
+
+--- NEW ENTRY @ 2025-06-19 22:23:10 ---
+TITTLE: BTS of how we used an LED Wall and Unreal Engine to recreate #severance
+VIEW: 517674
+YT_LINK: https://www.youtube.com/watch?v=gTwA6OHC7EY
