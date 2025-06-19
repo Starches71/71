@@ -524,3 +524,8 @@ YT_LINK: https://www.youtube.com/watch?v=ldNheO8FL6Y
 TITTLE: 静電気に困ってる人は試してみて #science #静電気  #ナイスガイ須貝
 VIEW: 540933
 YT_LINK: https://www.youtube.com/watch?v=cl4cqx-vIVw
+
+--- NEW ENTRY @ 2025-06-19 21:03:21 ---
+TITTLE: iPhone in Clean vs Dirty Water 📱
+VIEW: 534090
+YT_LINK: https://www.youtube.com/watch?v=P1X2cDoylzU
