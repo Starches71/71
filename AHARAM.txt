@@ -544,3 +544,8 @@ YT_LINK: https://www.youtube.com/watch?v=gTwA6OHC7EY
 TITTLE: اگه میخوای از گوشی دل بکنی ،اینو ببین!!!
 VIEW: 511601
 YT_LINK: https://www.youtube.com/watch?v=Our-SlcXL4s
+
+--- NEW ENTRY @ 2025-06-19 22:56:19 ---
+TITTLE: Hyundai neden gemi üretiyor? #shortvideo
+VIEW: 509679
+YT_LINK: https://www.youtube.com/watch?v=k50Y_V_Ti-0
