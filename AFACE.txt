@@ -159,3 +159,8 @@ YT_LINK: https://www.youtube.com/watch?v=2zPfS7vd1HE
 TITTLE: Knicklichter SUPERCHARGEN #experiment #science #wissenschaft #chemie #vorgartenalchemist
 VIEW: 635737
 YT_LINK: https://www.youtube.com/watch?v=hFo1YYmsdK4
+
+--- NEW ENTRY @ 2025-06-19 15:44:56 ---
+TITTLE: should liquid metal thermal paste go directly on your CPU?
+VIEW: 631023
+YT_LINK: https://www.youtube.com/watch?v=sm57rMUifmw
