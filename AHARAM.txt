@@ -509,3 +509,8 @@ YT_LINK: https://www.youtube.com/watch?v=P8BvvCjgSfU
 TITTLE: Nintendo Switch 2 Camera Gone WRONG! 💀
 VIEW: 591226
 YT_LINK: https://www.youtube.com/watch?v=uq4mCG094b0
+
+--- NEW ENTRY @ 2025-06-19 18:30:22 ---
+TITTLE: How I find the USB port
+VIEW: 585392
+YT_LINK: https://www.youtube.com/watch?v=FC2dSIYgGFY
