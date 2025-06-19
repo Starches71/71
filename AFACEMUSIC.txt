@@ -119,3 +119,8 @@ YT_LINK: https://www.youtube.com/watch?v=rnwqNASRMSM
 TITTLE: AMD + NVIDIA = The Christmas PC!?
 VIEW: 887749
 YT_LINK: https://www.youtube.com/watch?v=0EA7L5wm2GQ
+
+--- NEW ENTRY @ 2025-06-19 06:01:40 ---
+TITTLE: Kasa fiskalna jako komputer do gier!? #shorts #kasafiskalna #ibm
+VIEW: 817298
+YT_LINK: https://www.youtube.com/watch?v=Vtw_oKK1spk
