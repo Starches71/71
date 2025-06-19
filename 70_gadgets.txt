@@ -36,7 +36,11 @@ May 20, 2024 - Google Pixel Tablet 2 (expected)
 
 Sep 12, 2024 - iPhone 15 Pro Max
 
-Feb 07, 2025 - Samsung Galaxy S25 / S25+ / S25 Ultra
+Feb 07, 2025 - Samsung Galaxy S25
+
+Feb 07, 2025 - Samsung S25+
+
+Feb 07, 2025 -Samsung S25 Ultra
 
 Mar 01, 2025 - NVIDIA RTX 50-series Laptop GPUs
 
