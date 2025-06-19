@@ -169,3 +169,8 @@ YT_LINK: https://www.youtube.com/watch?v=sm57rMUifmw
 TITTLE: The phone fell 🤣
 VIEW: 622976
 YT_LINK: https://www.youtube.com/watch?v=h0NKl3KcDo4
+
+--- NEW ENTRY @ 2025-06-19 17:22:32 ---
+TITTLE: Fiber kabloların yerine geçecek teknoloji belli oldu #shortvideo
+VIEW: 613168
+YT_LINK: https://www.youtube.com/watch?v=Ac4r-4_px98
