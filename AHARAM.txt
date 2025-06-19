@@ -549,3 +549,8 @@ YT_LINK: https://www.youtube.com/watch?v=Our-SlcXL4s
 TITTLE: Hyundai neden gemi üretiyor? #shortvideo
 VIEW: 509679
 YT_LINK: https://www.youtube.com/watch?v=k50Y_V_Ti-0
+
+--- NEW ENTRY @ 2025-06-19 23:47:05 ---
+TITTLE: What your iPhone does when you plug it in 🤔
+VIEW: 493386
+YT_LINK: https://www.youtube.com/watch?v=X_PkTh-Moug
