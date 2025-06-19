@@ -424,3 +424,8 @@ YT_LINK: https://www.youtube.com/watch?v=tihysJg6lck
 TITTLE: Average backend developer 🙃
 VIEW: 822956
 YT_LINK: https://www.youtube.com/watch?v=j5l_hmD1LXU
+
+--- NEW ENTRY @ 2025-06-19 07:24:07 ---
+TITTLE: 🧐 Bilgisayardaki miner nasıl bulunur
+VIEW: 786843
+YT_LINK: https://www.youtube.com/watch?v=OkSNxAAwH_g
