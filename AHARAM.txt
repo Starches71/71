@@ -649,3 +649,8 @@ YT_LINK: https://www.youtube.com/watch?v=PAiQ8W5OsyA
 TITTLE: Switch 2 Doesn't Play Switch 1 Games...
 VIEW: 266974
 YT_LINK: https://www.youtube.com/watch?v=Tw1dGsaET54
+
+--- NEW ENTRY @ 2025-06-20 18:33:22 ---
+TITTLE: How to charge an iPhone 💀
+VIEW: 266501
+YT_LINK: https://www.youtube.com/watch?v=4t1Ek4vJWa4
