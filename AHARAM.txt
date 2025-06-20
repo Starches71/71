@@ -559,3 +559,8 @@ YT_LINK: https://www.youtube.com/watch?v=X_PkTh-Moug
 TITTLE: Average iOS Developer 😵‍💫
 VIEW: 481042
 YT_LINK: https://www.youtube.com/watch?v=ZfxtPY-wysc
+
+--- NEW ENTRY @ 2025-06-20 04:31:41 ---
+TITTLE: Fake iPhones are Getting Scary Good 📲
+VIEW: 462040
+YT_LINK: https://www.youtube.com/watch?v=M2jNChfOlFk
