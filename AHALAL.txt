@@ -269,3 +269,8 @@ YT_LINK: https://www.youtube.com/watch?v=KjeK4bvkI5M
 TITTLE: Unboxing Assassina Cappuccino VS Ballerina Cappuccino
 VIEW: 265395
 YT_LINK: https://www.youtube.com/watch?v=fhjc1lmALR4
+
+--- NEW ENTRY @ 2025-06-20 19:26:53 ---
+TITTLE: Unboxing Lin Gang Melon *MIX VERSION*
+VIEW: 264585
+YT_LINK: https://www.youtube.com/watch?v=oAHIs0BRx78
