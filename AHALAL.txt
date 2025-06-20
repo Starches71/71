@@ -264,3 +264,8 @@ YT_LINK: https://www.youtube.com/watch?v=fCCBiMr94_8
 TITTLE: Unboxing Espressona Signora & Cappuccino Ballerina
 VIEW: 266257
 YT_LINK: https://www.youtube.com/watch?v=KjeK4bvkI5M
+
+--- NEW ENTRY @ 2025-06-20 19:05:02 ---
+TITTLE: Unboxing Assassina Cappuccino VS Ballerina Cappuccino
+VIEW: 265395
+YT_LINK: https://www.youtube.com/watch?v=fhjc1lmALR4
