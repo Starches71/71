@@ -654,3 +654,8 @@ YT_LINK: https://www.youtube.com/watch?v=Tw1dGsaET54
 TITTLE: How to charge an iPhone 💀
 VIEW: 266501
 YT_LINK: https://www.youtube.com/watch?v=4t1Ek4vJWa4
+
+--- NEW ENTRY @ 2025-06-20 19:52:58 ---
+TITTLE: Uçakların içi nasıl "sessiz" kalabiliyor? #shortvideo
+VIEW: 262116
+YT_LINK: https://www.youtube.com/watch?v=dk6uVChxeEk
