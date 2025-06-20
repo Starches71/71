@@ -224,3 +224,8 @@ YT_LINK: https://www.youtube.com/watch?v=I-5qeWybARI
 TITTLE: This Shouldn't Have Fixed My Nintendo Switch 2
 VIEW: 357966
 YT_LINK: https://www.youtube.com/watch?v=MVX6S5WerXQ
+
+--- NEW ENTRY @ 2025-06-20 15:44:40 ---
+TITTLE: 二重振り子を映えさせよう #実験 #カオス #ナイスガイ須貝
+VIEW: 303935
+YT_LINK: https://www.youtube.com/watch?v=y52r5wvr76o
