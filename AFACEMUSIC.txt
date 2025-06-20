@@ -169,3 +169,8 @@ YT_LINK: https://www.youtube.com/watch?v=kdDyHIguTYs
 TITTLE: Unboxing Lin Gang Melon #3
 VIEW: 348977
 YT_LINK: https://www.youtube.com/watch?v=cEaeMZKUF1Q
+
+--- NEW ENTRY @ 2025-06-20 13:25:38 ---
+TITTLE: Switch 2's Secret Settings...
+VIEW: 348160
+YT_LINK: https://www.youtube.com/watch?v=WnZGuTmfXYw
