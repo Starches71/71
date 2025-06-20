@@ -244,3 +244,8 @@ YT_LINK: https://www.youtube.com/watch?v=GBUgt3_K68g
 TITTLE: Dropping gaming tech for likes
 VIEW: 303612
 YT_LINK: https://www.youtube.com/watch?v=JgVkEtI5GSI
+
+--- NEW ENTRY @ 2025-06-20 15:52:46 ---
+TITTLE: Dropping gaming tech for likes
+VIEW: 303612
+YT_LINK: https://www.youtube.com/watch?v=JgVkEtI5GSI
