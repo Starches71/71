@@ -259,3 +259,8 @@ YT_LINK: https://www.youtube.com/watch?v=wYnPbPLSW9I
 TITTLE: Unboxing Cappuchino Assasino
 VIEW: 289860
 YT_LINK: https://www.youtube.com/watch?v=fCCBiMr94_8
+
+--- NEW ENTRY @ 2025-06-20 18:55:39 ---
+TITTLE: Unboxing Espressona Signora & Cappuccino Ballerina
+VIEW: 266257
+YT_LINK: https://www.youtube.com/watch?v=KjeK4bvkI5M
