@@ -244,3 +244,8 @@ YT_LINK: https://www.youtube.com/watch?v=y52r5wvr76o
 TITTLE: the bread CPU has returned home
 VIEW: 273735
 YT_LINK: https://www.youtube.com/watch?v=sjvpgfXz0pA
+
+--- NEW ENTRY @ 2025-06-20 20:48:00 ---
+TITTLE: つなげまくって十重振り子を作りたい #science #実験 #ナイスガイ須貝
+VIEW: 256911
+YT_LINK: https://www.youtube.com/watch?v=d0tWXHuA6_I
