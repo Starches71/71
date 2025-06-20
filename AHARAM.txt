@@ -594,3 +594,8 @@ YT_LINK: https://www.youtube.com/watch?v=81LgXHEOy_U
 TITTLE: Nintendo warns “do not remove screen protector”
 VIEW: 425457
 YT_LINK: https://www.youtube.com/watch?v=6CH3kMfKUuM
+
+--- NEW ENTRY @ 2025-06-20 09:34:49 ---
+TITTLE: Unboxing BARBIE x ITALIAN BRAINROT *MIX VERSION*
+VIEW: 411934
+YT_LINK: https://www.youtube.com/watch?v=XhPCfj6GqqE
