@@ -184,3 +184,8 @@ YT_LINK: https://www.youtube.com/watch?v=ZCdmjdw5ZLI
 TITTLE: چگونه گوشی خود را با چسب حرارتی تمیز کنیم ؟ 📱🧼
 VIEW: 293303
 YT_LINK: https://www.youtube.com/watch?v=2R8kp1cMjeo
+
+--- NEW ENTRY @ 2025-06-20 17:40:41 ---
+TITTLE: Nokia Best Simple Mobile Phone Review
+VIEW: 278732
+YT_LINK: https://www.youtube.com/watch?v=XXg5ahyaELg
