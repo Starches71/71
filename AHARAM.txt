@@ -644,3 +644,8 @@ YT_LINK: https://www.youtube.com/watch?v=2MCZmMgfqp8
 TITTLE: Why Researchers Choose JMIR Publications
 VIEW: 284242
 YT_LINK: https://www.youtube.com/watch?v=PAiQ8W5OsyA
+
+--- NEW ENTRY @ 2025-06-20 18:02:36 ---
+TITTLE: Switch 2 Doesn't Play Switch 1 Games...
+VIEW: 266974
+YT_LINK: https://www.youtube.com/watch?v=Tw1dGsaET54
