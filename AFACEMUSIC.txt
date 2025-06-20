@@ -174,3 +174,8 @@ YT_LINK: https://www.youtube.com/watch?v=cEaeMZKUF1Q
 TITTLE: Switch 2's Secret Settings...
 VIEW: 348160
 YT_LINK: https://www.youtube.com/watch?v=WnZGuTmfXYw
+
+--- NEW ENTRY @ 2025-06-20 14:58:43 ---
+TITTLE: Rate These WEIRD Gaming Setups
+VIEW: 319049
+YT_LINK: https://www.youtube.com/watch?v=ZCdmjdw5ZLI
