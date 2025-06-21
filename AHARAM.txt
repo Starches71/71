@@ -819,3 +819,8 @@ YT_LINK: https://www.youtube.com/watch?v=21s0b5Tcmn4
 TITTLE: Rate Your Hack Sidewall Plug
 VIEW: 197756
 YT_LINK: https://www.youtube.com/watch?v=wpeLoMg0TNY
+
+--- NEW ENTRY @ 2025-06-21 15:55:20 ---
+TITTLE: What if you use a Flashlight in a Movie Theater
+VIEW: 190509
+YT_LINK: https://www.youtube.com/watch?v=7hMMyyaKGPE
