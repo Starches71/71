@@ -274,3 +274,8 @@ YT_LINK: https://www.youtube.com/watch?v=swmfq6eO0LE
 TITTLE: Weird Joy-Con grips for the Nintendo Switch 2 #3dprinting
 VIEW: 496003
 YT_LINK: https://www.youtube.com/watch?v=U-wE7Qyrwuk
+
+--- NEW ENTRY @ 2025-06-21 09:56:51 ---
+TITTLE: Switch 2 Exploit
+VIEW: 417538
+YT_LINK: https://www.youtube.com/watch?v=MtEJKXnAUwo
