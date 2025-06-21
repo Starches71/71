@@ -21,11 +21,8 @@ def generate():
     # Prompt to extract product names
     prompt = (
         f"Watch this video: {yt_url}\n\n"
-        "List the **name(s)** of any product being reviewed or shown in this video.\n"
-        "Format your answer exactly like this:\n"
-        "■Product 1\n■Product 2\n■Product 3\n\n"
-        "If it's only one product, just return one line in the same format.\n"
-        "Do not add any extra text or explanation — only the product names, each starting with '■'."
+        "List the **name(s)** of any gadget being reviewed or shown in this video."
+        "Do not add any extra text or explanation — only the gadget names only."
     )
 
     contents = [
