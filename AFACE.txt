@@ -269,3 +269,8 @@ YT_LINK: https://www.youtube.com/watch?v=DuvmnFMOPBo
 TITTLE: joe rogan talks about starlink mini
 VIEW: 931726
 YT_LINK: https://www.youtube.com/watch?v=swmfq6eO0LE
+
+--- NEW ENTRY @ 2025-06-21 09:46:29 ---
+TITTLE: Weird Joy-Con grips for the Nintendo Switch 2 #3dprinting
+VIEW: 496003
+YT_LINK: https://www.youtube.com/watch?v=U-wE7Qyrwuk
