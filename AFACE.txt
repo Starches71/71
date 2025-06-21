@@ -264,3 +264,8 @@ YT_LINK: https://www.youtube.com/watch?v=lWltHLgdk5Q
 TITTLE: Why Your Old Keyboard Might Be OP
 VIEW: 956947
 YT_LINK: https://www.youtube.com/watch?v=DuvmnFMOPBo
+
+--- NEW ENTRY @ 2025-06-21 07:38:03 ---
+TITTLE: joe rogan talks about starlink mini
+VIEW: 931726
+YT_LINK: https://www.youtube.com/watch?v=swmfq6eO0LE
