@@ -749,3 +749,8 @@ YT_LINK: https://www.youtube.com/watch?v=0BCL2VKPqWY
 TITTLE: 🤯 Your laptop has been telling you which USB port is fastest this ENTIRE TIME!  #TechCommunity
 VIEW: 646659
 YT_LINK: https://www.youtube.com/watch?v=iSrJoPSoItg
+
+--- NEW ENTRY @ 2025-06-21 09:28:10 ---
+TITTLE: Wired Fiber‑Optic Drones
+VIEW: 525570
+YT_LINK: https://www.youtube.com/watch?v=WUc_m0dDD4Q
