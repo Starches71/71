@@ -219,3 +219,8 @@ YT_LINK: https://www.youtube.com/watch?v=COigGTaMzNU
 TITTLE: Estos fueron todos los avances en hackear la Switch hasta ahora
 VIEW: 2929487
 YT_LINK: https://www.youtube.com/watch?v=knFhJMzx4Kw
+
+--- NEW ENTRY @ 2025-06-21 12:01:26 ---
+TITTLE: He Broke Every iPhone 😱
+VIEW: 224237
+YT_LINK: https://www.youtube.com/watch?v=Tmx4O30OdCA
