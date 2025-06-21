@@ -814,3 +814,8 @@ YT_LINK: https://www.youtube.com/watch?v=RvlzbVXikqU
 TITTLE: Did you know this trick?
 VIEW: 198700
 YT_LINK: https://www.youtube.com/watch?v=21s0b5Tcmn4
+
+--- NEW ENTRY @ 2025-06-21 15:45:37 ---
+TITTLE: Rate Your Hack Sidewall Plug
+VIEW: 197756
+YT_LINK: https://www.youtube.com/watch?v=wpeLoMg0TNY
