@@ -689,3 +689,8 @@ YT_LINK: https://www.youtube.com/watch?v=r1lAbMQ3HqM
 TITTLE: Unboxing Tung Tung Assassino Boneca X Top Topi Bobrito X La Vaca Saturno Patapim
 VIEW: 232362
 YT_LINK: https://www.youtube.com/watch?v=FdrGhmCF2cM
+
+--- NEW ENTRY @ 2025-06-21 00:01:29 ---
+TITTLE: They Keep Breaking Laptops… Even After Warnings! #school
+VIEW: 229523
+YT_LINK: https://www.youtube.com/watch?v=Evbzh2JjykE
