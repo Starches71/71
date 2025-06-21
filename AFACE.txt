@@ -279,3 +279,8 @@ YT_LINK: https://www.youtube.com/watch?v=U-wE7Qyrwuk
 TITTLE: Switch 2 Exploit
 VIEW: 417538
 YT_LINK: https://www.youtube.com/watch?v=MtEJKXnAUwo
+
+--- NEW ENTRY @ 2025-06-21 10:51:28 ---
+TITTLE: The Switch 2 JoyCon Straps
+VIEW: 282742
+YT_LINK: https://www.youtube.com/watch?v=LFGru6fxFHk
