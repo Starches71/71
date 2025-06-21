@@ -214,3 +214,8 @@ YT_LINK: https://www.youtube.com/watch?v=16KFD_2L9rI
 TITTLE: Провальная акция Sony Walkman
 VIEW: 4995167
 YT_LINK: https://www.youtube.com/watch?v=COigGTaMzNU
+
+--- NEW ENTRY @ 2025-06-21 04:57:56 ---
+TITTLE: Estos fueron todos los avances en hackear la Switch hasta ahora
+VIEW: 2929487
+YT_LINK: https://www.youtube.com/watch?v=knFhJMzx4Kw
